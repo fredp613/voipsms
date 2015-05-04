@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>Pods-VOIPsms-APAddressBook.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-VOIPsms.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-VOIPsmsTests-APAddressBook.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-VOIPsmsTests.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>2FC31BB051716892C4123640</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6CDBFDF5CF5D8B77EF7743EB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>E14C8DC6FFFC31357EB2F874</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>EEBDC760E020C60997EC5ACB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>

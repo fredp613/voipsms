@@ -1,0 +1,12 @@
+PODS:
+  - APAddressBook/Core (0.1.5)
+  - APAddressBook/Swift (0.1.5):
+    - APAddressBook/Core
+
+DEPENDENCIES:
+  - APAddressBook/Swift
+
+SPEC CHECKSUMS:
+  APAddressBook: c72fec93464d57f39966ce28c107c10253fa7d39
+
+COCOAPODS: 0.37.0

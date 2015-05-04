@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7549" systemVersion="14D136" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="CoreContact" representedClassName="VOIPsms.CoreContact" syncable="YES">
+        <attribute name="contactId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lastModified" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="messages" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CoreMessage" inverseName="contact" inverseEntity="CoreMessage" syncable="YES"/>
+    </entity>
+    <entity name="CoreDID" representedClassName="VOIPsms.CoreDID" syncable="YES">
+        <attribute name="did" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="CoreMessage" representedClassName="VOIPsms.CoreMessage" syncable="YES">
+        <attribute name="contactId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="coreId" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="date" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="did" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="flag" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="message" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <relationship name="contact" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CoreContact" inverseName="messages" inverseEntity="CoreContact" syncable="YES"/>
+    </entity>
+    <entity name="CoreUser" representedClassName="VOIPsms.CoreUser" syncable="YES">
+        <attribute name="apiPassword" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="remember" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="token" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="CoreContact" positionX="-63" positionY="27" width="128" height="90"/>
+        <element name="CoreDID" positionX="-54" positionY="45" width="128" height="75"/>
+        <element name="CoreMessage" positionX="-63" positionY="9" width="128" height="180"/>
+        <element name="CoreUser" positionX="-63" positionY="-18" width="128" height="105"/>
+    </elements>
+</model>
