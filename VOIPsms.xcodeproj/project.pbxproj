@@ -66,7 +66,7 @@
 		2A98D4471ADB665D003D3512 /* VOIPsmsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VOIPsmsTests.swift; sourceTree = "<group>"; };
 		2A98D4511ADB6690003D3512 /* VoipAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = VoipAPI.swift; path = ../VoipAPI.swift; sourceTree = "<group>"; };
 		2A98D4541ADB66EE003D3512 /* SwiftyJSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftyJSON.swift; sourceTree = "<group>"; };
-		2A98D4561ADB6891003D3512 /* CoreUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreUser.swift; path = "untitled folder/CoreUser.swift"; sourceTree = "<group>"; };
+		2A98D4561ADB6891003D3512 /* CoreUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreUser.swift; sourceTree = "<group>"; };
 		2A98D4591ADB69D0003D3512 /* KeyChainHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyChainHelper.swift; sourceTree = "<group>"; };
 		2A98D45B1ADB6A97003D3512 /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		2A98D45D1ADB6B0B003D3512 /* APIUrls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIUrls.swift; sourceTree = "<group>"; };
