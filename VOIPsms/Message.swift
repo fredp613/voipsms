@@ -15,7 +15,7 @@ import CoreData
 class Message {
     var contact: String!
     var message: String!
-    var type: Bool!
+    var type: Bool! 
     var date: String!
     var id: String!
     
@@ -25,12 +25,13 @@ class Message {
         dateFormatter.dateFormat = "YYYY-MM-dd"
         //from should be last date in core data
         let params = [
-            "from" : "2015-04-13",
+            "method" : "getSMS",
+            "from" : "2015-04-11",
             "to" : dateFormatter.stringFromDate(NSDate()) as String,
-            "method" : "getSMS"
+            "limit" : "1000000"
         ]
+
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
-        println(APIUrls.get_request_url_contruct(params)!)
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
             
             let json = responseObject
@@ -62,10 +63,7 @@ class Message {
                     } else {
                         CoreContact.createInManagedObjectContext(moc, contactId: contact, lastModified: date)
                     }
-                    //check if did exists
-                    if !CoreDID.isExistingDID(moc, didnum: did) {
-                        CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: "Parent")
-                    }
+                  
                 }
             }
             return completionHandler(responseObject: json, error: nil)

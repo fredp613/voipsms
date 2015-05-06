@@ -18,13 +18,15 @@ class CoreDID: NSManagedObject {
 
     @NSManaged var did: String
     @NSManaged var type: String
+    @NSManaged var registeredOn: String
     
     
-    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, didnum: String, didtype: String) -> Bool {
+    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, didnum: String, didtype: String, didRegisteredOn: String) -> Bool {
         
         let did : CoreDID = NSEntityDescription.insertNewObjectForEntityForName("CoreDID", inManagedObjectContext: managedObjectContext) as! CoreDID
         did.did = didnum
         did.type = didtype
+        did.registeredOn = didRegisteredOn
         
         if managedObjectContext.save(nil) {
             return true
@@ -80,10 +82,10 @@ class CoreDID: NSManagedObject {
         return nil
     }
     
-    class func updateSubAccounts(moc: NSManagedObjectContext) {
+    class func createOrUpdateDID(moc: NSManagedObjectContext) {
         
         let params = [
-            "method" : "getDIDsInfo"
+            "method": "getDIDsInfo"
         ]
         
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
@@ -98,8 +100,15 @@ class CoreDID: NSManagedObject {
                     type = didType.SUB.rawValue
                 }
                 let did = t["did"].stringValue
-                if !CoreDID.isExistingDID(moc, didnum: did) {
-                    CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: type)
+                let registeredOn = t["order_date"].stringValue
+                let sms_enabled = t["sms_enabled"].stringValue
+                
+                if sms_enabled == "1" {
+                    if !CoreDID.isExistingDID(moc, didnum: did) {
+                        CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: type, didRegisteredOn: registeredOn)
+                    }
+                } else {
+                    //some error to user
                 }
             }
             

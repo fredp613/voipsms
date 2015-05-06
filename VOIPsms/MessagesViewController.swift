@@ -36,25 +36,23 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         self.activityIndicator.center=self.view.center;
         if CoreUser.userExists(moc) {
             self.activityIndicator.startAnimating()
-            self.contacts = CoreContact.getContacts(self.moc)
-            CoreDID.updateSubAccounts(self.moc)
+            CoreDID.createOrUpdateDID(self.moc)
+            self.contacts = CoreContact.getContacts(self.moc, did: "6474796878")
             self.tableView.reloadData()
         } else {
             self.activityIndicator.stopAnimating()
         }
-        
          NSTimer.scheduledTimerWithTimeInterval(3, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
     }
     
 
-    
     func timerDidFire(sender: NSTimer) {
         if CoreUser.userExists(moc) {
             Message.getMessagesFromAPI(self.moc, completionHandler: { (responseObject, error) -> () in
                 if responseObject.count > 0 {
 //                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        self.contacts = CoreContact.getContacts(self.moc)
-                        CoreDID.updateSubAccounts(self.moc)
+                        CoreDID.createOrUpdateDID(self.moc)
+                        self.contacts = CoreContact.getContacts(self.moc, did: "6474796878")
                         self.tableView.reloadData()
                         self.activityIndicator.stopAnimating()
 //                    })
@@ -73,7 +71,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
         self.activityIndicator.center=self.view.center;
-        if CoreContact.getContacts(moc).count == 0 {
+        if CoreContact.getContacts(moc, did: nil).count == 0 {
             self.activityIndicator.startAnimating()
         } else {
             self.activityIndicator.stopAnimating()
@@ -170,7 +168,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         self.searchBar.text = ""
         searchBar.resignFirstResponder()
         maskView.removeFromSuperview()
-        contacts = CoreContact.getContacts(moc)
+        contacts = CoreContact.getContacts(moc, did: nil)
     }
     
     

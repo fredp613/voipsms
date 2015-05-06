@@ -38,19 +38,32 @@ class CoreMessage: NSManagedObject {
         coreMessage.did = did
         coreMessage.flag = flag
         
+        var uuid = NSNumber()
         if CoreMessage.getMessages(managedObjectContext, ascending: false).count > 0 {
             let lastMsgId = CoreMessage.getMessages(managedObjectContext, ascending: false)[0].coreId
             var newMsgID = lastMsgId.intValue + 1
             coreMessage.coreId = NSNumber(int: newMsgID)
+            uuid = NSNumber(int: newMsgID)
         } else {
             coreMessage.coreId = 1
         }
         
-        if managedObjectContext.save(nil) {
-            return coreMessage
-        }
+
+//        if !isExistingMessage(managedObjectContext, coreId: uuid) {
+            if managedObjectContext.save(nil) {
+                return coreMessage
+            }
+//        }
         
         return nil
+    }
+    
+    class func isExistingMessage(moc: NSManagedObjectContext, coreId: NSNumber) -> Bool {
+        if let messageExists = CoreMessage.getMessageByUUID(moc, coreId: coreId) {
+            return true
+        }
+
+        return false
     }
     
     class func updateSentMessageFromAPI(moc: NSManagedObjectContext, coreId:NSNumber, id: String) -> CoreMessage? {
@@ -81,7 +94,6 @@ class CoreMessage: NSManagedObject {
     }
     
     class func getMessageByUUID(moc: NSManagedObjectContext, coreId: NSNumber) -> CoreMessage? {
-        println(coreId)
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         let predicate = NSPredicate(format: "coreId == %@", coreId)
         fetchRequest.predicate = predicate
@@ -114,12 +126,12 @@ class CoreMessage: NSManagedObject {
     }
     
     class func sendMessage(moc: NSManagedObjectContext, contact: String, messageText: String, did: String) -> CoreMessage? {
-
         let date = NSDate()
         let formatter = NSDateFormatter()
-        formatter.dateFormat = "YYYY-mm-dd hh:mm:ss"
+        formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)
-        println(dateStr + "hi")
+        
+        
         if let cm = CoreMessage.createInManagedObjectContext(moc, contact: contact, id: "", type: false, date: dateStr, message: messageText, did: did, flag: message_status.PENDING.rawValue) {
             return cm
         }

@@ -320,7 +320,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
     @IBAction func sendWasPressed(sender: AnyObject) {
         var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         
-        if let cm =  CoreMessage.sendMessage(self.moc, contact: self.contactId, messageText: msg, did: "6135021177")  {
+        if let cm =  CoreMessage.sendMessage(self.moc, contact: self.contactId, messageText: msg, did: "6474796878")  {
             self.textMessage.text = ""
             self.messages = CoreContact.getMsgsByContact(moc, contactId: self.contactId)
             self.tableView.beginUpdates()
@@ -329,26 +329,23 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
             self.tableView.endUpdates()
             self.tableViewScrollToBottomAnimated(false)
             
-            dispatch_async(dispatch_get_global_queue(Int(QOS_CLASS_USER_INITIATED.value), 0)) { // 1
-                Message.sendMessageAPI(self.contactId, messageText: msg, did: "6135021177", completionHandler: { (responseObject, error) -> () in
+//            dispatch_async(dispatch_get_global_queue(Int(QOS_CLASS_USER_INITIATED.value), 0)) { // 1
+                Message.sendMessageAPI(self.contactId, messageText: msg, did: "6474796878", completionHandler: { (responseObject, error) -> () in
                      println(responseObject)
                     if responseObject["status"].stringValue == "success" {
                         let smsId = responseObject["sms"].stringValue
 
                         if let cmi = CoreMessage.updateSentMessageFromAPI(self.moc, coreId: cm.coreId, id: smsId) {
                             println("success")
+                            CoreContact.updateInManagedObjectContext(self.moc, contactId: cm.contactId, lastModified: cmi.date)
                         }
-                        
-//                        if let cm = CoreMessage.updateSentMessageFromAPI(self.moc, coreId: cm.coreId, id: smsId) {
-//                            //update api date or delivered flag
-//                        }
                     }
               
                 })
-            }
+//            }
 
         } else {
-            println("soemthing went wrong!")
+            println("sommething went wrong! message detail view controller")
         }
     }
     /*

@@ -20,7 +20,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         self.textMessage.delegate = self
         
 //        dispatch_async(dispatch_get_current_queue(), ^{
-//            [self.usernameInputField becomeFirstResponder];
+//    a        [self.usernameInputField becomeFirstResponder];
 //            });
         self.textContacts.becomeFirstResponder()
         self.addressBook.loadContacts(

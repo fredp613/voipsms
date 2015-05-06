@@ -7,6 +7,7 @@
     </entity>
     <entity name="CoreDID" representedClassName="VOIPsms.CoreDID" syncable="YES">
         <attribute name="did" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="registeredOn" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="type" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <entity name="CoreMessage" representedClassName="VOIPsms.CoreMessage" syncable="YES">
@@ -28,7 +29,7 @@
     </entity>
     <elements>
         <element name="CoreContact" positionX="-63" positionY="27" width="128" height="90"/>
-        <element name="CoreDID" positionX="-54" positionY="45" width="128" height="75"/>
+        <element name="CoreDID" positionX="-54" positionY="45" width="128" height="90"/>
         <element name="CoreMessage" positionX="-63" positionY="9" width="128" height="180"/>
         <element name="CoreUser" positionX="-63" positionY="-18" width="128" height="105"/>
     </elements>

@@ -31,7 +31,7 @@ class ViewController: UIViewController, UIAlertViewDelegate {
         CoreUser.authenticate(moc, email: self.txtUserName.text, password: self.txtPwd.text) { (success) -> Void in
             if success {
                 let alert = UIAlertView(title: "Login successful", message: "Start sms'ing!!", delegate: self, cancelButtonTitle: nil)
-                CoreDID.updateSubAccounts(self.moc)                
+//                CoreDID.createOrUpdateDID(self.moc)
                 alert.show()
                 self.dismissViewControllerAnimated(true, completion: nil)
                 self.dismissAlert(alert)

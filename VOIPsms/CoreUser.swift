@@ -26,6 +26,7 @@ class CoreUser: NSManagedObject {
         
         if managedObjectContext.save(nil) {
             KeyChainHelper.createORupdateForKey(pwd, keyName: email)
+            //create dids
             return true
         }
         
@@ -74,23 +75,26 @@ class CoreUser: NSManagedObject {
     
     class func authenticate(moc: NSManagedObjectContext, email: String, password: String, completionHandler: ((Bool) -> Void)!) -> Void {
         
-        let params = [
-            "api_username":  email,
-            "api_password" : password,
-            "method" : "getSMS"
-        ]
         
-        var url = APIUrls.getUrl + "api_username=" + email + "&api_password=" + password
+        var url = APIUrls.getUrl + "api_username=" + email + "&api_password=" + password + "&method=getDIDsInfo"
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: url, params: nil, completionHandler: { (data, error) -> () in
             if data != nil {
-                if self.userExists(moc) == false {
-                    CoreUser.createInManagedObjectContext(moc, email: email, pwd: password)
+                if data["status"] == "success" {
+//                    println(data)
+                    if self.userExists(moc) == false {
+                        CoreUser.createInManagedObjectContext(moc, email: email, pwd: password)
+                        CoreDID.createOrUpdateDID(moc)
+
+                    } else {
+                        let currentUser = CoreUser.currentUser(moc)
+                        currentUser?.remember = true
+                        moc.save(nil)
+                    }
+                    return completionHandler(true)
                 } else {
-                    let currentUser = CoreUser.currentUser(moc)
-                    currentUser?.remember = true
-                    moc.save(nil)
+                    return completionHandler(false)
                 }
-                return completionHandler(true)
+                
             } else {
                 return completionHandler(false)
             }

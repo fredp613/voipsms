@@ -68,19 +68,34 @@ class CoreContact: NSManagedObject {
         return nil
     }
     
-    class func getContacts(moc: NSManagedObjectContext) -> [CoreContact] {
-        
-        let fetchRequest = NSFetchRequest(entityName: "CoreContact")
-        let entity = NSEntityDescription.entityForName("CoreContact", inManagedObjectContext: moc)
-        fetchRequest.entity = entity
-        let sortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
-        
-        fetchRequest.returnsObjectsAsFaults = false
+    class func getContacts(moc: NSManagedObjectContext, did: String?) -> [CoreContact] {
+        //perform fetch for all messages with did == did, get contact id from there
+        //for each contact_id in DID append coreContacts array (if contactId doesnt exist yet in array)
         var coreContacts = [CoreContact]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreContact]
-        if fetchResults?.count > 0 {
-            coreContacts = fetchResults!
+        
+        if let did = did {
+
+            let messages = CoreMessage.getMessagesByDID(moc, did: did)
+            for m in messages {
+                if let contact = CoreContact.currentContact(moc, contactId: m.contactId) {
+                    if !contains(coreContacts, contact) {
+                        println("hihi")
+                        coreContacts.append(contact)
+                    }
+                }
+            }
+        } else {
+            let fetchRequest = NSFetchRequest(entityName: "CoreContact")
+            let entity = NSEntityDescription.entityForName("CoreContact", inManagedObjectContext: moc)
+            fetchRequest.entity = entity
+            let sortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
+            fetchRequest.sortDescriptors = [sortDescriptor]
+            
+            fetchRequest.returnsObjectsAsFaults = false
+            let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreContact]
+            if fetchResults?.count > 0 {
+                coreContacts = fetchResults!
+            }
         }
         return coreContacts
     }
