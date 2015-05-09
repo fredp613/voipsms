@@ -76,6 +76,8 @@ struct IOSModel {
 }
 
 
+
+
 class MessageDetailViewController: UIViewController, UITableViewDelegate, UITextFieldDelegate, UIScrollViewDelegate {
 
     @IBOutlet weak var textMessage: UITextField!
@@ -92,6 +94,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
     var lastContentOffset = CGFloat()
     var model = ModelSize()
     var titleText = String()
+    var tableData : [Message] = [Message]()
+    var timer : NSTimer = NSTimer()
+    
 //    var coreDid = CoreDID()
 //    var delegate:UpdateMessagesTableViewDelegate? = nil
 
@@ -99,8 +104,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
         super.viewDidLoad()
         self.tableView.delegate = self
         self.scrollView.delegate = self
+        self.messages = CoreContact.getMsgsByContact(moc, contactId: self.contactId)
         
-        // Do any additional setup after loading the view.
         if textMessage.text == "" {
             sendButton.enabled = false
         }
@@ -120,8 +125,63 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
         scrollView.bounces = false
         scrollView.bringSubviewToFront(tableView)
         
-        CoreContact.updateMessagesToRead(moc, contactId: contactId)
         
+        for m in self.messages {
+            var message = Message(contact: m.contactId, message: m.message, type: m.type, date: m.date, id: m.id)
+            tableData.append(message)
+        }
+        
+        CoreContact.updateMessagesToRead(moc, contactId: contactId)
+        startTimer()
+    }
+    
+    func dataSourceRefreshTimerDidFire(sender: NSTimer) {
+
+        var messageReceived = [Message]()
+        
+        for m in self.tableData {
+            if m.type.boolValue == true || m.type == 1 {
+                messageReceived.append(m)
+            }
+        }
+        
+        var filteredArray : [Message] = tableData.filter() { $0.type == true }
+        var lastMessage = tableData[tableData.endIndex - 1]
+
+        Message.getIncomingMessagesFromAPI(self.moc,completionHandler: { (responseObject, error) -> () in
+            if responseObject.count > 0 {
+                self.messages = CoreContact.getIncomingMsgsByContact(self.moc, contactId: self.contactId)
+                if self.messages.count > filteredArray.count {
+                    println("message received update message")
+                    var newMessages = []
+                    for m in self.messages {
+                        if !contains(filteredArray.map {$0.id}, m.id) {
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                var message = Message(contact: m.contactId, message: m.message, type: true, date: m.date, id: m.id)
+                                self.tableData.append(message)
+                                self.tableView.beginUpdates()
+                                let indexPath = NSIndexPath(forItem: self.tableData.endIndex - 1, inSection: 0)
+                                self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+                                self.tableView.endUpdates()
+                                self.tableViewScrollToBottomAnimated(true)
+                            })
+                        }
+                    }
+                }
+            }
+            
+        })
+
+        
+        
+    }
+    
+    func startTimer() {
+        timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
+    }
+    
+    func stopTimer() {
+        timer.invalidate()
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -186,7 +246,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete method implementation.
         // Return the number of rows in the section.
-        return messages.count
+//        return messages.count
+        return tableData.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -204,7 +265,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
 //                cell.bubbleImageView.addGestureRecognizer(doubleTapGestureRecognizer)
 //                cell.bubbleImageView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: action))
             }
-            let message = self.messages[indexPath.row]
+            let message : Message = self.tableData[indexPath.row]
             cell.configureWithMessage(message)
             var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
 //            cellHeights.append(size.height + 10)
@@ -309,7 +370,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
     func tableViewScrollToBottomAnimated(animated: Bool) {
         let numberOfRows = tableView.numberOfRowsInSection(0)
         if numberOfRows > 0 {
-            let indexPath = NSIndexPath(forRow: self.messages.endIndex - 1, inSection: 0)
+            let indexPath = NSIndexPath(forRow: self.tableData.endIndex - 1, inSection: 0)
             tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: UITableViewScrollPosition.Top,
                 animated: animated)
         }
@@ -320,41 +381,52 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
     @IBAction func sendWasPressed(sender: AnyObject) {
         var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         
-        if let cm =  CoreMessage.sendMessage(self.moc, contact: self.contactId, messageText: msg, did: "6474796878")  {
             self.textMessage.text = ""
-            self.messages = CoreContact.getMsgsByContact(moc, contactId: self.contactId)
+        
+            let date = NSDate()
+            let formatter = NSDateFormatter()
+            formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
+            var dateStr = formatter.stringFromDate(date)
+        
+            var message = Message(contact: self.contactId, message: msg, type: 0, date: dateStr, id: "")
+            tableData.append(message)
             self.tableView.beginUpdates()
-            var indexPath = NSIndexPath(forRow: self.messages.count - 1, inSection: 0)
-            self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Right)
+            let indexPath = NSIndexPath(forItem: tableData.count - 1, inSection: 0)
+            self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
             self.tableView.endUpdates()
-            self.tableViewScrollToBottomAnimated(false)
-            
-//            dispatch_async(dispatch_get_global_queue(Int(QOS_CLASS_USER_INITIATED.value), 0)) { // 1
-                Message.sendMessageAPI(self.contactId, messageText: msg, did: "6474796878", completionHandler: { (responseObject, error) -> () in
-                     println(responseObject)
-                    if responseObject["status"].stringValue == "success" {
-                        let smsId = responseObject["sms"].stringValue
-
-                        if let cmi = CoreMessage.updateSentMessageFromAPI(self.moc, coreId: cm.coreId, id: smsId) {
-                            println("success")
-                            CoreContact.updateInManagedObjectContext(self.moc, contactId: cm.contactId, lastModified: cmi.date)
-                        }
-                    }
-              
-                })
-//            }
-
-        } else {
-            println("sommething went wrong! message detail view controller")
-        }
+            self.tableViewScrollToBottomAnimated(true)
+            NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
+        
+            let did = CoreDID.getDIDs(moc)[0].did
+            Message.sendMessageAPI(self.contactId, messageText: msg, did: did, completionHandler: { (responseObject, error) -> () in
+                if responseObject["status"].stringValue == "success" {
+                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                        self.messages = CoreContact.getMsgsByContact(self.moc, contactId: self.contactId)
+//                        self.tableView.reloadData()
+//                        self.tableViewScrollToBottomAnimated(true)
+//                        NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
+                    })
+                    
+                }
+            })
     }
-    /*
+    
+    func timerDidFire(sender: NSTimer) {
+        self.tableViewScrollToBottomAnimated(true)
+    }
+    
+ 
+    
+
+    
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
     }
-    */
+
 }

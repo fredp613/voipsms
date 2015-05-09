@@ -79,7 +79,6 @@ class CoreContact: NSManagedObject {
             for m in messages {
                 if let contact = CoreContact.currentContact(moc, contactId: m.contactId) {
                     if !contains(coreContacts, contact) {
-                        println("hihi")
                         coreContacts.append(contact)
                     }
                 }
@@ -104,6 +103,32 @@ class CoreContact: NSManagedObject {
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         fetchRequest.returnsObjectsAsFaults = false
         let predicate = NSPredicate(format: "contactId == %@", contactId)
+        fetchRequest.predicate = predicate
+        let sortDescriptor = NSSortDescriptor(key: "date", ascending: true)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        var coreMessages = [CoreMessage]()
+        let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        if fetchResults?.count > 0 {
+            coreMessages = fetchResults!
+        }
+        
+        return coreMessages
+        
+    }
+    
+    class func getIncomingMsgsByContact(managedObjectContext: NSManagedObjectContext, contactId: String) -> [CoreMessage] {
+        let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
+        fetchRequest.returnsObjectsAsFaults = false
+        
+//        NSPredicate *compoundPredicate
+//            = [NSCompoundPredicate andPredicateWithSubpredicates:[NSArray of Predicates]];
+//        let compoundPredicate = NSCompoundPredicate(format: <#String#>, <#args: CVarArgType#>...)
+        
+        let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
+        let secondPredicate = NSPredicate(format: "type == %@", "1")
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
+        
+        // Set the predicate on the fetch request
         fetchRequest.predicate = predicate
         let sortDescriptor = NSSortDescriptor(key: "date", ascending: true)
         fetchRequest.sortDescriptors = [sortDescriptor]

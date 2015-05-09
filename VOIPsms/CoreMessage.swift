@@ -27,36 +27,69 @@ class CoreMessage: NSManagedObject {
     @NSManaged var flag: String
     @NSManaged var contact: CoreContact
     
-    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contact: String, id: String, type: Bool, date: String, message: String, did: String, flag: String) -> CoreMessage? {
-        
-        let coreMessage : CoreMessage = NSEntityDescription.insertNewObjectForEntityForName("CoreMessage", inManagedObjectContext: managedObjectContext) as! CoreMessage
-        coreMessage.message = message
-        coreMessage.contactId = contact
-        coreMessage.id = id
-        coreMessage.type = type
-        coreMessage.date = date
-        coreMessage.did = did
-        coreMessage.flag = flag
-        
-        var uuid = NSNumber()
-        if CoreMessage.getMessages(managedObjectContext, ascending: false).count > 0 {
-            let lastMsgId = CoreMessage.getMessages(managedObjectContext, ascending: false)[0].coreId
-            var newMsgID = lastMsgId.intValue + 1
-            coreMessage.coreId = NSNumber(int: newMsgID)
-            uuid = NSNumber(int: newMsgID)
-        } else {
-            coreMessage.coreId = 1
-        }
-        
-
-//        if !isExistingMessage(managedObjectContext, coreId: uuid) {
-            if managedObjectContext.save(nil) {
-                return coreMessage
-            }
+//    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contact: String, id: String, type: Bool, date: String, message: String, did: String, flag: String) -> CoreMessage? {
+//        
+//        let coreMessage : CoreMessage = NSEntityDescription.insertNewObjectForEntityForName("CoreMessage", inManagedObjectContext: managedObjectContext) as! CoreMessage
+//        coreMessage.message = message
+//        coreMessage.contactId = contact
+//        coreMessage.id = id
+//        coreMessage.type = type
+//        coreMessage.date = date
+//        coreMessage.did = did
+//        coreMessage.flag = flag
+//        
+//        var uuid = NSNumber()
+//        if CoreMessage.getMessages(managedObjectContext, ascending: false).count > 0 {
+//            let lastMsgId = CoreMessage.getMessages(managedObjectContext, ascending: false)[0].coreId
+//            var newMsgID = lastMsgId.intValue + 1
+//            coreMessage.coreId = NSNumber(int: newMsgID)
+//            uuid = NSNumber(int: newMsgID)
+//        } else {
+//            coreMessage.coreId = 1
 //        }
+//        
+//
+//
+//            if managedObjectContext.save(nil) {
+//                return coreMessage
+//            }
+//
+//        
+//        return nil
+//        
+//        
+//    }
+    
+    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contact: String, id: String, type: Bool, date: String, message: String, did: String, flag: String,completionHandler: (responseObject: CoreMessage?, error: NSError?) -> ()) {
+
+            let coreMessage : CoreMessage = NSEntityDescription.insertNewObjectForEntityForName("CoreMessage", inManagedObjectContext: managedObjectContext) as! CoreMessage
+            coreMessage.message = message
+            coreMessage.contactId = contact
+            coreMessage.id = id
+            coreMessage.type = type
+            coreMessage.date = date
+            coreMessage.did = did
+            coreMessage.flag = flag
+            
+            var uuid = NSNumber()
+            if CoreMessage.getMessages(managedObjectContext, ascending: false).count > 0 {
+                let lastMsgId = CoreMessage.getMessages(managedObjectContext, ascending: false)[0].coreId
+                var newMsgID = lastMsgId.intValue + 1
+                coreMessage.coreId = NSNumber(int: newMsgID)
+                uuid = NSNumber(int: newMsgID)
+            } else {
+                coreMessage.coreId = 1
+            }
         
-        return nil
+            let err = NSError()
+            if managedObjectContext.save(nil) {
+                return completionHandler(responseObject: coreMessage, error: nil)
+            } else {
+                return completionHandler(responseObject: nil, error: err)
+            }
+        
     }
+
     
     class func isExistingMessage(moc: NSManagedObjectContext, coreId: NSNumber) -> Bool {
         if let messageExists = CoreMessage.getMessageByUUID(moc, coreId: coreId) {
@@ -71,7 +104,11 @@ class CoreMessage: NSManagedObject {
         if let cm = CoreMessage.getMessageByUUID(moc, coreId: coreId) {
             cm.id = id
             moc.save(nil)
-            CoreContact.updateInManagedObjectContext(moc, contactId: cm.contactId, lastModified: nil)
+            
+            var formatter: NSDateFormatter = NSDateFormatter()
+            formatter.dateFormat = "dd-MM-yyyy"
+            let stringDate: String = formatter.stringFromDate(NSDate())
+            CoreContact.updateInManagedObjectContext(moc, contactId: cm.contactId, lastModified: stringDate)
             return cm
         }
         return nil
@@ -125,17 +162,22 @@ class CoreMessage: NSManagedObject {
         return coreMessages
     }
     
-    class func sendMessage(moc: NSManagedObjectContext, contact: String, messageText: String, did: String) -> CoreMessage? {
+    class func sendMessage(moc: NSManagedObjectContext, contact: String, messageText: String, did: String, completionHandler: (responseObject: CoreMessage?, error: NSError?) -> ()) {
         let date = NSDate()
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)
         
-        
-        if let cm = CoreMessage.createInManagedObjectContext(moc, contact: contact, id: "", type: false, date: dateStr, message: messageText, did: did, flag: message_status.PENDING.rawValue) {
-            return cm
+        CoreMessage.createInManagedObjectContext(moc, contact: contact, id: "", type: false, date: dateStr, message: messageText, did: did, flag: message_status.PENDING.rawValue) { (responseObject, error) -> () in
+            let err = NSError()
+            if responseObject != nil {
+                return completionHandler(responseObject: responseObject, error: nil)
+            } else {
+                return completionHandler(responseObject: nil, error: err)
+                
+            }
         }
-        return nil
+
     }
     
     

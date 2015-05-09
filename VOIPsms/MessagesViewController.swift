@@ -25,26 +25,14 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
     var currentDID : CoreDID!
     var maskView : UIView = UIView()
-    
-//    func updateMessagesTableView() {
-//        self.tableView.reloadData()
-//    }
-    
+    var timer : NSTimer = NSTimer()
+    var did : String = String()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
-        self.activityIndicator.center=self.view.center;
-        if CoreUser.userExists(moc) {
-            self.activityIndicator.startAnimating()
-            CoreDID.createOrUpdateDID(self.moc)
-            self.contacts = CoreContact.getContacts(self.moc, did: "6474796878")
-            self.tableView.reloadData()
-        } else {
-            self.activityIndicator.stopAnimating()
-        }
-         NSTimer.scheduledTimerWithTimeInterval(3, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+        viewSetup()
     }
-    
 
     func timerDidFire(sender: NSTimer) {
         if CoreUser.userExists(moc) {
@@ -52,7 +40,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 if responseObject.count > 0 {
 //                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
                         CoreDID.createOrUpdateDID(self.moc)
-                        self.contacts = CoreContact.getContacts(self.moc, did: "6474796878")
+                        self.contacts = CoreContact.getContacts(self.moc, did: self.did)
                         self.tableView.reloadData()
                         self.activityIndicator.stopAnimating()
 //                    })
@@ -65,27 +53,31 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        self.tableView.reloadData()
+        timer = NSTimer.scheduledTimerWithTimeInterval(3, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
-        self.activityIndicator.center=self.view.center;
-        if CoreContact.getContacts(moc, did: nil).count == 0 {
-            self.activityIndicator.startAnimating()
-        } else {
-            self.activityIndicator.stopAnimating()
-        }
-        
         var btnDID = UIButton(frame: CGRectMake(0, 0, 100, 40))
         btnDID.setTitle("All Messages (filter)", forState: UIControlState.Normal)
         btnDID.addTarget(self, action: Selector("titleClicked:"), forControlEvents: UIControlEvents.TouchUpInside)
         btnDID.setTitleColor(UIColor.lightGrayColor(), forState: UIControlState.Normal)
         self.navigationController?.navigationBar.topItem?.titleView = btnDID
-        
+        viewSetup()
     }
     
-   
+    func viewSetup() {
+        self.activityIndicator.center=self.view.center;
+        if CoreUser.userExists(moc) {
+            self.activityIndicator.startAnimating()
+            CoreDID.createOrUpdateDID(self.moc)
+            did = "6135021177"
+            self.contacts = CoreContact.getContacts(self.moc, did: did)
+            self.activityIndicator.stopAnimating()
+        } else {
+            self.activityIndicator.stopAnimating()
+        }
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -170,10 +162,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         maskView.removeFromSuperview()
         contacts = CoreContact.getContacts(moc, did: nil)
     }
-    
-    
 
-    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
@@ -188,7 +177,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             var messages = CoreContact.getMsgsByContact(moc, contactId: contactId)
             detailSegue.titleText = CoreContact.currentContact(self.moc, contactId: contactId)!.contactId
             detailSegue.contactId = contactId
-            detailSegue.messages = messages
+            timer.invalidate()
+//            detailSegue.messages = messages
             
             
         }

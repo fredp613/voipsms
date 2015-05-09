@@ -40,8 +40,7 @@ class MessageBubbleCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configureWithMessage(message: CoreMessage) {
-        
+    func configureWithMessage(message: Message) {
         let font:UIFont? = UIFont(name: "Arial", size: 9.0)
         let dateStr = NSAttributedString(string: message.date, attributes:
             [NSForegroundColorAttributeName: UIColor.lightGrayColor(),

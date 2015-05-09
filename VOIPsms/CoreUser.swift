@@ -25,6 +25,7 @@ class CoreUser: NSManagedObject {
         coreUser.remember = true
         
         if managedObjectContext.save(nil) {
+
             KeyChainHelper.createORupdateForKey(pwd, keyName: email)
             //create dids
             return true
@@ -84,7 +85,6 @@ class CoreUser: NSManagedObject {
                     if self.userExists(moc) == false {
                         CoreUser.createInManagedObjectContext(moc, email: email, pwd: password)
                         CoreDID.createOrUpdateDID(moc)
-
                     } else {
                         let currentUser = CoreUser.currentUser(moc)
                         currentUser?.remember = true
