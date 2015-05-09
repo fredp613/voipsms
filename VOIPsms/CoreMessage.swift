@@ -26,39 +26,7 @@ class CoreMessage: NSManagedObject {
     @NSManaged var date: String
     @NSManaged var flag: String
     @NSManaged var contact: CoreContact
-    
-//    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contact: String, id: String, type: Bool, date: String, message: String, did: String, flag: String) -> CoreMessage? {
-//        
-//        let coreMessage : CoreMessage = NSEntityDescription.insertNewObjectForEntityForName("CoreMessage", inManagedObjectContext: managedObjectContext) as! CoreMessage
-//        coreMessage.message = message
-//        coreMessage.contactId = contact
-//        coreMessage.id = id
-//        coreMessage.type = type
-//        coreMessage.date = date
-//        coreMessage.did = did
-//        coreMessage.flag = flag
-//        
-//        var uuid = NSNumber()
-//        if CoreMessage.getMessages(managedObjectContext, ascending: false).count > 0 {
-//            let lastMsgId = CoreMessage.getMessages(managedObjectContext, ascending: false)[0].coreId
-//            var newMsgID = lastMsgId.intValue + 1
-//            coreMessage.coreId = NSNumber(int: newMsgID)
-//            uuid = NSNumber(int: newMsgID)
-//        } else {
-//            coreMessage.coreId = 1
-//        }
-//        
-//
-//
-//            if managedObjectContext.save(nil) {
-//                return coreMessage
-//            }
-//
-//        
-//        return nil
-//        
-//        
-//    }
+
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contact: String, id: String, type: Bool, date: String, message: String, did: String, flag: String,completionHandler: (responseObject: CoreMessage?, error: NSError?) -> ()) {
 
@@ -70,7 +38,7 @@ class CoreMessage: NSManagedObject {
             coreMessage.date = date
             coreMessage.did = did
             coreMessage.flag = flag
-            
+        
             var uuid = NSNumber()
             if CoreMessage.getMessages(managedObjectContext, ascending: false).count > 0 {
                 let lastMsgId = CoreMessage.getMessages(managedObjectContext, ascending: false)[0].coreId
@@ -82,14 +50,22 @@ class CoreMessage: NSManagedObject {
             }
         
             let err = NSError()
+
             if managedObjectContext.save(nil) {
                 return completionHandler(responseObject: coreMessage, error: nil)
             } else {
                 return completionHandler(responseObject: nil, error: err)
             }
+
         
     }
 
+    class func isExistingMessageById(moc: NSManagedObjectContext, id: String) -> Bool {
+        if let messageExists = CoreMessage.getMessageById(moc, Id: id) {
+            return true
+        }
+        return false
+    }
     
     class func isExistingMessage(moc: NSManagedObjectContext, coreId: NSNumber) -> Bool {
         if let messageExists = CoreMessage.getMessageByUUID(moc, coreId: coreId) {
@@ -144,6 +120,25 @@ class CoreMessage: NSManagedObject {
         }
         return nil
     }
+    
+    class func getMessageById(moc: NSManagedObjectContext, Id: String) -> CoreMessage? {
+        let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
+        let predicate = NSPredicate(format: "id == %@", Id)
+        fetchRequest.predicate = predicate
+        var error : NSError? = nil
+        if let fetchResults = moc.executeFetchRequest(fetchRequest, error: &error) as? [CoreMessage] {
+            if fetchResults.count > 0 {
+                return fetchResults[0] as CoreMessage
+            }
+        } else {
+            println("\(error?.userInfo)")
+        }
+        return nil
+    }
+    
+    
+    
+ 
     
     class func getMessagesByDID(moc: NSManagedObjectContext, did: String) -> [CoreMessage] {
         

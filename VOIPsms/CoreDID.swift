@@ -48,7 +48,7 @@ class CoreDID: NSManagedObject {
         return false
     }
     
-    class func getDIDs(moc: NSManagedObjectContext) -> [CoreDID] {
+    class func getDIDs(moc: NSManagedObjectContext) -> [CoreDID]? {
         
         let fetchRequest = NSFetchRequest(entityName: "CoreDID")
         let entity = NSEntityDescription.entityForName("CoreDID", inManagedObjectContext: moc)
@@ -60,8 +60,9 @@ class CoreDID: NSManagedObject {
         let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDID]
         if fetchResults?.count > 0 {
             coreDIDs = fetchResults!
+            return coreDIDs
         }
-        return coreDIDs
+        return nil
     }
     
     class func currentDID(managedObjectContext: NSManagedObjectContext) -> CoreDID? {

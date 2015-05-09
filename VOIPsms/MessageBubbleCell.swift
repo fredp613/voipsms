@@ -46,7 +46,7 @@ class MessageBubbleCell: UITableViewCell {
             [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
                 NSFontAttributeName: font!])
         
-        messageLabel.text = "\(message.message) \r\n \(dateStr.string)"
+        messageLabel.text = "\(message.message) \r\n \(dateStr.string) \r\n \(message.id)"
         
             var layoutAttribute: NSLayoutAttribute
             var layoutConstant: CGFloat

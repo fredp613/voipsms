@@ -31,29 +31,17 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
-        viewSetup()
-    }
-
-    func timerDidFire(sender: NSTimer) {
-        if CoreUser.userExists(moc) {
-            Message.getMessagesFromAPI(self.moc, completionHandler: { (responseObject, error) -> () in
-                if responseObject.count > 0 {
-//                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        CoreDID.createOrUpdateDID(self.moc)
-                        self.contacts = CoreContact.getContacts(self.moc, did: self.did)
-                        self.tableView.reloadData()
-                        self.activityIndicator.stopAnimating()
-//                    })
-                } else {
-                    println("no messages yet")
-                }
-            })
-        }
+        startTimer()
+       
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        timer = NSTimer.scheduledTimerWithTimeInterval(3, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+//        self.activityIndicator.center=self.view.center;
+        self.activityIndicator.startAnimating()
+        viewSetup()
+        timer.invalidate()
+        startTimer()
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -63,21 +51,55 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         btnDID.addTarget(self, action: Selector("titleClicked:"), forControlEvents: UIControlEvents.TouchUpInside)
         btnDID.setTitleColor(UIColor.lightGrayColor(), forState: UIControlState.Normal)
         self.navigationController?.navigationBar.topItem?.titleView = btnDID
-        viewSetup()
+        
     }
     
     func viewSetup() {
-        self.activityIndicator.center=self.view.center;
+
         if CoreUser.userExists(moc) {
-            self.activityIndicator.startAnimating()
             CoreDID.createOrUpdateDID(self.moc)
-            did = "6135021177"
-            self.contacts = CoreContact.getContacts(self.moc, did: did)
-            self.activityIndicator.stopAnimating()
+            if let didArr = CoreDID.getDIDs(moc) {
+                did = didArr[0].did
+            }
+            
+            self.tableView.reloadData()
+
+            CoreContact.getContacts(moc, did: did, completionHandler: { (responseObject, error) -> () in
+                self.contacts = responseObject
+                self.activityIndicator.stopAnimating()
+            })
+
         } else {
             self.activityIndicator.stopAnimating()
         }
+        self.tableView.reloadData()
     }
+    
+    func startTimer() {
+        timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+    }
+    
+    func timerDidFire(sender: NSTimer) {
+        if CoreUser.userExists(moc) {
+            Message.getMessagesFromAPI(self.moc, completionHandler: { (responseObject, error) -> () in
+                if responseObject.count > 0 {
+                    CoreDID.createOrUpdateDID(self.moc)
+                    CoreContact.getContacts(self.moc, did: self.did, completionHandler: { (responseObject, error) -> () in
+                        self.contacts = responseObject
+                        let indexSet = NSIndexSet(index: 0)
+                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
+                        })
+
+                        self.activityIndicator.stopAnimating()
+                    })
+                } else {
+                    println("no messages yet")
+                }
+            })
+        }
+    }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -106,8 +128,13 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell    
         var contact = self.contacts[indexPath.row]
-        cell.textLabel?.text = contact.contactId
         
+        //if not and existing contact from contacts - format
+        cell.textLabel?.text = CoreContact.getFormattedPhoneNumber(contact.contactId) as String
+        //if existing contact : cell... = contact.full_name
+        
+        
+
         
         if let lastMessage = CoreContact.getLastMessageFromContact(moc, contactId: contact.contactId) {
             cell.detailTextLabel?.text = "\(lastMessage.message)"
@@ -160,7 +187,10 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         self.searchBar.text = ""
         searchBar.resignFirstResponder()
         maskView.removeFromSuperview()
-        contacts = CoreContact.getContacts(moc, did: nil)
+//        contacts = CoreContact.getContacts(moc, did: nil)
+        CoreContact.getContacts(moc, did: did) { (responseObject, error) -> () in
+            self.contacts = responseObject
+        }
     }
 
     // MARK: - Navigation
@@ -175,7 +205,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             var contactId = self.contacts[path!.row].contactId
             
             var messages = CoreContact.getMsgsByContact(moc, contactId: contactId)
-            detailSegue.titleText = CoreContact.currentContact(self.moc, contactId: contactId)!.contactId
+            detailSegue.titleText = CoreContact.getFormattedPhoneNumber(contactId) as String
             detailSegue.contactId = contactId
             timer.invalidate()
 //            detailSegue.messages = messages

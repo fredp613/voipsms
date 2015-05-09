@@ -86,6 +86,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var tableViewHeightConstraint: NSLayoutConstraint!
     
+
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
     var messages : [CoreMessage]!
     var contactId = String()
@@ -130,21 +131,21 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
             var message = Message(contact: m.contactId, message: m.message, type: m.type, date: m.date, id: m.id)
             tableData.append(message)
         }
-        
+
         CoreContact.updateMessagesToRead(moc, contactId: contactId)
         startTimer()
     }
     
+   
+    
     func dataSourceRefreshTimerDidFire(sender: NSTimer) {
 
         var messageReceived = [Message]()
-        
         for m in self.tableData {
             if m.type.boolValue == true || m.type == 1 {
                 messageReceived.append(m)
             }
         }
-        
         var filteredArray : [Message] = tableData.filter() { $0.type == true }
         var lastMessage = tableData[tableData.endIndex - 1]
 
@@ -152,7 +153,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
             if responseObject.count > 0 {
                 self.messages = CoreContact.getIncomingMsgsByContact(self.moc, contactId: self.contactId)
                 if self.messages.count > filteredArray.count {
-                    println("message received update message")
+                    println("number of messages: \(self.messages.count)")
+                    println("number of filtered: \(filteredArray.count)")
                     var newMessages = []
                     for m in self.messages {
                         if !contains(filteredArray.map {$0.id}, m.id) {
@@ -355,7 +357,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
                     scrollView.contentInset = contentInsets;
                     scrollView.scrollIndicatorInsets = contentInsets;
                 } else {
-                    scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height, right: 0)
+                    scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height + 10, right: 0)
                 }
             }
            
@@ -397,9 +399,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
             self.tableViewScrollToBottomAnimated(true)
             NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
         
-            let did = CoreDID.getDIDs(moc)[0].did
+            var did = String()
+            if let didArr = CoreDID.getDIDs(moc) {
+                did = didArr[0].did
+            }
             Message.sendMessageAPI(self.contactId, messageText: msg, did: did, completionHandler: { (responseObject, error) -> () in
                 if responseObject["status"].stringValue == "success" {
+                    //save to core data here
                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
 //                        self.messages = CoreContact.getMsgsByContact(self.moc, contactId: self.contactId)
 //                        self.tableView.reloadData()

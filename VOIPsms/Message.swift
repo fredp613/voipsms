@@ -64,7 +64,7 @@ class Message {
                 }
                 let did = t["did"].stringValue
                 
-                if !contains(coreMessages, id) {
+                if CoreMessage.isExistingMessageById(moc, id: id) == false {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
                         //check if contact exists
                         if CoreContact.isExistingContact(moc, contactId: contact) {
@@ -95,11 +95,10 @@ class Message {
             "limit" : "1000000"
         ]
         
-        var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
+        
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
             
             let json = responseObject
-            //            println(json)
             for (key: String, t: JSON) in json["sms"] {
                 
                 let contact = t["contact"].stringValue
@@ -117,10 +116,7 @@ class Message {
                     flagValue = message_status.PENDING.rawValue
                 }
                 let did = t["did"].stringValue
-                
-                if !contains(coreMessages, id) {
-                    //                    CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue)
-                    
+                if CoreMessage.isExistingMessageById(moc, id: id) == false {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
                         //check if contact exists
                         if CoreContact.isExistingContact(moc, contactId: contact) {

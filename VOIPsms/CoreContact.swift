@@ -68,7 +68,7 @@ class CoreContact: NSManagedObject {
         return nil
     }
     
-    class func getContacts(moc: NSManagedObjectContext, did: String?) -> [CoreContact] {
+    class func getContacts(moc: NSManagedObjectContext, did: String?, completionHandler: (responseObject: [CoreContact], error: NSError?) -> ()) {
         //perform fetch for all messages with did == did, get contact id from there
         //for each contact_id in DID append coreContacts array (if contactId doesnt exist yet in array)
         var coreContacts = [CoreContact]()
@@ -96,9 +96,10 @@ class CoreContact: NSManagedObject {
                 coreContacts = fetchResults!
             }
         }
-        return coreContacts
+        return completionHandler(responseObject: coreContacts, error: nil)
     }
-
+    
+    
     class func getMsgsByContact(managedObjectContext: NSManagedObjectContext, contactId: String) -> [CoreMessage] {
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         fetchRequest.returnsObjectsAsFaults = false
@@ -191,6 +192,16 @@ class CoreContact: NSManagedObject {
         }
         return nil
         
+    }
+    
+    class func getFormattedPhoneNumber(contactId: String) -> NSString {
+        let contactStr = contactId as NSString
+        let areaCode = contactStr.substringWithRange(NSRange(location: 0, length: 3))
+        let firstPart = contactStr.substringWithRange(NSRange(location: 3, length: 3))
+        let lastPart = contactStr.substringWithRange(NSRange(location: 6, length: 4))
+        let formattedPhoneNumber = areaCode + "-" + firstPart + "-" + lastPart
+        
+        return formattedPhoneNumber
     }
 
 }

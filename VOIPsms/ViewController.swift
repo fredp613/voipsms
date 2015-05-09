@@ -35,11 +35,22 @@ class ViewController: UIViewController, UIAlertViewDelegate {
                 alert.show()
                 self.dismissViewControllerAnimated(true, completion: nil)
                 self.dismissAlert(alert)
+//                self.getInitialMessages()
             } else {
                 let alert = UIAlertView(title: "Invalid Login Credentials", message: "Please try again", delegate: self, cancelButtonTitle: "Ok")
                 alert.show()
             }
         }
+    }
+    
+    func getInitialMessages() {
+        Message.getMessagesFromAPI(self.moc, completionHandler: { (responseObject, error) -> () in
+            if responseObject.count > 0 {
+                println("success")
+            } else {
+                println("no messages yet")
+            }
+        })
     }
     
     func dismissAlert(alertView: UIAlertView) {

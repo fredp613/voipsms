@@ -208,7 +208,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="610"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="610" id="eZm-pk-wEm"/>
+                                            <constraint firstAttribute="height" constant="610" id="nT0-6I-R1A"/>
                                         </constraints>
                                         <prototypes>
                                             <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" id="yxS-FR-zvm">
@@ -232,7 +232,7 @@
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J98-40-cjO">
                                         <rect key="frame" x="308" y="616" width="34" height="30"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="34" id="l1i-gk-6i1"/>
+                                            <constraint firstAttribute="width" constant="34" id="xdp-QD-88b"/>
                                         </constraints>
                                         <state key="normal" title="send">
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -243,25 +243,25 @@
                                     </button>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="LDl-NP-Feb" firstAttribute="top" secondItem="J98-40-cjO" secondAttribute="top" id="9HM-zh-eH1"/>
-                                    <constraint firstItem="J98-40-cjO" firstAttribute="leading" secondItem="LDl-NP-Feb" secondAttribute="trailing" constant="8" symbolic="YES" id="B9j-nI-gvD"/>
-                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="leading" secondItem="qL9-TF-RCI" secondAttribute="leading" id="D7d-1I-Oau"/>
-                                    <constraint firstItem="LDl-NP-Feb" firstAttribute="top" secondItem="KSs-8p-4xD" secondAttribute="bottom" constant="6" id="Ui6-zb-woI"/>
-                                    <constraint firstItem="LDl-NP-Feb" firstAttribute="leading" secondItem="qL9-TF-RCI" secondAttribute="leadingMargin" id="Xm4-eA-HeV"/>
-                                    <constraint firstAttribute="bottom" secondItem="LDl-NP-Feb" secondAttribute="bottom" constant="21" id="Xwe-I9-YWp"/>
-                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="top" secondItem="qL9-TF-RCI" secondAttribute="top" id="YWk-KR-13J"/>
-                                    <constraint firstAttribute="trailing" secondItem="KSs-8p-4xD" secondAttribute="trailing" id="ea9-om-xCO"/>
-                                    <constraint firstAttribute="trailing" secondItem="J98-40-cjO" secondAttribute="trailing" constant="33" id="hNd-uL-t09"/>
-                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="centerX" secondItem="qL9-TF-RCI" secondAttribute="centerX" id="oaS-jv-NPN"/>
+                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="centerX" secondItem="qL9-TF-RCI" secondAttribute="centerX" id="2JE-YI-Gbe"/>
+                                    <constraint firstItem="LDl-NP-Feb" firstAttribute="top" secondItem="KSs-8p-4xD" secondAttribute="bottom" constant="6" id="3Iw-ec-02y"/>
+                                    <constraint firstAttribute="bottom" secondItem="LDl-NP-Feb" secondAttribute="bottom" constant="21" id="9SV-iw-EDI"/>
+                                    <constraint firstItem="LDl-NP-Feb" firstAttribute="leading" secondItem="qL9-TF-RCI" secondAttribute="leadingMargin" id="AzO-8n-5Cx"/>
+                                    <constraint firstAttribute="trailing" secondItem="J98-40-cjO" secondAttribute="trailing" constant="33" id="Iry-eh-sax"/>
+                                    <constraint firstItem="J98-40-cjO" firstAttribute="leading" secondItem="LDl-NP-Feb" secondAttribute="trailing" constant="8" symbolic="YES" id="QJz-ml-aqj"/>
+                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="leading" secondItem="qL9-TF-RCI" secondAttribute="leading" id="Vwg-S2-dwd"/>
+                                    <constraint firstItem="J98-40-cjO" firstAttribute="top" secondItem="LDl-NP-Feb" secondAttribute="top" id="fhK-MP-8lL"/>
+                                    <constraint firstAttribute="trailing" secondItem="KSs-8p-4xD" secondAttribute="trailing" id="nlf-cR-ncP"/>
+                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="top" secondItem="qL9-TF-RCI" secondAttribute="top" id="ufV-ES-1IF"/>
                                 </constraints>
                             </scrollView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="qL9-TF-RCI" firstAttribute="top" secondItem="Nbt-Ry-dVz" secondAttribute="top" id="4ct-gy-bCs"/>
-                            <constraint firstAttribute="trailing" secondItem="qL9-TF-RCI" secondAttribute="trailing" id="j1f-ag-02r"/>
-                            <constraint firstItem="qL9-TF-RCI" firstAttribute="bottom" secondItem="Ssl-Tq-FOo" secondAttribute="top" id="jjQ-Kt-lFv"/>
-                            <constraint firstItem="qL9-TF-RCI" firstAttribute="leading" secondItem="Nbt-Ry-dVz" secondAttribute="leading" id="ymT-A1-Rao"/>
+                            <constraint firstItem="qL9-TF-RCI" firstAttribute="bottom" secondItem="Ssl-Tq-FOo" secondAttribute="top" id="7Oo-q5-NsY"/>
+                            <constraint firstItem="qL9-TF-RCI" firstAttribute="leading" secondItem="Nbt-Ry-dVz" secondAttribute="leading" id="7RF-KF-MU8"/>
+                            <constraint firstAttribute="trailing" secondItem="qL9-TF-RCI" secondAttribute="trailing" id="GUr-ey-cHY"/>
+                            <constraint firstItem="qL9-TF-RCI" firstAttribute="top" secondItem="Nbt-Ry-dVz" secondAttribute="top" id="U2Z-M8-2qk"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout" bottom="YES"/>
@@ -272,7 +272,7 @@
                         <outlet property="scrollView" destination="qL9-TF-RCI" id="6Cv-Sv-ace"/>
                         <outlet property="sendButton" destination="J98-40-cjO" id="EzK-WM-wBc"/>
                         <outlet property="tableView" destination="KSs-8p-4xD" id="5KN-yb-nzD"/>
-                        <outlet property="tableViewHeightConstraint" destination="eZm-pk-wEm" id="FZe-aJ-jN0"/>
+                        <outlet property="tableViewHeightConstraint" destination="nT0-6I-R1A" id="0JM-Js-hEo"/>
                         <outlet property="textMessage" destination="LDl-NP-Feb" id="zWh-fa-3LD"/>
                     </connections>
                 </viewController>
@@ -388,7 +388,7 @@
                                     <constraint firstAttribute="width" constant="19" id="zHm-kQ-XNJ"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="15"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="contactAdd" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3dK-bP-Nmo">
