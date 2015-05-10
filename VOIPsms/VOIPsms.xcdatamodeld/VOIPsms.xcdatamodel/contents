@@ -6,6 +6,7 @@
         <relationship name="messages" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CoreMessage" inverseName="contact" inverseEntity="CoreMessage" syncable="YES"/>
     </entity>
     <entity name="CoreDID" representedClassName="VOIPsms.CoreDID" syncable="YES">
+        <attribute name="currentlySelected" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="did" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="registeredOn" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="type" optional="YES" attributeType="String" syncable="YES"/>
@@ -29,7 +30,7 @@
     </entity>
     <elements>
         <element name="CoreContact" positionX="-63" positionY="27" width="128" height="90"/>
-        <element name="CoreDID" positionX="-54" positionY="45" width="128" height="90"/>
+        <element name="CoreDID" positionX="-54" positionY="45" width="128" height="105"/>
         <element name="CoreMessage" positionX="-63" positionY="9" width="128" height="180"/>
         <element name="CoreUser" positionX="-63" positionY="-18" width="128" height="105"/>
     </elements>

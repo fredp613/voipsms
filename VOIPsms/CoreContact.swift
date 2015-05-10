@@ -100,10 +100,12 @@ class CoreContact: NSManagedObject {
     }
     
     
-    class func getMsgsByContact(managedObjectContext: NSManagedObjectContext, contactId: String) -> [CoreMessage] {
+    class func getMsgsByContact(managedObjectContext: NSManagedObjectContext, contactId: String, did: String) -> [CoreMessage] {
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         fetchRequest.returnsObjectsAsFaults = false
-        let predicate = NSPredicate(format: "contactId == %@", contactId)
+        let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
+        let secondPredicate = NSPredicate(format: "did == %@", did)
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
         fetchRequest.predicate = predicate
         let sortDescriptor = NSSortDescriptor(key: "date", ascending: true)
         fetchRequest.sortDescriptors = [sortDescriptor]
@@ -117,17 +119,14 @@ class CoreContact: NSManagedObject {
         
     }
     
-    class func getIncomingMsgsByContact(managedObjectContext: NSManagedObjectContext, contactId: String) -> [CoreMessage] {
+    class func getIncomingMsgsByContact(managedObjectContext: NSManagedObjectContext, contactId: String, did: String) -> [CoreMessage] {
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         fetchRequest.returnsObjectsAsFaults = false
         
-//        NSPredicate *compoundPredicate
-//            = [NSCompoundPredicate andPredicateWithSubpredicates:[NSArray of Predicates]];
-//        let compoundPredicate = NSCompoundPredicate(format: <#String#>, <#args: CVarArgType#>...)
-        
         let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
         let secondPredicate = NSPredicate(format: "type == %@", "1")
-        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
+        let thirdPredicate = NSPredicate(format: "did == %@", did)
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate, thirdPredicate])
         
         // Set the predicate on the fetch request
         fetchRequest.predicate = predicate
@@ -143,9 +142,9 @@ class CoreContact: NSManagedObject {
         
     }
     
-    class func updateMessagesToRead(moc: NSManagedObjectContext, contactId:String) {
+    class func updateMessagesToRead(moc: NSManagedObjectContext, contactId:String, did: String) {
         
-            let coreMessages = CoreContact.getMsgsByContact(moc, contactId: contactId)
+        let coreMessages = CoreContact.getMsgsByContact(moc, contactId: contactId, did: did)
             for cm in coreMessages {
                 if cm.type == 1 || cm.type == true {
                     cm.flag = message_status.READ.rawValue
@@ -170,11 +169,13 @@ class CoreContact: NSManagedObject {
         return false
     }
     
-    class func getLastMessageFromContact(managedObjectContext: NSManagedObjectContext, contactId: String) -> CoreMessage? {
+    class func getLastMessageFromContact(managedObjectContext: NSManagedObjectContext, contactId: String, did: String) -> CoreMessage? {
         
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         fetchRequest.returnsObjectsAsFaults = false
-        let predicate = NSPredicate(format: "contactId == %@", contactId)
+        let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
+        let secondPredicate = NSPredicate(format: "did == %@", did)
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
         fetchRequest.predicate = predicate
         let sortDescriptor = NSSortDescriptor(key: "id", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
@@ -194,14 +195,6 @@ class CoreContact: NSManagedObject {
         
     }
     
-    class func getFormattedPhoneNumber(contactId: String) -> NSString {
-        let contactStr = contactId as NSString
-        let areaCode = contactStr.substringWithRange(NSRange(location: 0, length: 3))
-        let firstPart = contactStr.substringWithRange(NSRange(location: 3, length: 3))
-        let lastPart = contactStr.substringWithRange(NSRange(location: 6, length: 4))
-        let formattedPhoneNumber = areaCode + "-" + firstPart + "-" + lastPart
-        
-        return formattedPhoneNumber
-    }
+   
 
 }

@@ -94,6 +94,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
     var allCellHeight = CGFloat()
     var lastContentOffset = CGFloat()
     var model = ModelSize()
+    var did = String()
     var titleText = String()
     var tableData : [Message] = [Message]()
     var timer : NSTimer = NSTimer()
@@ -105,8 +106,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
         super.viewDidLoad()
         self.tableView.delegate = self
         self.scrollView.delegate = self
-        self.messages = CoreContact.getMsgsByContact(moc, contactId: self.contactId)
-        
+        self.messages = CoreContact.getMsgsByContact(moc, contactId: self.contactId, did: did)
         if textMessage.text == "" {
             sendButton.enabled = false
         }
@@ -132,15 +132,14 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
             tableData.append(message)
         }
 
-        CoreContact.updateMessagesToRead(moc, contactId: contactId)
+        CoreContact.updateMessagesToRead(moc, contactId: contactId, did: did)
         startTimer()
     }
-    
-   
     
     func dataSourceRefreshTimerDidFire(sender: NSTimer) {
 
         var messageReceived = [Message]()
+
         for m in self.tableData {
             if m.type.boolValue == true || m.type == 1 {
                 messageReceived.append(m)
@@ -149,9 +148,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
         var filteredArray : [Message] = tableData.filter() { $0.type == true }
         var lastMessage = tableData[tableData.endIndex - 1]
 
-        Message.getIncomingMessagesFromAPI(self.moc,completionHandler: { (responseObject, error) -> () in
+        Message.getIncomingMessagesFromAPI(self.moc, did: did, completionHandler: { (responseObject, error) -> () in
             if responseObject.count > 0 {
-                self.messages = CoreContact.getIncomingMsgsByContact(self.moc, contactId: self.contactId)
+                self.messages = CoreContact.getIncomingMsgsByContact(self.moc, contactId: self.contactId, did: self.did)
                 if self.messages.count > filteredArray.count {
                     println("number of messages: \(self.messages.count)")
                     println("number of filtered: \(filteredArray.count)")
@@ -399,10 +398,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
             self.tableViewScrollToBottomAnimated(true)
             NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
         
-            var did = String()
-            if let didArr = CoreDID.getDIDs(moc) {
-                did = didArr[0].did
-            }
             Message.sendMessageAPI(self.contactId, messageText: msg, did: did, completionHandler: { (responseObject, error) -> () in
                 if responseObject["status"].stringValue == "success" {
                     //save to core data here

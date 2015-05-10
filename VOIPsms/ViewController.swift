@@ -35,7 +35,6 @@ class ViewController: UIViewController, UIAlertViewDelegate {
                 alert.show()
                 self.dismissViewControllerAnimated(true, completion: nil)
                 self.dismissAlert(alert)
-//                self.getInitialMessages()
             } else {
                 let alert = UIAlertView(title: "Invalid Login Credentials", message: "Please try again", delegate: self, cancelButtonTitle: "Ok")
                 alert.show()

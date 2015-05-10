@@ -15,7 +15,7 @@ import QuartzCore
 //}
 
 
-class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate {
+class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
 
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var searchBar: UISearchBar!
@@ -23,44 +23,46 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     @IBOutlet weak var tableView: UITableView!
     var contacts : [CoreContact] = [CoreContact]()
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-    var currentDID : CoreDID!
     var maskView : UIView = UIView()
     var timer : NSTimer = NSTimer()
     var did : String = String()
+    var didView : UIPickerView = UIPickerView()
+    var titleBtn : UIButton = UIButton()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
         startTimer()
-       
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-//        self.activityIndicator.center=self.view.center;
+
+        titleBtn = UIButton(frame: CGRectMake(0, 0, 100, 40))
+        if let selectedDID = CoreDID.getSelectedDID(moc) {
+            self.did = selectedDID.did
+            titleBtn.setTitle(self.did.northAmericanPhoneNumberFormat(), forState: UIControlState.Normal)
+            titleBtn.addTarget(self, action: Selector("titleClicked:"), forControlEvents: UIControlEvents.TouchUpInside)
+            titleBtn.setTitleColor(UIColor.lightGrayColor(), forState: UIControlState.Normal)
+            self.navigationController?.navigationBar.topItem?.titleView = titleBtn
+        }
+
         self.activityIndicator.startAnimating()
         viewSetup()
         timer.invalidate()
         startTimer()
+        
+
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
-        var btnDID = UIButton(frame: CGRectMake(0, 0, 100, 40))
-        btnDID.setTitle("All Messages (filter)", forState: UIControlState.Normal)
-        btnDID.addTarget(self, action: Selector("titleClicked:"), forControlEvents: UIControlEvents.TouchUpInside)
-        btnDID.setTitleColor(UIColor.lightGrayColor(), forState: UIControlState.Normal)
-        self.navigationController?.navigationBar.topItem?.titleView = btnDID
         
     }
     
     func viewSetup() {
 
         if CoreUser.userExists(moc) {
-            CoreDID.createOrUpdateDID(self.moc)
-            if let didArr = CoreDID.getDIDs(moc) {
-                did = didArr[0].did
-            }
             
             self.tableView.reloadData()
 
@@ -83,14 +85,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         if CoreUser.userExists(moc) {
             Message.getMessagesFromAPI(self.moc, completionHandler: { (responseObject, error) -> () in
                 if responseObject.count > 0 {
-                    CoreDID.createOrUpdateDID(self.moc)
                     CoreContact.getContacts(self.moc, did: self.did, completionHandler: { (responseObject, error) -> () in
                         self.contacts = responseObject
                         let indexSet = NSIndexSet(index: 0)
                         dispatch_async(dispatch_get_main_queue(), { () -> Void in
                             self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
                         })
-
                         self.activityIndicator.stopAnimating()
                     })
                 } else {
@@ -130,13 +130,10 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         var contact = self.contacts[indexPath.row]
         
         //if not and existing contact from contacts - format
-        cell.textLabel?.text = CoreContact.getFormattedPhoneNumber(contact.contactId) as String
+        cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
         //if existing contact : cell... = contact.full_name
         
-        
-
-        
-        if let lastMessage = CoreContact.getLastMessageFromContact(moc, contactId: contact.contactId) {
+        if let lastMessage = CoreContact.getLastMessageFromContact(moc, contactId: contact.contactId, did: did) {
             cell.detailTextLabel?.text = "\(lastMessage.message)"
             if lastMessage.type == true || lastMessage.type == 1 {
                 if lastMessage.flag == message_status.PENDING.rawValue {
@@ -160,9 +157,58 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     //MARK: - Button Events
     func titleClicked(sender: UIButton) {
-        println("clicked")
+
+        didView.removeFromSuperview()
+        
+        didView = UIPickerView(frame: CGRectMake(0, 0, self.tableView.frame.size.width / 2, self.tableView.frame.size.height / 2))
+        didView.center = self.view.center
+        didView.backgroundColor = UIColor.whiteColor()
+        didView.layer.cornerRadius = 10
+        didView.layer.borderColor = UIColor.lightGrayColor().CGColor
+        didView.layer.borderWidth = 1.0
+        didView.delegate = self
+        didView.dataSource = self
+
+        var didArr = [String]()
+        if let coreDids = CoreDID.getDIDs(self.moc) {
+//            coreDids.filter() { $0.did == self.did }
+            for c in coreDids {
+                didArr.append(c.did)
+            }
+        }
+        let currentDIDIndex = find(didArr, self.did)
+        didView.selectRow(currentDIDIndex!, inComponent: 0, animated: false)
+        drawMaskView()
+        self.view.addSubview(didView)
+
     }
     
+    //MARK: - PickerView delegate methods
+    
+    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return CoreDID.getDIDs(self.moc)!.count
+    }
+    
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+        let formattedDID = CoreDID.getDIDs(self.moc)![row].did.northAmericanPhoneNumberFormat()
+        return formattedDID
+    }
+
+    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+
+        if let dids = CoreDID.getDIDs(self.moc) {
+            self.did = dids[row].did
+            CoreDID.toggleSelected(moc, did: self.did)
+            titleBtn.setTitle(self.did.northAmericanPhoneNumberFormat(), forState: UIControlState.Normal)
+            viewSetup()
+        }
+        didView.removeFromSuperview()
+        maskView.removeFromSuperview()
+    }
     
     //MARK: - Searchbar delegate methods
     func searchBarCancelButtonClicked(searchBar: UISearchBar) {
@@ -172,14 +218,19 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         searchBar.resignFirstResponder()
         maskView.removeFromSuperview()
+        didView.removeFromSuperview()
+
     }
     
     func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
-        //add blocking view
-        
+        drawMaskView()
+    }
+    
+    func drawMaskView() {
         maskView.frame = CGRectMake(self.tableView.frame.origin.x, self.tableView.frame.origin.y - 75, self.tableView.frame.width, self.tableView.frame.height)
         maskView.backgroundColor = UIColor(white: 0.98, alpha: 0.8)
-        maskView.bounds = CGRectMake(tableView.frame.origin.x, tableView.frame.origin.y, tableView.frame.width, tableView.frame.height - (searchBar.frame.height * 2) - 60) //CGRectMake(0, -150, self.tableView.frame.width, (self.view.frame.height -  350))
+        maskView.bounds = CGRectMake(tableView.frame.origin.x, tableView.frame.origin.y, tableView.frame.width, tableView.frame.height)//- (searchBar.frame.height * 2) - 60)
+        maskView.center = self.tableView.center
         self.view.addSubview(maskView)
     }
     
@@ -203,13 +254,10 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             let path = self.tableView.indexPathForSelectedRow()
 
             var contactId = self.contacts[path!.row].contactId
-            
-            var messages = CoreContact.getMsgsByContact(moc, contactId: contactId)
-            detailSegue.titleText = CoreContact.getFormattedPhoneNumber(contactId) as String
+            detailSegue.did = self.did
+            detailSegue.titleText = contactId.northAmericanPhoneNumberFormat()
             detailSegue.contactId = contactId
             timer.invalidate()
-//            detailSegue.messages = messages
-            
             
         }
         

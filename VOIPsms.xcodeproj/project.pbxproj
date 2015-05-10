@@ -28,6 +28,7 @@
 		2ABFAEDD1AE09FD700EFABBD /* CoreMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAEDC1AE09FD700EFABBD /* CoreMessage.swift */; };
 		2ABFAEDF1AE0AA4900EFABBD /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAEDE1AE0AA4900EFABBD /* Message.swift */; };
 		2AC251C51AF6F40700A47AD0 /* NewMessageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC251C41AF6F40700A47AD0 /* NewMessageViewController.swift */; };
+		2ADBA1CB1AFED4460048972E /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ADBA1CA1AFED4460048972E /* StringExtension.swift */; };
 		2AE0DE5E1AE72946008EC08E /* MessageBubbleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE0DE5D1AE72945008EC08E /* MessageBubbleCell.swift */; };
 		2AE76D331AE2B91D00A6E84D /* MessageDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE76D321AE2B91D00A6E84D /* MessageDetailViewController.swift */; };
 		2AE76D361AE2C26500A6E84D /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE76D351AE2C26500A6E84D /* ArrayExtension.swift */; };
@@ -74,6 +75,7 @@
 		2ABFAEDC1AE09FD700EFABBD /* CoreMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreMessage.swift; sourceTree = "<group>"; };
 		2ABFAEDE1AE0AA4900EFABBD /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		2AC251C41AF6F40700A47AD0 /* NewMessageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewMessageViewController.swift; sourceTree = "<group>"; };
+		2ADBA1CA1AFED4460048972E /* StringExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 		2AE0DE5D1AE72945008EC08E /* MessageBubbleCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageBubbleCell.swift; sourceTree = "<group>"; };
 		2AE76D321AE2B91D00A6E84D /* MessageDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageDetailViewController.swift; sourceTree = "<group>"; };
 		2AE76D351AE2C26500A6E84D /* ArrayExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
@@ -139,6 +141,7 @@
 		2A98D42B1ADB665C003D3512 /* VOIPsms */ = {
 			isa = PBXGroup;
 			children = (
+				2ADBA1C71AFED01E0048972E /* Helpers */,
 				2AC251C41AF6F40700A47AD0 /* NewMessageViewController.swift */,
 				2AE76D341AE2C24900A6E84D /* extensions */,
 				2AE76D321AE2B91D00A6E84D /* MessageDetailViewController.swift */,
@@ -208,9 +211,17 @@
 			name = CoreModels;
 			sourceTree = "<group>";
 		};
+		2ADBA1C71AFED01E0048972E /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Helpers;
+			sourceTree = "<group>";
+		};
 		2AE76D341AE2C24900A6E84D /* extensions */ = {
 			isa = PBXGroup;
 			children = (
+				2ADBA1CA1AFED4460048972E /* StringExtension.swift */,
 				2AE76D351AE2C26500A6E84D /* ArrayExtension.swift */,
 				2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */,
 			);
@@ -414,6 +425,7 @@
 				2AE76D331AE2B91D00A6E84D /* MessageDetailViewController.swift in Sources */,
 				2ABFAED91AE08DBC00EFABBD /* MessagesViewController.swift in Sources */,
 				2AE0DE5E1AE72946008EC08E /* MessageBubbleCell.swift in Sources */,
+				2ADBA1CB1AFED4460048972E /* StringExtension.swift in Sources */,
 				2A98D45C1ADB6A97003D3512 /* CoreDataStack.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

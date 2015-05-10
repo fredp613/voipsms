@@ -81,7 +81,7 @@ class Message {
         
     }
     
-    class func getIncomingMessagesFromAPI(moc: NSManagedObjectContext, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
+    class func getIncomingMessagesFromAPI(moc: NSManagedObjectContext, did: String,  completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "YYYY-MM-dd"
@@ -91,6 +91,7 @@ class Message {
             "method" : "getSMS",
             "from" : "2015-04-11",
             "type" : "1",
+            "did" : did,
             "to" : dateFormatter.stringFromDate(NSDate()) as String,
             "limit" : "1000000"
         ]

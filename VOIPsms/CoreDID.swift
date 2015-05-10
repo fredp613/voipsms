@@ -19,6 +19,7 @@ class CoreDID: NSManagedObject {
     @NSManaged var did: String
     @NSManaged var type: String
     @NSManaged var registeredOn: String
+    @NSManaged var currentlySelected: NSNumber
     
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, didnum: String, didtype: String, didRegisteredOn: String) -> Bool {
@@ -27,11 +28,39 @@ class CoreDID: NSManagedObject {
         did.did = didnum
         did.type = didtype
         did.registeredOn = didRegisteredOn
+        if didtype == "Primary" {
+         
+            did.currentlySelected = true
+        } else {
+         
+            did.currentlySelected = false
+        }
+
         
         if managedObjectContext.save(nil) {
             return true
         }
         return false
+    }
+    
+    class func toggleSelected(moc: NSManagedObjectContext, did: String)  {
+        
+        let fetchRequest = NSFetchRequest(entityName: "CoreDID")
+        fetchRequest.returnsObjectsAsFaults = false
+        var coreDIDs = [CoreDID]()
+        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDID]
+        if fetchResults?.count > 0 {
+            coreDIDs = fetchResults!
+        }
+        
+        for c in coreDIDs {
+            if c.did == did {
+                c.currentlySelected = true
+            } else {
+                c.currentlySelected = false
+            }
+            moc.save(nil)
+        }
     }
     
     class func isExistingDID(managedObjectContext: NSManagedObjectContext, didnum: String) -> Bool {
@@ -46,6 +75,22 @@ class CoreDID: NSManagedObject {
             return true
         }
         return false
+    }
+    
+    class func getSelectedDID(moc: NSManagedObjectContext) -> CoreDID? {
+        let fetchRequest = NSFetchRequest(entityName: "CoreDID")
+        fetchRequest.returnsObjectsAsFaults = false
+        let predicate = NSPredicate(format: "currentlySelected == %@", true)
+        fetchRequest.predicate = predicate
+        
+        var coreDIDs = [CoreDID]()
+        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDID]
+        if fetchResults?.count > 0 {
+            coreDIDs = fetchResults!
+            return coreDIDs[0]
+        }
+        return nil
+        
     }
     
     class func getDIDs(moc: NSManagedObjectContext) -> [CoreDID]? {
@@ -101,9 +146,10 @@ class CoreDID: NSManagedObject {
                     type = didType.SUB.rawValue
                 }
                 let did = t["did"].stringValue
+
                 let registeredOn = t["order_date"].stringValue
                 let sms_enabled = t["sms_enabled"].stringValue
-                
+
                 if sms_enabled == "1" {
                     if !CoreDID.isExistingDID(moc, didnum: did) {
                         CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: type, didRegisteredOn: registeredOn)

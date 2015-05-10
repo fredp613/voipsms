@@ -75,13 +75,11 @@ class CoreUser: NSManagedObject {
         
     
     class func authenticate(moc: NSManagedObjectContext, email: String, password: String, completionHandler: ((Bool) -> Void)!) -> Void {
-        
-        
+                
         var url = APIUrls.getUrl + "api_username=" + email + "&api_password=" + password + "&method=getDIDsInfo"
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: url, params: nil, completionHandler: { (data, error) -> () in
             if data != nil {
                 if data["status"] == "success" {
-//                    println(data)
                     if self.userExists(moc) == false {
                         CoreUser.createInManagedObjectContext(moc, email: email, pwd: password)
                         CoreDID.createOrUpdateDID(moc)
