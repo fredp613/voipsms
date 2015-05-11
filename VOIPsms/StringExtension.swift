@@ -22,4 +22,9 @@ extension String {
         return formattedPhoneNumber
     }
     
+    func strippedDateFromString() -> String {
+        let strToFormat = self as NSString
+        return strToFormat.substringWithRange(NSRange(location: 0, length: 10)) as String
+    }
+    
 }

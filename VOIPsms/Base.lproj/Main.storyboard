@@ -74,6 +74,7 @@
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <size key="freeformSize" width="375" height="667"/>
                     <connections>
+                        <outlet property="loginBtn" destination="gbm-vp-upM" id="hZV-cq-eQ3"/>
                         <outlet property="txtPwd" destination="cCY-AD-TGq" id="ich-nL-QA7"/>
                         <outlet property="txtUserName" destination="GNB-8H-0Kx" id="gDE-X9-4Mk"/>
                     </connections>
@@ -187,7 +188,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rYL-wY-Uec" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="951.5" y="940.5"/>
+            <point key="canvasLocation" x="1009.5" y="1001.5"/>
         </scene>
         <!--Message Detail View Controller-->
         <scene sceneID="tgA-iS-qSG">
@@ -198,11 +199,11 @@
                         <viewControllerLayoutGuide type="bottom" id="Ssl-Tq-FOo"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="Nbt-Ry-dVz">
-                        <rect key="frame" x="0.0" y="44" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="623"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qL9-TF-RCI">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="623"/>
                                 <subviews>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="KSs-8p-4xD">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="610"/>
@@ -273,7 +274,7 @@
                         <outlet property="sendButton" destination="J98-40-cjO" id="EzK-WM-wBc"/>
                         <outlet property="tableView" destination="KSs-8p-4xD" id="5KN-yb-nzD"/>
                         <outlet property="tableViewHeightConstraint" destination="nT0-6I-R1A" id="0JM-Js-hEo"/>
-                        <outlet property="textMessage" destination="LDl-NP-Feb" id="zWh-fa-3LD"/>
+                        <outlet property="textMessage" destination="LDl-NP-Feb" id="bUJ-8L-Z4Y"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="C7c-cp-cio" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -463,6 +464,6 @@
         <image name="profille1x" width="40" height="40"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="XUi-kl-MnI"/>
+        <segue reference="Vkc-5X-M1X"/>
     </inferredMetricsTieBreakers>
 </document>

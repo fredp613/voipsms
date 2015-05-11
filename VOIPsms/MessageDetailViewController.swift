@@ -147,8 +147,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
         }
         var filteredArray : [Message] = tableData.filter() { $0.type == true }
         var lastMessage = tableData[tableData.endIndex - 1]
-
-        Message.getIncomingMessagesFromAPI(self.moc, did: did, completionHandler: { (responseObject, error) -> () in
+        let lastMsgDate = CoreContact.getLastIncomingMessageFromContact(moc, contactId: contactId, did: did)!.date
+        
+        Message.getIncomingMessagesFromAPI(self.moc, did: did, contact: contactId, from: lastMsgDate.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
             if responseObject.count > 0 {
                 self.messages = CoreContact.getIncomingMsgsByContact(self.moc, contactId: self.contactId, did: self.did)
                 if self.messages.count > filteredArray.count {
@@ -401,13 +402,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
             Message.sendMessageAPI(self.contactId, messageText: msg, did: did, completionHandler: { (responseObject, error) -> () in
                 if responseObject["status"].stringValue == "success" {
                     //save to core data here
-                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-//                        self.messages = CoreContact.getMsgsByContact(self.moc, contactId: self.contactId)
-//                        self.tableView.reloadData()
-//                        self.tableViewScrollToBottomAnimated(true)
-//                        NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
+                    CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: responseObject["sms"].stringValue, type: false, date: message.date, message: message.message, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
+                        println("saved to core data")
                     })
-                    
                 }
             })
     }

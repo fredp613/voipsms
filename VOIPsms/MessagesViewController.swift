@@ -32,12 +32,13 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
+       
         startTimer()
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-
+        
         titleBtn = UIButton(frame: CGRectMake(0, 0, 100, 40))
         if let selectedDID = CoreDID.getSelectedDID(moc) {
             self.did = selectedDID.did
@@ -83,20 +84,26 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     func timerDidFire(sender: NSTimer) {
         if CoreUser.userExists(moc) {
-            Message.getMessagesFromAPI(self.moc, completionHandler: { (responseObject, error) -> () in
-                if responseObject.count > 0 {
-                    CoreContact.getContacts(self.moc, did: self.did, completionHandler: { (responseObject, error) -> () in
-                        self.contacts = responseObject
-                        let indexSet = NSIndexSet(index: 0)
-                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
-                        })
-                        self.activityIndicator.stopAnimating()
-                    })
-                } else {
-                    println("no messages yet")
+            if let str = CoreDID.getSelectedDID(moc) {
+                let fromStr = CoreMessage.getLastMsgByDID(moc, did: did)?.date.strippedDateFromString()
+                if fromStr == nil {
+                    self.activityIndicator.startAnimating()
                 }
-            })
+                Message.getMessagesFromAPI(self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
+                    if responseObject.count > 0 {
+                        CoreContact.getContacts(self.moc, did: self.did, completionHandler: { (responseObject, error) -> () in
+                            self.contacts = responseObject
+                            let indexSet = NSIndexSet(index: 0)
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
+                            })
+                            self.activityIndicator.stopAnimating()
+                        })
+                    } else {
+                        println("no messages yet")
+                    }
+                })
+            }
         }
     }
 

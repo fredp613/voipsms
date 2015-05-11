@@ -28,15 +28,22 @@ class Message {
         
     }
     
-    class func getMessagesFromAPI(moc: NSManagedObjectContext, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
+    class func getMessagesFromAPI(moc: NSManagedObjectContext, from: String!, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "YYYY-MM-dd"
         //from should be last date in core data
         
+        var fromStr = String()
+        if from != nil {
+            fromStr = from!
+        } else {
+            fromStr = CoreDID.getSelectedDID(moc)!.registeredOn
+        }
+        
         let params = [
             "method" : "getSMS",
-            "from" : "2015-04-11",
+            "from" : fromStr.strippedDateFromString(),
             "to" : dateFormatter.stringFromDate(NSDate()) as String,
             "limit" : "1000000"
         ]
@@ -81,17 +88,24 @@ class Message {
         
     }
     
-    class func getIncomingMessagesFromAPI(moc: NSManagedObjectContext, did: String,  completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
-        
+    class func getIncomingMessagesFromAPI(moc: NSManagedObjectContext, did: String, contact: String, from: String!,  completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "YYYY-MM-dd"
         //from should be last date in core data
+        var fromStr = String()
+        if from != nil {
+            fromStr = from
+        } else {
+            fromStr = CoreDID.getSelectedDID(moc)!.registeredOn
+        }
+
         
         let params = [
             "method" : "getSMS",
-            "from" : "2015-04-11",
+            "from" : fromStr.strippedDateFromString(),
             "type" : "1",
             "did" : did,
+            "contact" : contact,
             "to" : dateFormatter.stringFromDate(NSDate()) as String,
             "limit" : "1000000"
         ]

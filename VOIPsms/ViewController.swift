@@ -12,6 +12,7 @@ import CoreData
 class ViewController: UIViewController, UIAlertViewDelegate {
     @IBOutlet weak var txtUserName: UITextField!
     @IBOutlet weak var txtPwd: UITextField!
+    @IBOutlet weak var loginBtn: UIButton!
 
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
     
@@ -19,6 +20,8 @@ class ViewController: UIViewController, UIAlertViewDelegate {
         super.viewDidLoad()
         txtUserName.text = "hiphopshop@gmail.com"
         txtPwd.text = "DPG613yg"
+        loginBtn.layer.cornerRadius = 10
+
         // Do any additional setup after loading the view, typically from a nib.
     }
 
@@ -43,7 +46,8 @@ class ViewController: UIViewController, UIAlertViewDelegate {
     }
     
     func getInitialMessages() {
-        Message.getMessagesFromAPI(self.moc, completionHandler: { (responseObject, error) -> () in
+        let fromStr = CoreDID.getSelectedDID(moc)!.registeredOn.strippedDateFromString()        
+        Message.getMessagesFromAPI(self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
             if responseObject.count > 0 {
                 println("success")
             } else {

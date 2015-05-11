@@ -157,6 +157,32 @@ class CoreMessage: NSManagedObject {
         return coreMessages
     }
     
+    class func getLastMsgByDID(moc: NSManagedObjectContext, did: String) -> CoreMessage? {
+        
+            let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
+            fetchRequest.returnsObjectsAsFaults = false
+            let firstPredicate = NSPredicate(format: "did == %@", did)
+            let secondPredicate = NSPredicate(format: "id != %@", "")
+            let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
+            fetchRequest.predicate = predicate
+            let sortDescriptor = NSSortDescriptor(key: "id", ascending: false)
+            fetchRequest.sortDescriptors = [sortDescriptor]
+            fetchRequest.fetchLimit = 1
+            
+            var coreMessages = [CoreMessage]()
+            var error : NSError? = nil
+            if let fetchResults = moc.executeFetchRequest(fetchRequest, error: &error) as? [CoreMessage] {
+                coreMessages = fetchResults
+                if fetchResults.count > 0 {
+                    return coreMessages[0]
+                }
+            } else {
+                println("\(error?.userInfo)")
+            }
+            return nil
+
+    }
+    
     class func sendMessage(moc: NSManagedObjectContext, contact: String, messageText: String, did: String, completionHandler: (responseObject: CoreMessage?, error: NSError?) -> ()) {
         let date = NSDate()
         let formatter = NSDateFormatter()
