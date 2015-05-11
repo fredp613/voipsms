@@ -71,9 +71,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 self.contacts = responseObject
                 self.activityIndicator.stopAnimating()
             })
-
-        } else {
-            self.activityIndicator.stopAnimating()
         }
         self.tableView.reloadData()
     }
@@ -86,7 +83,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         if CoreUser.userExists(moc) {
             if let str = CoreDID.getSelectedDID(moc) {
                 let fromStr = CoreMessage.getLastMsgByDID(moc, did: did)?.date.strippedDateFromString()
-                if fromStr == nil {
+                if fromStr == nil && self.contacts.count > 0 {
                     self.activityIndicator.startAnimating()
                 }
                 Message.getMessagesFromAPI(self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
@@ -154,6 +151,44 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         
         return cell
 
+    }
+    
+    func tableView(tableView: UITableView!, canEditRowAtIndexPath indexPath: NSIndexPath!) -> Bool {
+        return true
+    }
+    
+    
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        self.timer.invalidate()
+        
+        if editingStyle == UITableViewCellEditingStyle.Delete {
+
+            let contactId = contacts[indexPath.row].contactId
+            var ids = CoreContact.getMsgsByContact(moc, contactId: contactId, did: self.did).map {$0.id}
+
+            CoreMessage.deleteAllMessagesFromContact(moc, contactId: contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
+                
+                CoreContact.getContacts(self.moc, did: self.did, completionHandler: { (responseObject, error) -> () in
+                    self.contacts = responseObject
+                    self.tableView.beginUpdates()
+                    self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
+                    self.tableView.endUpdates()
+                    self.startTimer()
+                })
+                
+                
+                
+                Message.deleteMessagesFromAPI(ids, completionHandler: { (responseObject, error) -> () in
+                    if responseObject {
+                        println("something went right :)")
+                    } else {
+                        println("something went wrong")
+                    }
+                })
+
+            })
+            println("deleting")
+        }
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {

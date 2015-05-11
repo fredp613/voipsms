@@ -10,6 +10,7 @@
 		2A1648251ADCBB7E00E8DF91 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1648241ADCBB7E00E8DF91 /* MainTabBarController.swift */; };
 		2A287D381AF724380078F0F7 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A287D371AF724380078F0F7 /* AddressBook.framework */; };
 		2A3ACCB11AEAF0630005193B /* UIDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */; };
+		2A5E35991B0047AA0099F69B /* CoreDeleteMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */; };
 		2A7FA6331AEB4BDD00011C6C /* CoreDID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */; };
 		2A98D42F1ADB665C003D3512 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A98D42E1ADB665C003D3512 /* AppDelegate.swift */; };
 		2A98D4321ADB665C003D3512 /* VOIPsms.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2A98D4301ADB665C003D3512 /* VOIPsms.xcdatamodeld */; };
@@ -53,6 +54,7 @@
 		2A287D361AF723F20078F0F7 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		2A287D371AF724380078F0F7 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIDeviceExtension.swift; sourceTree = "<group>"; };
+		2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDeleteMessage.swift; sourceTree = "<group>"; };
 		2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDID.swift; sourceTree = "<group>"; };
 		2A98D4291ADB665C003D3512 /* VOIPsms.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VOIPsms.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A98D42D1ADB665C003D3512 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -203,6 +205,7 @@
 		2A98D4581ADB689E003D3512 /* CoreModels */ = {
 			isa = PBXGroup;
 			children = (
+				2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */,
 				2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */,
 				2AE76D371AE2D79800A6E84D /* CoreContact.swift */,
 				2ABFAEDC1AE09FD700EFABBD /* CoreMessage.swift */,
@@ -417,6 +420,7 @@
 				2A98D4571ADB6891003D3512 /* CoreUser.swift in Sources */,
 				2A98D4551ADB66EE003D3512 /* SwiftyJSON.swift in Sources */,
 				2ABFAEDD1AE09FD700EFABBD /* CoreMessage.swift in Sources */,
+				2A5E35991B0047AA0099F69B /* CoreDeleteMessage.swift in Sources */,
 				2A98D45E1ADB6B0B003D3512 /* APIUrls.swift in Sources */,
 				2A98D45A1ADB69D0003D3512 /* KeyChainHelper.swift in Sources */,
 				2ABFAEDF1AE0AA4900EFABBD /* Message.swift in Sources */,

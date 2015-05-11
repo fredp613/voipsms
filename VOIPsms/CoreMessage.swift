@@ -56,8 +56,43 @@ class CoreMessage: NSManagedObject {
             } else {
                 return completionHandler(responseObject: nil, error: err)
             }
-
+    }
+    
+    class func deleteAllMessagesFromContact(moc: NSManagedObjectContext, contactId: String, did: String, completionHandler: (responseObject: Bool, error: NSError?)->()) {
         
+        let coreMessages = CoreContact.getMsgsByContact(moc, contactId: contactId, did: did)
+        
+        for cm in coreMessages {
+            CoreDeleteMessage.createInManagedObjectContext(moc, id: cm.id)
+            moc.deleteObject(cm)
+            moc.save(nil)
+        }
+        
+        return completionHandler(responseObject: true, error: nil)
+        
+    }
+    
+    class func deleteInManagedObjectContext(moc: NSManagedObjectContext, id: String) -> Bool {
+        
+        let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
+        let entity = NSEntityDescription.entityForName("CoreMessage", inManagedObjectContext: moc)
+        let predicate = NSPredicate(format: "id == %@", id)
+        fetchRequest.predicate = predicate
+        fetchRequest.entity = entity
+        fetchRequest.returnsObjectsAsFaults = false
+        var coreMessages = [CoreMessage]()
+        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        if fetchResults?.count > 0 {
+            coreMessages = fetchResults!
+        }
+        for cm in coreMessages {
+            CoreDeleteMessage.createInManagedObjectContext(moc, id: cm.id)
+            moc.deleteObject(cm)
+            moc.save(nil)
+            return true
+        }
+        
+        return false
     }
 
     class func isExistingMessageById(moc: NSManagedObjectContext, id: String) -> Bool {

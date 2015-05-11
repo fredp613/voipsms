@@ -71,7 +71,7 @@ class Message {
                 }
                 let did = t["did"].stringValue
                 
-                if CoreMessage.isExistingMessageById(moc, id: id) == false {
+                if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
                         //check if contact exists
                         if CoreContact.isExistingContact(moc, contactId: contact) {
@@ -161,6 +161,22 @@ class Message {
             VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
                 return completionHandler(responseObject: responseObject, error: nil)
             }
+
+    }
+    
+    class func deleteMessagesFromAPI(ids: [String], completionHandler: (responseObject: Bool, error: NSError?)->()) {
+        
+        for id in ids {
+            let params = [
+                "method":"deleteSMS",
+                "id":id
+            ]
+            VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
+                    println(responseObject)
+            }
+        }
+        return completionHandler(responseObject: true, error: nil)
+       
 
     }
     
