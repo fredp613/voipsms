@@ -83,19 +83,18 @@ class CoreContact: NSManagedObject {
                     }
                 }
             }
-        } else {
-            let fetchRequest = NSFetchRequest(entityName: "CoreContact")
-            let entity = NSEntityDescription.entityForName("CoreContact", inManagedObjectContext: moc)
-            fetchRequest.entity = entity
-            let sortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
-            fetchRequest.sortDescriptors = [sortDescriptor]
-            
-            fetchRequest.returnsObjectsAsFaults = false
-            let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreContact]
-            if fetchResults?.count > 0 {
-                coreContacts = fetchResults!
-            }
         }
+        let fetchRequest = NSFetchRequest(entityName: "CoreContact")
+        let entity = NSEntityDescription.entityForName("CoreContact", inManagedObjectContext: moc)
+        fetchRequest.entity = entity
+        let sortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        fetchRequest.returnsObjectsAsFaults = false
+        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreContact]
+        if fetchResults?.count > 0 {
+            coreContacts = fetchResults!
+        }
+        
         return completionHandler(responseObject: coreContacts, error: nil)
     }
     

@@ -23,19 +23,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
 //    a        [self.usernameInputField becomeFirstResponder];
 //            });
         self.textContacts.becomeFirstResponder()
-        self.addressBook.loadContacts(
-            { (contacts: [AnyObject]!, error: NSError!) in
-                if (contacts != nil) {
-                    for c in contacts {
-                        println(c.firstName)
-                    }
-                }
-                else if (error != nil) {
-                    let alert = UIAlertView(title: "Error", message: error.localizedDescription,
-                        delegate: nil, cancelButtonTitle: "OK")
-                    alert.show()
-                }
-        })
+       
     }
     
     

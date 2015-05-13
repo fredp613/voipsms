@@ -110,6 +110,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
         if textMessage.text == "" {
             sendButton.enabled = false
         }
+
         self.textMessage.delegate = self
         self.textMessage.addTarget(self, action: "textFieldChange:", forControlEvents: UIControlEvents.EditingChanged)
         tableView.separatorStyle = .None
@@ -194,12 +195,25 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
-         self.navigationController?.navigationBar.topItem?.title = titleText
+
+        Contact().getContactsArray { (contacts) -> () in
+            if contacts[self.contactId] != nil {
+                self.navigationController?.navigationBar.topItem?.title = contacts[self.contactId]
+
+            } else {
+                self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat()
+            }
+        }
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.tableViewScrollToBottomAnimated(false)
             self.tableViewScrollToBottomAnimated(false)
         })
         self.tableView.reloadData()
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(true)
+        self.timer.invalidate()
     }
     
 
@@ -403,6 +417,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
                 if responseObject["status"].stringValue == "success" {
                     //save to core data here
                     CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: responseObject["sms"].stringValue, type: false, date: message.date, message: message.message, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
+                        CoreContact.updateInManagedObjectContext(self.moc, contactId: self.contactId, lastModified: dateStr)
                         println("saved to core data")
                     })
                 }

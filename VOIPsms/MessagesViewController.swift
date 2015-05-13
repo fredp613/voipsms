@@ -32,7 +32,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
-       
         startTimer()
     }
     
@@ -61,6 +60,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         
     }
     
+
+    
     func viewSetup() {
 
         if CoreUser.userExists(moc) {
@@ -80,6 +81,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     }
     
     func timerDidFire(sender: NSTimer) {
+        var initialMessageCount = CoreMessage.getMessages(moc, ascending: false).count
         if CoreUser.userExists(moc) {
             if let str = CoreDID.getSelectedDID(moc) {
                 let fromStr = CoreMessage.getLastMsgByDID(moc, did: did)?.date.strippedDateFromString()
@@ -89,11 +91,11 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 Message.getMessagesFromAPI(self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
                     if responseObject.count > 0 {
                         CoreContact.getContacts(self.moc, did: self.did, completionHandler: { (responseObject, error) -> () in
-                            self.contacts = responseObject
-                            let indexSet = NSIndexSet(index: 0)
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
+                            if initialMessageCount < newMessageCount {
+                                let indexSet = NSIndexSet(index: 0)
                                 self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
-                            })
+                            }
                             self.activityIndicator.stopAnimating()
                         })
                     } else {
@@ -134,7 +136,19 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         var contact = self.contacts[indexPath.row]
         
         //if not and existing contact from contacts - format
-        cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+        var contactName = String()
+        Contact().getContactsArray { (contacts) -> () in
+
+            let contStr = contact.contactId as String
+            if contacts[contact.contactId] != nil {
+               cell.textLabel?.text = contacts[contact.contactId]
+            } else {
+               cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+            }
+        }
+        
+        
+        
         //if existing contact : cell... = contact.full_name
         
         if let lastMessage = CoreContact.getLastMessageFromContact(moc, contactId: contact.contactId, did: did) {
@@ -145,6 +159,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 } else {
                     cell.detailTextLabel?.textColor = UIColor.blackColor()
                 }
+            } else {
+                cell.detailTextLabel?.textColor = UIColor.blackColor()
             }
 
         }
@@ -297,7 +313,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
             var contactId = self.contacts[path!.row].contactId
             detailSegue.did = self.did
-            detailSegue.titleText = contactId.northAmericanPhoneNumberFormat()
             detailSegue.contactId = contactId
             timer.invalidate()
             

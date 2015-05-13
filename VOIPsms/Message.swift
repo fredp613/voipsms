@@ -72,7 +72,7 @@ class Message {
                 let did = t["did"].stringValue
                 
                 if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
-                    CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
+                    CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
                         //check if contact exists
                         if CoreContact.isExistingContact(moc, contactId: contact) {
                             CoreContact.updateInManagedObjectContext(moc, contactId: contact, lastModified: date)
@@ -132,7 +132,7 @@ class Message {
                 }
                 let did = t["did"].stringValue
                 if CoreMessage.isExistingMessageById(moc, id: id) == false {
-                    CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
+                    CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
                         //check if contact exists
                         if CoreContact.isExistingContact(moc, contactId: contact) {
                             CoreContact.updateInManagedObjectContext(moc, contactId: contact, lastModified: date)
