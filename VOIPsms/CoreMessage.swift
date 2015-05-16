@@ -192,6 +192,46 @@ class CoreMessage: NSManagedObject {
         return coreMessages
     }
     
+    class func getMessagesByDST(moc: NSManagedObjectContext, dst: String, did: String) -> [CoreMessage]? {
+        
+        let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
+        let entity = NSEntityDescription.entityForName("CoreMessage", inManagedObjectContext: moc)
+        fetchRequest.entity = entity
+        let firstPredicate = NSPredicate(format: "contactId CONTAINS[cd] %@", dst)
+        let secondPredicate = NSPredicate(format: "did == %@", did)
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
+        fetchRequest.predicate = predicate
+        
+        fetchRequest.returnsObjectsAsFaults = false
+        var coreMessages = [CoreMessage]()
+        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        if fetchResults?.count > 0 {
+            coreMessages = fetchResults!
+            return coreMessages
+        }
+        return nil
+    }
+    
+    class func getMessagesByString(moc: NSManagedObjectContext, message: String, did: String) -> [CoreMessage]? {
+        
+        let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
+        let entity = NSEntityDescription.entityForName("CoreMessage", inManagedObjectContext: moc)
+        fetchRequest.entity = entity
+        let firstPredicate = NSPredicate(format: "message CONTAINS[cd] %@", message)
+        let secondPredicate = NSPredicate(format: "did == %@", did)
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
+        fetchRequest.predicate = predicate
+        
+        fetchRequest.returnsObjectsAsFaults = false
+        var coreMessages = [CoreMessage]()
+        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        if fetchResults?.count > 0 {
+            coreMessages = fetchResults!
+            return coreMessages
+        }
+        return nil
+    }
+    
     class func getLastMsgByDID(moc: NSManagedObjectContext, did: String) -> CoreMessage? {
         
             let fetchRequest = NSFetchRequest(entityName: "CoreMessage")

@@ -49,10 +49,14 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
         self.activityIndicator.startAnimating()
         viewSetup()
-        timer.invalidate()
+//        timer.invalidate()
         startTimer()
         
-
+        if self.searchBar.text != "" {
+            self.search(self.searchBar.text)
+            self.searchBar.becomeFirstResponder()
+        }
+        
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -66,11 +70,15 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
         if CoreUser.userExists(moc) {
             
-            self.tableView.reloadData()
-
-            CoreContact.getContacts(moc, did: did, completionHandler: { (responseObject, error) -> () in
-                self.contacts = responseObject
-                self.activityIndicator.stopAnimating()
+            var searchTerm = self.searchBar.text
+            
+            CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm, completionHandler: { (responseObject, error) -> () in
+//                var ccs = [CoreContact]()
+                self.contacts = responseObject as! [CoreContact]
+                CoreContact.findByName(self.moc, searchTerm: searchTerm, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
+                    self.contacts = contacts!
+                    self.activityIndicator.stopAnimating()
+                })
             })
         }
         self.tableView.reloadData()
@@ -90,14 +98,19 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 }
                 Message.getMessagesFromAPI(self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
                     if responseObject.count > 0 {
-                        CoreContact.getContacts(self.moc, did: self.did, completionHandler: { (responseObject, error) -> () in
-                            var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
-                            if initialMessageCount < newMessageCount {
-                                let indexSet = NSIndexSet(index: 0)
-                                self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
-                            }
-                            self.activityIndicator.stopAnimating()
+                        CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message: self.searchBar.text, completionHandler: { (responseObject, error) -> () in
+                            CoreContact.findByName(self.moc, searchTerm: self.searchBar.text, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
+                                var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
+                                if initialMessageCount < newMessageCount {
+                                    let indexSet = NSIndexSet(index: 0)
+                                    self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
+                                }
+                                self.activityIndicator.stopAnimating()
+                            })
                         })
+                        
+                        
+                        
                     } else {
                         println("no messages yet")
                     }
@@ -137,7 +150,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         
         //if not and existing contact from contacts - format
         var contactName = String()
-        Contact().getContactsArray { (contacts) -> () in
+        Contact().getContactsDict { (contacts) -> () in
 
             let contStr = contact.contactId as String
             if contacts[contact.contactId] != nil {
@@ -184,16 +197,19 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
             CoreMessage.deleteAllMessagesFromContact(moc, contactId: contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
                 
-                CoreContact.getContacts(self.moc, did: self.did, completionHandler: { (responseObject, error) -> () in
-                    self.contacts = responseObject
-                    self.tableView.beginUpdates()
-                    self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
-                    self.tableView.endUpdates()
-                    self.startTimer()
+                CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message:
+                    self.searchBar.text, completionHandler: { (responseObject, error) -> () in
+                        
+                        CoreContact.findByName(self.moc, searchTerm: "", existingContacts: self.contacts, completionHandler: { (contacts) -> () in
+                            self.contacts = responseObject as! [CoreContact]
+                            self.tableView.beginUpdates()
+                            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
+                            self.tableView.endUpdates()
+                            self.startTimer()
+
+                        })
                 })
-                
-                
-                
+
                 Message.deleteMessagesFromAPI(ids, completionHandler: { (responseObject, error) -> () in
                     if responseObject {
                         println("something went right :)")
@@ -269,6 +285,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     }
     
     //MARK: - Searchbar delegate methods
+    
+    
     func searchBarCancelButtonClicked(searchBar: UISearchBar) {
         clearSearch()
     }
@@ -284,6 +302,17 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         drawMaskView()
     }
     
+    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        self.search(searchText)
+    }
+    
+    func searchBarShouldEndEditing(searchBar: UISearchBar) -> Bool {
+        if self.searchBar.text == "" || self.searchBar.text == nil {
+            clearSearch()
+        }
+        return true
+    }
+    
     func drawMaskView() {
         maskView.frame = CGRectMake(self.tableView.frame.origin.x, self.tableView.frame.origin.y - 75, self.tableView.frame.width, self.tableView.frame.height)
         maskView.backgroundColor = UIColor(white: 0.98, alpha: 0.8)
@@ -296,9 +325,33 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         self.searchBar.text = ""
         searchBar.resignFirstResponder()
         maskView.removeFromSuperview()
-//        contacts = CoreContact.getContacts(moc, did: nil)
-        CoreContact.getContacts(moc, did: did) { (responseObject, error) -> () in
-            self.contacts = responseObject
+
+        CoreContact.getContacts(moc, did: did, dst: nil, name: nil, message: nil) { (responseObject, error) -> () in
+            CoreContact.findByName(self.moc, searchTerm: "", existingContacts: self.contacts, completionHandler: { (contacts) -> () in
+                self.contacts = responseObject as! [CoreContact]
+                self.tableView.reloadData()
+            })
+        }
+    
+        startTimer()
+    }
+    
+    func search(searchTerm: String) {
+//        timer.invalidate()
+        if count(searchTerm) > 0 {
+//            CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm) { (responseObject, error) -> () in
+//                self.contacts = responseObject as! [CoreContact]
+//                self.tableView.reloadData()
+//            }
+            
+            CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm, completionHandler: { (responseObject, error) -> () in
+                self.contacts = responseObject as! [CoreContact]
+                CoreContact.findByName(self.moc, searchTerm: searchTerm, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
+                    self.contacts = contacts!
+                    self.tableView.reloadData()
+                })
+            })
+
         }
     }
 
@@ -307,7 +360,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "showMessagesSegue") {
-            
+
             var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
             let path = self.tableView.indexPathForSelectedRow()
 
@@ -315,6 +368,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             detailSegue.did = self.did
             detailSegue.contactId = contactId
             timer.invalidate()
+            
             
         }
         

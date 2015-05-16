@@ -15,6 +15,8 @@ class CoreContact: NSManagedObject {
     @NSManaged var messages: NSSet
     @NSManaged var lastModified: String
     
+    var ccs = [CoreContact]()
+    
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?) -> Bool {
         
         let contact : CoreContact = NSEntityDescription.insertNewObjectForEntityForName("CoreContact", inManagedObjectContext: managedObjectContext) as! CoreContact
@@ -26,8 +28,7 @@ class CoreContact: NSManagedObject {
             formatter.dateFormat = "dd-MM-yyyy"
             let stringDate: String = formatter.stringFromDate(NSDate())
             contact.lastModified = stringDate
-        }
-        
+        }        
         if managedObjectContext.save(nil) {
             return true
         }
@@ -68,35 +69,108 @@ class CoreContact: NSManagedObject {
         return nil
     }
     
-    class func getContacts(moc: NSManagedObjectContext, did: String?, completionHandler: (responseObject: [CoreContact], error: NSError?) -> ()) {
+
+    
+    class func getContacts(moc: NSManagedObjectContext, did: String?, dst: String?, name: String?, message: String?, completionHandler: (responseObject: NSArray, error: NSError?) -> ()) {
         //perform fetch for all messages with did == did, get contact id from there
         //for each contact_id in DID append coreContacts array (if contactId doesnt exist yet in array)
         var coreContacts = [CoreContact]()
         
         if let did = did {
-
-            let messages = CoreMessage.getMessagesByDID(moc, did: did)
-            for m in messages {
-                if let contact = CoreContact.currentContact(moc, contactId: m.contactId) {
-                    if !contains(coreContacts, contact) {
-                        coreContacts.append(contact)
+            let messagesByDid = CoreMessage.getMessagesByDID(moc, did: did)
+            
+            if let dst = dst {
+                if let messagesByDst = CoreMessage.getMessagesByDST(moc, dst: dst, did: did) {
+                    for m in messagesByDst {
+                        if let contact = CoreContact.currentContact(moc, contactId: m.contactId) {
+                            if !contains(coreContacts, contact) {
+                                coreContacts.append(contact)
+                            }
+                        }
                     }
                 }
             }
-        }
-        let fetchRequest = NSFetchRequest(entityName: "CoreContact")
-        let entity = NSEntityDescription.entityForName("CoreContact", inManagedObjectContext: moc)
-        fetchRequest.entity = entity
-        let sortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
-        fetchRequest.returnsObjectsAsFaults = false
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreContact]
-        if fetchResults?.count > 0 {
-            coreContacts = fetchResults!
+            
+            if let message = message {
+                if let messagesByString = CoreMessage.getMessagesByString(moc, message: message, did: did) {
+                    for m in messagesByString {
+                        if let contact = CoreContact.currentContact(moc, contactId: m.contactId) {
+                            if !contains(coreContacts, contact) {
+                                coreContacts.append(contact)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if let name = name {
+                Contact().getContactsDict({ (contacts) -> () in
+                    var closureContacts : [CoreContact] = coreContacts
+                    if contacts.count > 0 {
+                        for (key,value) in contacts {
+                            if (value.rangeOfString(name) != nil) {
+                                if let contact1 = CoreContact.currentContact(moc, contactId: key) {
+                                    if !contains(coreContacts, contact1) {
+                                        coreContacts.append(contact1)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+            
+            if (dst == nil && name == nil && message == nil) || (dst == "" && name == "" && message == "")  {
+                for m in messagesByDid {
+                    // do some if msg id not already in
+                    if let contact = CoreContact.currentContact(moc, contactId: m.contactId) {
+                        if !contains(coreContacts, contact) {
+                            coreContacts.append(contact)
+                        }
+                    }
+                }
+            }
+
+        } else {
+            let fetchRequest = NSFetchRequest(entityName: "CoreContact")
+    
+            let entity = NSEntityDescription.entityForName("CoreContact", inManagedObjectContext: moc)
+            fetchRequest.entity = entity
+            let sortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
+            fetchRequest.sortDescriptors = [sortDescriptor]
+            fetchRequest.returnsObjectsAsFaults = false
+            let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreContact]
+            if fetchResults?.count > 0 {
+                coreContacts = fetchResults!
+            }
         }
         
-        return completionHandler(responseObject: coreContacts, error: nil)
+        let sortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
+        let ns = NSArray(array: coreContacts).sortedArrayUsingDescriptors([sortDescriptor])
+        
+        return completionHandler(responseObject: ns, error: nil)
     }
+    
+    
+    class func findByName(moc: NSManagedObjectContext, searchTerm: String, existingContacts: [CoreContact], completionHandler: ([CoreContact]?)->()) {
+        var coreContacts : [CoreContact] = existingContacts
+            Contact().getContactsDict({ (contacts) -> () in
+                if contacts.count > 0 {
+                    for (key,value) in contacts {
+                        if (value.rangeOfString(searchTerm) != nil) {
+                            if let contact1 = CoreContact.currentContact(moc, contactId: key) {
+                                if !contains(existingContacts, contact1) {
+                                    coreContacts.append(contact1)
+                                }
+                            }
+                        }
+                    }
+                    return completionHandler(coreContacts)
+                }
+            })
+    }
+    
+    
     
     
     class func getMsgsByContact(managedObjectContext: NSManagedObjectContext, contactId: String, did: String) -> [CoreMessage] {

@@ -8,11 +8,14 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 class Contact {
     
     var addressBook = APAddressBook()
     var access = APAddressBook.access()
+    var searchTerm = String()
+    var coreContacts = [CoreContact]()
 
     init() {
         self.addressBook = APAddressBook()
@@ -47,14 +50,9 @@ class Contact {
         ABMultiValueAddValueAndLabel(phoneNumbers, phone, kABPersonPhoneMainLabel, nil)
         success = ABRecordSetValue(newContact, kABPersonPhoneProperty, phoneNumbers, &error)
 
-
-
         success = ABAddressBookAddRecord(adbk, newContact, &error)
         success = ABAddressBookSave(adbk, &error)
-        
 
-
-        
         if success {
             return true
         }
@@ -68,7 +66,7 @@ class Contact {
     }
   
     
-    func getContactsArray(completionHandler: ([String: String]) -> ()){
+    func getContactsDict(completionHandler: ([String: String]) -> ()){
         var contactsDict = [String: String]()
         self.addressBook.loadContacts(
             { (contacts: [AnyObject]!, error: NSError!) in
@@ -89,7 +87,71 @@ class Contact {
                 }
         })
     }
-
+    
+    func getContactsByName(searchTerm: String, moc: NSManagedObjectContext, completionHandler: ([CoreContact]?) -> ()) -> [CoreContact]? {
+        var contactsDict = [String: String]()
+        self.searchTerm = searchTerm
+        self.addressBook.loadContacts(
+            { (contacts: [AnyObject]!, error: NSError!) in
+                
+                if (contacts != nil) {
+                    for c in contacts {
+                        for p in c.phones! {
+                            let regex = NSRegularExpression(pattern: "[0-9]",
+                                options: nil, error: nil)!
+                            let pStr = p as! NSString
+                            let results = regex.matchesInString(p as! String,
+                                options: nil, range: NSMakeRange(0, pStr.length))
+                            let mappedResults = map(results) { pStr.substringWithRange($0.range)}
+                            let strRepresentationResults = "".join(mappedResults)
+                            contactsDict.updateValue("\(c.firstName) \(c.lastName)", forKey: strRepresentationResults)
+                        }
+                    }
+                    for (key, value) in contactsDict {
+                        if (value.rangeOfString(self.searchTerm) != nil) {
+                            println(searchTerm)
+                            if let contact1 = CoreContact.currentContact(moc, contactId: key) {
+                                if !contains(self.coreContacts, contact1) {
+                                    println("hi")
+                                    self.coreContacts.append(contact1)
+                                }
+                            }
+                        }
+                    }
+                    return completionHandler(self.coreContacts)
+                }
+        })
+        println(self.coreContacts)
+        
+        if self.coreContacts.count > 0 {
+            for c in self.coreContacts {
+                println(c.contactId)
+            }
+            return self.coreContacts
+        }
+        
+        return nil
+        
+    }
+    
+//    if let name = name {
+//        Contact().getContactsDict({ (contacts) -> () in
+//            var closureContacts : [CoreContact] = coreContacts
+//            if contacts.count > 0 {
+//                for (key,value) in contacts {
+//                    if (value.rangeOfString(name) != nil) {
+//                        if let contact1 = CoreContact.currentContact(moc, contactId: key) {
+//                            if !contains(coreContacts, contact1) {
+//                                coreContacts.append(contact1)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        })
+//    }
+    
+   
     
 
 }

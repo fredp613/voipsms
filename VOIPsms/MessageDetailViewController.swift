@@ -196,14 +196,15 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
 
-        Contact().getContactsArray { (contacts) -> () in
+        Contact().getContactsDict({ (contacts) -> () in
             if contacts[self.contactId] != nil {
                 self.navigationController?.navigationBar.topItem?.title = contacts[self.contactId]
-
+                
             } else {
                 self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat()
             }
-        }
+        })
+
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.tableViewScrollToBottomAnimated(false)
             self.tableViewScrollToBottomAnimated(false)
