@@ -21,8 +21,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
         
-        
-        if CoreUser.userExists(moc)  {
+        if CoreUser.userExists(moc)  {            
             let currentUser = CoreUser.currentUser(moc)
             let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
             
@@ -65,14 +64,17 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
 //        self.performSegueWithIdentifier("newMessageSegue", sender: self)
     }
 
-    /*
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
+        var messagesVC = self.viewControllers?[0] as! MessagesViewController!
+        if (segue.identifier == "showLoginSegue") {
+                var loginVC = segue.destinationViewController as? ViewController
+                loginVC?.delegate = messagesVC!
+        }
     }
-    */
-
 }

@@ -10,12 +10,12 @@ import UIKit
 import CoreData
 import QuartzCore
 
-//protocol UpdateMessagesTableViewDelegate {
-//    func updateMessagesTableView()
-//}
+protocol UpdateMessagesTableViewDelegate {
+    func updateMessagesTableView()
+}
 
 
-class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
+class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UITableViewDataSource, UpdateMessagesTableViewDelegate {
 
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var searchBar: UISearchBar!
@@ -32,7 +32,15 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
+        self.tableView.dataSource = self
+
+        
+//        viewSetup()
         startTimer()
+    }
+    
+    func updateMessagesTableView() {
+        println("delegate called")
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -50,12 +58,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         self.activityIndicator.startAnimating()
         viewSetup()
 //        timer.invalidate()
-        startTimer()
         
         if self.searchBar.text != "" {
             self.search(self.searchBar.text)
             self.searchBar.becomeFirstResponder()
         }
+        startTimer()
         
     }
     
@@ -64,20 +72,17 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         
     }
     
-
-    
     func viewSetup() {
-
         if CoreUser.userExists(moc) {
-            
             var searchTerm = self.searchBar.text
-            
             CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm, completionHandler: { (responseObject, error) -> () in
-//                var ccs = [CoreContact]()
                 self.contacts = responseObject as! [CoreContact]
                 CoreContact.findByName(self.moc, searchTerm: searchTerm, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
-                    self.contacts = contacts!
-                    self.activityIndicator.stopAnimating()
+//                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                        self.contacts = contacts!
+                        self.activityIndicator.stopAnimating()
+//                        self.tableView.reloadData()
+//                    })
                 })
             })
         }
@@ -99,17 +104,20 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 Message.getMessagesFromAPI(self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
                     if responseObject.count > 0 {
                         CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message: self.searchBar.text, completionHandler: { (responseObject, error) -> () in
+                            self.contacts = responseObject as! [CoreContact]
                             CoreContact.findByName(self.moc, searchTerm: self.searchBar.text, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
+                                
                                 var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
                                 if initialMessageCount < newMessageCount {
-                                    let indexSet = NSIndexSet(index: 0)
-                                    self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
+//                                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                        self.contacts = contacts!
+                                        let indexSet = NSIndexSet(index: 0)
+                                        self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
+//                                    })
                                 }
                                 self.activityIndicator.stopAnimating()
                             })
                         })
-                        
-                        
                         
                     } else {
                         println("no messages yet")
@@ -182,7 +190,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
     }
     
-    func tableView(tableView: UITableView!, canEditRowAtIndexPath indexPath: NSIndexPath!) -> Bool {
+    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPth: NSIndexPath) -> Bool {
         return true
     }
     

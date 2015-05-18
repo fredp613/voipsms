@@ -76,7 +76,8 @@ class CoreContact: NSManagedObject {
         //for each contact_id in DID append coreContacts array (if contactId doesnt exist yet in array)
         var coreContacts = [CoreContact]()
         
-        if let did = did {
+        
+        if let did = did  {
             let messagesByDid = CoreMessage.getMessagesByDID(moc, did: did)
             
             if let dst = dst {

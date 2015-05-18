@@ -9,12 +9,13 @@
 import UIKit
 import CoreData
 
-class ViewController: UIViewController, UIAlertViewDelegate {
+class ViewController: UIViewController, UIAlertViewDelegate, UpdateMessagesTableViewDelegate {
     @IBOutlet weak var txtUserName: UITextField!
     @IBOutlet weak var txtPwd: UITextField!
     @IBOutlet weak var loginBtn: UIButton!
 
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+    var delegate: UpdateMessagesTableViewDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,9 +23,23 @@ class ViewController: UIViewController, UIAlertViewDelegate {
         txtPwd.text = "DPG613yg"
         loginBtn.layer.cornerRadius = 10
 
+     
         // Do any additional setup after loading the view, typically from a nib.
     }
-
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(true)
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(true)
+        self.delegate?.updateMessagesTableView()
+    }
+    
+    func updateMessagesTableView() {
+        //soemthing
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -34,10 +49,12 @@ class ViewController: UIViewController, UIAlertViewDelegate {
         CoreUser.authenticate(moc, email: self.txtUserName.text, password: self.txtPwd.text) { (success) -> Void in
             if success {
                 let alert = UIAlertView(title: "Login successful", message: "Start sms'ing!!", delegate: self, cancelButtonTitle: nil)
-//                CoreDID.createOrUpdateDID(self.moc)
+                CoreDID.createOrUpdateDID(self.moc)
+//                self.getInitialMessages()
                 alert.show()
                 self.dismissViewControllerAnimated(true, completion: nil)
                 self.dismissAlert(alert)
+
             } else {
                 let alert = UIAlertView(title: "Invalid Login Credentials", message: "Please try again", delegate: self, cancelButtonTitle: "Ok")
                 alert.show()

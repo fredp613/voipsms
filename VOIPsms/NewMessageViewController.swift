@@ -32,7 +32,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillShowNotification, object: nil)
-//        self.textMessage.becomeFirstResponder()
+        self.textMessage.becomeFirstResponder()
 //        self.textContacts.becomeFirstResponder()
         scrollView.bounces = false
         scrollView.bringSubviewToFront(tableView)
@@ -58,7 +58,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     }
 
     @IBAction func cancelWasPressed(sender: AnyObject) {
-        self.dismissViewControllerAnimated(false, completion: nil)
+        self.dismissViewControllerAnimated(true, completion: nil)
     }
     
     @IBAction func sendMessageWasPressed(sender: AnyObject) {
