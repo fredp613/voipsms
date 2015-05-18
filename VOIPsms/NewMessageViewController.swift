@@ -8,21 +8,39 @@
 
 import UIKit
 
-class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFieldDelegate {
+class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFieldDelegate, UITextViewDelegate, UIScrollViewDelegate {
     @IBOutlet weak var textContacts: UITextField!
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var textMessage: UITextField!
+    @IBOutlet weak var textMessage: UITextView!
+    @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var tableViewHeighConstraint: NSLayoutConstraint!
+    
+    @IBOutlet weak var sendButton: UIButton!
+    
     let addressBook = APAddressBook()
-
+    var model = ModelSize()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
         self.textMessage.delegate = self
+        self.scrollView.delegate = self
         
 //        dispatch_async(dispatch_get_current_queue(), ^{
 //    a        [self.usernameInputField becomeFirstResponder];
 //            });
-        self.textContacts.becomeFirstResponder()
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillShowNotification, object: nil)
+//        self.textMessage.becomeFirstResponder()
+//        self.textContacts.becomeFirstResponder()
+        scrollView.bounces = false
+        scrollView.bringSubviewToFront(tableView)
+        scrollView.bringSubviewToFront(textMessage)
+        scrollView.bringSubviewToFront(sendButton)
+        
+        let screenHeight: CGFloat = UIScreen.mainScreen().bounds.height
+        model = IOSModel(screen: screenHeight).model
        
     }
     
@@ -75,6 +93,34 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         //update text field to show contact
     }
+    
+    //MARK: - Keyboard delegates
+    
+    func keyboardWillHide(sender: NSNotification) {
+        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+        scrollView.contentInset = contentInsets;
+        scrollView.scrollIndicatorInsets = contentInsets;
+    }
+    
+    func adjustForKeyboard(notification: NSNotification) {
+        let userInfo = notification.userInfo!
+        
+        let keyboardScreenEndFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
+        let keyboardViewEndFrame = view.convertRect(keyboardScreenEndFrame, fromView: view.window)
+        
+        if notification.name == UIKeyboardWillHideNotification {
+            scrollView.contentInset = UIEdgeInsetsZero
+        } else {
+            if notification.name == UIKeyboardWillShowNotification {
+                if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
+                    self.tableViewHeighConstraint.constant = IOSModel(model: self.model).compressedHeight
+                    let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+                    scrollView.contentInset = contentInsets;
+                }
+            }
+        }
+    }
+
     
     
     /*

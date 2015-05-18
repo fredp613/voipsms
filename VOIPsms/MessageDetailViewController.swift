@@ -78,14 +78,16 @@ struct IOSModel {
 
 
 
-class MessageDetailViewController: UIViewController, UITableViewDelegate, UITextFieldDelegate, UIScrollViewDelegate {
+class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScrollViewDelegate, UITextViewDelegate {
 
-    @IBOutlet weak var textMessage: UITextField!
+//    @IBOutlet weak var textMessage: UITextField!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var sendButton: UIButton!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var tableViewHeightConstraint: NSLayoutConstraint!
     
+    @IBOutlet weak var bottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var textMessage: UITextView!
 
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
     var messages : [CoreMessage]!
@@ -112,11 +114,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
         }
 
         self.textMessage.delegate = self
-        self.textMessage.addTarget(self, action: "textFieldChange:", forControlEvents: UIControlEvents.EditingChanged)
+
+//        self.textMessage.addTarget(self, action: "textFieldChange:", forControlEvents: UIControlEvents.EditingChanged)
         tableView.separatorStyle = .None
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillShowNotification, object: nil)
         
 //        tableView.keyboardDismissMode = .Interactive
 //        let modelName = UIDevice.currentDevice().modelName
@@ -154,8 +157,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
             if responseObject.count > 0 {
                 self.messages = CoreContact.getIncomingMsgsByContact(self.moc, contactId: self.contactId, did: self.did)
                 if self.messages.count > filteredArray.count {
-                    println("number of messages: \(self.messages.count)")
-                    println("number of filtered: \(filteredArray.count)")
                     var newMessages = []
                     for m in self.messages {
                         if !contains(filteredArray.map {$0.id}, m.id) {
@@ -314,7 +315,17 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
 //    }
     
    
-
+    //MARK: - textView delegates
+    
+    func textViewDidChange(textView: UITextView) {
+        if textMessage.text == "" {
+            sendButton.enabled = false
+        } else {
+            sendButton.enabled = true
+        }
+    }
+    
+    
     //MARK: - textField delegates
     func textFieldChange(sender: UITextField) {
         if textMessage.text == "" {
@@ -324,28 +335,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
         }
     }
     //MARK: - Keyboard delegates
-//    func keyboardWillShow(sender: NSNotification) {
-//        
-//            if let keyboardSize = (sender.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
-//                let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardSize.height + 20, right: 0)
-//                scrollView.contentInset = contentInsets
-//                scrollView.scrollIndicatorInsets = contentInsets
-//        
-//                if allCellHeight < keyboardSize.height  {
-//                    tableViewHeightConstraint.constant = keyboardSize.height - (keyboardSize.height * 0.17)
-//                    tableViewScrollToBottomAnimated(true)
-//                    let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
-//                    scrollView.contentInset = contentInsets;
-//                    scrollView.scrollIndicatorInsets = contentInsets;
-//                } else {
-//                    tableViewScrollToBottomAnimated(true)
-//                }
-//            }
-//
-//        
-//        
-//        
-//    }
+
     func keyboardWillHide(sender: NSNotification) {
         let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
         scrollView.contentInset = contentInsets;
@@ -361,25 +351,24 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIText
         if notification.name == UIKeyboardWillHideNotification {
             scrollView.contentInset = UIEdgeInsetsZero
         } else {
-            if notification.name == UIKeyboardWillChangeFrameNotification {
-                scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height - 30, right: 0)
-            }
+            
+            if notification.name == UIKeyboardWillShowNotification {
 
-            if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
-                if allCellHeight < keyboardSize.height  {
-                    tableViewHeightConstraint.constant = IOSModel(model: self.model).compressedHeight // keyboardSize.height + (keyboardSize.height * 0.17)
-                    let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
-                    scrollView.contentInset = contentInsets;
-                    scrollView.scrollIndicatorInsets = contentInsets;
-                } else {
-                    scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height + 10, right: 0)
+                if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
+                    if allCellHeight < keyboardSize.height  {
+                        tableViewHeightConstraint.constant = IOSModel(model: self.model).compressedHeight // keyboardSize.height + (keyboardSize.height * 0.17)
+                        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+                        scrollView.contentInset = contentInsets;
+                        scrollView.scrollIndicatorInsets = contentInsets;
+                    } else {
+                        scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height, right: 0)
+                        scrollView.scrollIndicatorInsets = scrollView.contentInset
+                    }
                 }
             }
            
         }
-        
-        
-        scrollView.scrollIndicatorInsets = scrollView.contentInset
+
         tableViewScrollToBottomAnimated(true)
      
     }
