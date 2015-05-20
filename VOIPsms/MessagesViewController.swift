@@ -37,7 +37,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         self.tableView.dataSource = self
 //        startTimer()
         if self.searchBar.text != "" {
-            self.search(self.searchBar.text)
+//            self.search(self.searchBar.text)
             timer.invalidate()
         }
     }
@@ -178,7 +178,11 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             if contacts[contact.contactId] != nil {
                cell.textLabel?.text = contacts[contact.contactId]
             } else {
-               cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+                if (contact.contactId.toInt() != nil) {
+                   cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+                } else {
+                    cell.textLabel?.text = contact.contactId
+                }
             }
         }
         
@@ -361,7 +365,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     if let contact = contacts {
                         self.contacts = contact
                         let indexSet = NSIndexSet(index: 0)
-                        self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
+                        self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.Automatic)
                     }
                 })
             })

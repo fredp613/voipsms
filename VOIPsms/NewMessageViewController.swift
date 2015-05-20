@@ -93,11 +93,20 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             contact = self.textContacts.text
         }
         
-        Message.sendMessageAPI(contact, messageText: msg, did: did, completionHandler: { (responseObject, error) -> () in
-            if responseObject["status"].stringValue == "success" {
+
                 //save to core data here
-                CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: responseObject["sms"].stringValue, type: false, date: dateStr, message: msg, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
-                    CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
+                CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msg, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
+                    if (CoreContact.currentContact(self.moc, contactId: contact) != nil) {
+                        CoreContact.updateInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
+                    } else {
+                        CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
+                    }
+                    //run the send message in the background
+                    // Message.sendMessageAPI(contact, messageText: msg, did: did, completionHandler: { (responseObject, error) -> () in
+                     //     if responseObject["status"].stringValue == "success" {
+                     //     }
+                    // })
+
 //                    self.performSegueWithIdentifier("showDetailSegue", sender: self)
 //                    
 //                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
@@ -109,11 +118,11 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
                     
                     
                 })
-            } else {
-               // do something else
-            }
-            
-        })
+//            } else {
+//               // do something else
+//            }
+        
+//        })
     }
     
   

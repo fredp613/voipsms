@@ -112,9 +112,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         if textMessage.text == "" {
             sendButton.enabled = false
         }
-
         self.textMessage.delegate = self
-
 //        self.textMessage.addTarget(self, action: "textFieldChange:", forControlEvents: UIControlEvents.EditingChanged)
         tableView.separatorStyle = .None
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
@@ -151,33 +149,33 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         }
         var filteredArray : [Message] = tableData.filter() { $0.type == true }
         var lastMessage = tableData[tableData.endIndex - 1]
-        let lastMsgDate = CoreContact.getLastIncomingMessageFromContact(moc, contactId: contactId, did: did)!.date
-        
-        Message.getIncomingMessagesFromAPI(self.moc, did: did, contact: contactId, from: lastMsgDate.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
-            if responseObject.count > 0 {
-                self.messages = CoreContact.getIncomingMsgsByContact(self.moc, contactId: self.contactId, did: self.did)
-                if self.messages.count > filteredArray.count {
-                    var newMessages = []
-                    for m in self.messages {
-                        if !contains(filteredArray.map {$0.id}, m.id) {
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                var message = Message(contact: m.contactId, message: m.message, type: true, date: m.date, id: m.id)
-                                self.tableData.append(message)
-                                self.tableView.beginUpdates()
-                                let indexPath = NSIndexPath(forItem: self.tableData.endIndex - 1, inSection: 0)
-                                self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
-                                self.tableView.endUpdates()
-                                self.tableViewScrollToBottomAnimated(true)
-                            })
+        if let lastMsg = CoreContact.getLastIncomingMessageFromContact(moc, contactId: contactId, did: did) {
+            let lastMsgDate = lastMsg.date
+            Message.getIncomingMessagesFromAPI(self.moc, did: did, contact: contactId, from: lastMsgDate.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
+                if responseObject.count > 0 {
+                    self.messages = CoreContact.getIncomingMsgsByContact(self.moc, contactId: self.contactId, did: self.did)
+                    if self.messages.count > filteredArray.count {
+                        var newMessages = []
+                        for m in self.messages {
+                            if !contains(filteredArray.map {$0.id}, m.id) {
+                                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                    var message = Message(contact: m.contactId, message: m.message, type: true, date: m.date, id: m.id)
+                                    self.tableData.append(message)
+                                    self.tableView.beginUpdates()
+                                    let indexPath = NSIndexPath(forItem: self.tableData.endIndex - 1, inSection: 0)
+                                    self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+                                    self.tableView.endUpdates()
+                                    self.tableViewScrollToBottomAnimated(true)
+                                    CoreContact.updateMessagesToRead(self.moc, contactId: self.contactId, did: self.did)
+                                })
+                            }
                         }
                     }
                 }
-            }
-            
-        })
+                
+            })
+        }
 
-        
-        
     }
     
     func startTimer() {
@@ -202,7 +200,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 self.navigationController?.navigationBar.topItem?.title = contacts[self.contactId]
                 
             } else {
-                self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat()
+                if (self.contactId.toInt() != nil) {
+                    self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat()
+                } else {
+                    self.navigationController?.navigationBar.topItem?.title = self.contactId
+                }
+                
             }
         })
 
