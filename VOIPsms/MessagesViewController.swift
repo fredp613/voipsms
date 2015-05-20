@@ -10,12 +10,13 @@ import UIKit
 import CoreData
 import QuartzCore
 
-protocol UpdateMessagesTableViewDelegate {
-    func updateMessagesTableView()
+@objc protocol MessageViewDelegate {
+     optional func updateMessagesTableView()
+    optional func triggerSegue(contact: String)
 }
 
 
-class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UITableViewDataSource, UpdateMessagesTableViewDelegate {
+class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UITableViewDataSource, MessageViewDelegate {
 
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var searchBar: UISearchBar!
@@ -28,19 +29,27 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     var did : String = String()
     var didView : UIPickerView = UIPickerView()
     var titleBtn : UIButton = UIButton()
+    var contactForSegue = String()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
         self.tableView.dataSource = self
-
-        
-//        viewSetup()
-        startTimer()
+//        startTimer()
+        if self.searchBar.text != "" {
+            self.search(self.searchBar.text)
+            timer.invalidate()
+        }
     }
     
     func updateMessagesTableView() {
         println("delegate called")
+    }
+    
+    func triggerSegue(contact: String) {
+        self.contactForSegue = contact
+        println("delegate called trigger")
+        self.performSegueWithIdentifier("showMessagesSegue", sender: self)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -54,16 +63,18 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             titleBtn.setTitleColor(UIColor.lightGrayColor(), forState: UIControlState.Normal)
             self.navigationController?.navigationBar.topItem?.titleView = titleBtn
         }
-
-        self.activityIndicator.startAnimating()
+        if self.contacts.count == 0 {
+            self.activityIndicator.startAnimating()
+        }
         viewSetup()
 //        timer.invalidate()
         
+        startTimer()
+        
         if self.searchBar.text != "" {
             self.search(self.searchBar.text)
-            self.searchBar.becomeFirstResponder()
+            timer.invalidate()
         }
-        startTimer()
         
     }
     
@@ -106,7 +117,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                         CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message: self.searchBar.text, completionHandler: { (responseObject, error) -> () in
                             self.contacts = responseObject as! [CoreContact]
                             CoreContact.findByName(self.moc, searchTerm: self.searchBar.text, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
-                                
                                 var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
                                 if initialMessageCount < newMessageCount {
 //                                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -148,8 +158,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete method implementation.
         // Return the number of rows in the section.
-        
-        return contacts.count
+        switch section {
+            case 0: return self.contacts.count
+            case 1: return self.contacts.count
+            default: fatalError("unknown section")
+        }
+//        return self.contacts.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -167,10 +181,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
             }
         }
-        
-        
-        
-        //if existing contact : cell... = contact.full_name
         
         if let lastMessage = CoreContact.getLastMessageFromContact(moc, contactId: contact.contactId, did: did) {
             cell.detailTextLabel?.text = "\(lastMessage.message)"
@@ -207,13 +217,13 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 
                 CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message:
                     self.searchBar.text, completionHandler: { (responseObject, error) -> () in
-                        
+                        self.contacts = responseObject as! [CoreContact]
                         CoreContact.findByName(self.moc, searchTerm: "", existingContacts: self.contacts, completionHandler: { (contacts) -> () in
                             self.contacts = responseObject as! [CoreContact]
                             self.tableView.beginUpdates()
                             self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
                             self.tableView.endUpdates()
-                            self.startTimer()
+//                            self.startTimer()
 
                         })
                 })
@@ -340,26 +350,21 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 self.tableView.reloadData()
             })
         }
-    
-        startTimer()
     }
     
     func search(searchTerm: String) {
-//        timer.invalidate()
+        timer.invalidate()
         if count(searchTerm) > 0 {
-//            CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm) { (responseObject, error) -> () in
-//                self.contacts = responseObject as! [CoreContact]
-//                self.tableView.reloadData()
-//            }
-            
             CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm, completionHandler: { (responseObject, error) -> () in
-                self.contacts = responseObject as! [CoreContact]
-                CoreContact.findByName(self.moc, searchTerm: searchTerm, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
-                    self.contacts = contacts!
-                    self.tableView.reloadData()
+                var contacts1 = responseObject as! [CoreContact]
+                CoreContact.findByName(self.moc, searchTerm: searchTerm, existingContacts: contacts1, completionHandler: { (contacts) -> () in
+                    if let contact = contacts {
+                        self.contacts = contact
+                        let indexSet = NSIndexSet(index: 0)
+                        self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
+                    }
                 })
             })
-
         }
     }
 
@@ -367,19 +372,20 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+
         if (segue.identifier == "showMessagesSegue") {
-
+            
+            self.searchBar.resignFirstResponder()
             var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
-            let path = self.tableView.indexPathForSelectedRow()
-
-            var contactId = self.contacts[path!.row].contactId
+            if let indexPath = self.tableView.indexPathForSelectedRow() {
+                detailSegue.contactId = self.contacts[indexPath.row].contactId
+            } else {
+                detailSegue.contactId = self.contactForSegue
+            }
+            
             detailSegue.did = self.did
-            detailSegue.contactId = contactId
             timer.invalidate()
-            
-            
         }
-        
        
     }
     

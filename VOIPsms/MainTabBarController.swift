@@ -61,10 +61,11 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     }
     
     @IBAction func newMessageWasClicked(sender: AnyObject) {
+        self.performSegueWithIdentifier("newMessageSegue", sender: self)
 //        self.performSegueWithIdentifier("newMessageSegue", sender: self)
     }
 
-    
+     
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
@@ -75,6 +76,11 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         if (segue.identifier == "showLoginSegue") {
                 var loginVC = segue.destinationViewController as? ViewController
                 loginVC?.delegate = messagesVC!
+        }
+        
+        if segue.identifier == "newMessageSegue" {
+            var newMsgVC = segue.destinationViewController as? NewMessageViewController
+            newMsgVC?.delegate = messagesVC!
         }
     }
 }

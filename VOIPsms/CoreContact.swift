@@ -152,13 +152,12 @@ class CoreContact: NSManagedObject {
         return completionHandler(responseObject: ns, error: nil)
     }
     
-    
     class func findByName(moc: NSManagedObjectContext, searchTerm: String, existingContacts: [CoreContact], completionHandler: ([CoreContact]?)->()) {
         var coreContacts : [CoreContact] = existingContacts
             Contact().getContactsDict({ (contacts) -> () in
                 if contacts.count > 0 {
                     for (key,value) in contacts {
-                        if (value.rangeOfString(searchTerm) != nil) {
+                        if (value.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) {
                             if let contact1 = CoreContact.currentContact(moc, contactId: key) {
                                 if !contains(existingContacts, contact1) {
                                     coreContacts.append(contact1)
@@ -166,6 +165,7 @@ class CoreContact: NSManagedObject {
                             }
                         }
                     }
+                    println(coreContacts.count)
                     return completionHandler(coreContacts)
                 }
             })

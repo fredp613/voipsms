@@ -387,31 +387,31 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     @IBAction func sendWasPressed(sender: AnyObject) {
         var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         
-            self.textMessage.text = ""
-        
-            let date = NSDate()
-            let formatter = NSDateFormatter()
-            formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
-            var dateStr = formatter.stringFromDate(date)
-        
-            var message = Message(contact: self.contactId, message: msg, type: 0, date: dateStr, id: "")
-            tableData.append(message)
-            self.tableView.beginUpdates()
-            let indexPath = NSIndexPath(forItem: tableData.count - 1, inSection: 0)
-            self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
-            self.tableView.endUpdates()
-            self.tableViewScrollToBottomAnimated(true)
-            NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
-        
-            Message.sendMessageAPI(self.contactId, messageText: msg, did: did, completionHandler: { (responseObject, error) -> () in
-                if responseObject["status"].stringValue == "success" {
-                    //save to core data here
-                    CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: responseObject["sms"].stringValue, type: false, date: message.date, message: message.message, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
-                        CoreContact.updateInManagedObjectContext(self.moc, contactId: self.contactId, lastModified: dateStr)
-                        println("saved to core data")
-                    })
-                }
-            })
+        self.textMessage.text = ""
+    
+        let date = NSDate()
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
+        var dateStr = formatter.stringFromDate(date)
+    
+        var message = Message(contact: self.contactId, message: msg, type: 0, date: dateStr, id: "")
+        tableData.append(message)
+        self.tableView.beginUpdates()
+        let indexPath = NSIndexPath(forItem: tableData.count - 1, inSection: 0)
+        self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+        self.tableView.endUpdates()
+        self.tableViewScrollToBottomAnimated(true)
+        NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
+    
+        Message.sendMessageAPI(self.contactId, messageText: msg, did: did, completionHandler: { (responseObject, error) -> () in
+            if responseObject["status"].stringValue == "success" {
+                //save to core data here
+                CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: responseObject["sms"].stringValue, type: false, date: message.date, message: message.message, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
+                    CoreContact.updateInManagedObjectContext(self.moc, contactId: self.contactId, lastModified: dateStr)
+                    println("saved to core data")
+                })
+            }
+        })
     }
     
     func timerDidFire(sender: NSTimer) {

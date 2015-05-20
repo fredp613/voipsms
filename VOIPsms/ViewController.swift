@@ -9,13 +9,13 @@
 import UIKit
 import CoreData
 
-class ViewController: UIViewController, UIAlertViewDelegate, UpdateMessagesTableViewDelegate {
+class ViewController: UIViewController, UIAlertViewDelegate, MessageViewDelegate {
     @IBOutlet weak var txtUserName: UITextField!
     @IBOutlet weak var txtPwd: UITextField!
     @IBOutlet weak var loginBtn: UIButton!
 
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-    var delegate: UpdateMessagesTableViewDelegate?
+    var delegate: MessageViewDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +33,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UpdateMessagesTable
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        self.delegate?.updateMessagesTableView()
+        self.delegate?.updateMessagesTableView!()
     }
     
     func updateMessagesTableView() {
