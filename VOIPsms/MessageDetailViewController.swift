@@ -287,6 +287,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
 //                cell.bubbleImageView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: action))
             }
             let message : Message = self.tableData[indexPath.row]
+        
             cell.configureWithMessage(message)
             var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
 //            cellHeights.append(size.height + 10)
@@ -389,7 +390,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     //MARK: - Button actions
     @IBAction func sendWasPressed(sender: AnyObject) {
         var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
-        
+        var msgForCoreData = self.textMessage.text
         self.textMessage.text = ""
     
         let date = NSDate()
@@ -397,7 +398,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)
     
-        var message = Message(contact: self.contactId, message: msg, type: 0, date: dateStr, id: "")
+        var message = Message(contact: self.contactId, message: msgForCoreData, type: 0, date: dateStr, id: "")
         tableData.append(message)
         self.tableView.beginUpdates()
         let indexPath = NSIndexPath(forItem: tableData.count - 1, inSection: 0)

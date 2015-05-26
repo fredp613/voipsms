@@ -165,7 +165,6 @@ class CoreContact: NSManagedObject {
                             }
                         }
                     }
-                    println(coreContacts.count)
                     return completionHandler(coreContacts)
                 }
             })

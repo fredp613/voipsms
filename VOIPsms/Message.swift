@@ -147,7 +147,6 @@ class Message {
         
         
     }
-
     
     class func sendMessageAPI(contact: String, messageText: String, did: String,
         completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
@@ -172,16 +171,8 @@ class Message {
                 "id":id
             ]
             VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
-                    println(responseObject)
             }
         }
         return completionHandler(responseObject: true, error: nil)
-       
-
     }
-    
-    
-
-
-
 }

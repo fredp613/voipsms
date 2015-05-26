@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pjp-HW-Xts">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pjp-HW-Xts">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -82,49 +82,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="30.5" y="1267.5"/>
-        </scene>
-        <!--Profile-->
-        <scene sceneID="0LP-WL-s5v">
-            <objects>
-                <viewController id="IHz-bL-fzK" customClass="ProfileViewController" customModule="VOIPsms" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="RCc-rY-KiX"/>
-                        <viewControllerLayoutGuide type="bottom" id="dcy-As-VgT"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="Tzn-in-h1B">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lWA-MM-gV7">
-                                <rect key="frame" x="310" y="103" width="51" height="31"/>
-                            </switch>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Access contacts" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SnR-fX-BLX">
-                                <rect key="frame" x="169" y="108" width="133" height="21"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="133" id="I7M-Yv-7aA"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="lWA-MM-gV7" firstAttribute="trailing" secondItem="Tzn-in-h1B" secondAttribute="trailingMargin" id="1dp-lO-G9a"/>
-                            <constraint firstItem="lWA-MM-gV7" firstAttribute="top" secondItem="RCc-rY-KiX" secondAttribute="bottom" constant="39" id="Q5T-bu-5TY"/>
-                            <constraint firstItem="SnR-fX-BLX" firstAttribute="centerY" secondItem="lWA-MM-gV7" secondAttribute="centerY" id="QHj-Fy-e60"/>
-                            <constraint firstItem="lWA-MM-gV7" firstAttribute="leading" secondItem="SnR-fX-BLX" secondAttribute="trailing" constant="8" symbolic="YES" id="fb0-6L-Wke"/>
-                        </constraints>
-                    </view>
-                    <tabBarItem key="tabBarItem" title="Profile" image="profille1x" id="tLi-Xn-BuT"/>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
-                    <connections>
-                        <outlet property="profileAccessSwitch" destination="lWA-MM-gV7" id="Jhg-jJ-IUZ"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="0Xc-Iw-Cqg" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="494.5" y="1305.5"/>
         </scene>
         <!--Messages-->
         <scene sceneID="VaQ-0k-BVw">
@@ -350,7 +307,6 @@
                     <connections>
                         <segue destination="UIf-Jw-jJG" kind="relationship" relationship="viewControllers" id="fke-JI-tLS"/>
                         <segue destination="vXZ-lx-hvc" kind="presentation" identifier="showLoginSegue" id="sig-DE-FWq"/>
-                        <segue destination="IHz-bL-fzK" kind="relationship" relationship="viewControllers" id="QPY-WM-uT9"/>
                         <segue destination="jku-9G-aGb" kind="presentation" identifier="newMessageSegue" id="h19-83-Dhr"/>
                     </connections>
                 </tabBarController>
@@ -493,7 +449,6 @@
     </scenes>
     <resources>
         <image name="messageMenuIcon" width="30" height="30"/>
-        <image name="profille1x" width="40" height="40"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="XUi-kl-MnI"/>

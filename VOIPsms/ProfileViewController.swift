@@ -22,12 +22,9 @@ class ProfileViewController: UIViewController {
         var alert = UIAlertView(title: "No contact access", message: "In order to sync your messages with your current contact(s) you must grant this application access with your contacts in your phone settings", delegate: self, cancelButtonTitle: "Ok")
         
         if Contact().checkAccess() {
-
-            
             Contact().getContactsDict({ (contacts) -> () in
                 println(contacts)
             })
-            
         }
         
         
