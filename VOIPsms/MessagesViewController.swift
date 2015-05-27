@@ -98,11 +98,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
-        
     }
     
     func viewSetup() {
-        self.contactsArray = [ContactStruct]()
         if CoreUser.userExists(moc) {
             if self.contacts.count == 0 {
                 self.activityIndicator.startAnimating()
@@ -125,14 +123,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                                 contact.lastMsgFlag = contactLastMessage.flag
                                 contact.did = self.did
                             }
-                            self.contactsArray.append(contact)
+                                self.contactsArray.append(contact)
                         }
-                    
-//                    println(self.contactsArray.map {$0.contactId})
-                    
+
+                        var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
                         let indexSet = NSIndexSet(index: 0)
                         self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
-                    
                 })
             })
         }
@@ -201,7 +197,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 })
             }
         }
-//        self.tableView.reloadData()
         self.contactsArray.count
     }
 
