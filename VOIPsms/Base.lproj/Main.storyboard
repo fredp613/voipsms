@@ -189,10 +189,10 @@
                         <viewControllerLayoutGuide type="bottom" id="Ssl-Tq-FOo"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="Nbt-Ry-dVz">
-                        <rect key="frame" x="0.0" y="64" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qL9-TF-RCI">
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qL9-TF-RCI">
                                 <rect key="frame" x="0.0" y="20" width="600" height="580"/>
                                 <subviews>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="KSs-8p-4xD">
@@ -255,6 +255,8 @@
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout" bottom="YES"/>
+                    <toolbarItems/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="bottomConstraint" destination="tdQ-G7-Hsj" id="E24-ov-ITj"/>
                         <outlet property="scrollView" destination="qL9-TF-RCI" id="6Cv-Sv-ace"/>
@@ -262,11 +264,77 @@
                         <outlet property="tableView" destination="KSs-8p-4xD" id="5KN-yb-nzD"/>
                         <outlet property="tableViewHeightConstraint" destination="9kw-oJ-rvL" id="d0x-hk-ycd"/>
                         <outlet property="textMessage" destination="LOV-x7-l3V" id="KBc-dK-Rbo"/>
+                        <segue destination="gjZ-Zh-MF7" kind="show" identifier="showContactDetailSegue" id="PlH-4M-Ti2"/>
+                        <segue destination="DNK-03-LAE" kind="show" identifier="showExistingContactDetailSegue" id="0k9-Wd-F0d"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="C7c-cp-cio" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1790" y="712"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="z7M-Xe-aex">
+            <objects>
+                <viewController id="gjZ-Zh-MF7" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="04l-Sk-dpx"/>
+                        <viewControllerLayoutGuide type="bottom" id="og8-aC-9Z8"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="jpf-vM-0e3">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ncu-C2-sMG">
+                                <rect key="frame" x="16" y="93" width="290" height="100"/>
+                                <color key="backgroundColor" red="0.94082754630105825" green="0.94082754630105825" blue="0.94082754630105825" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="290" id="Khv-KI-0qf"/>
+                                    <constraint firstAttribute="height" constant="100" id="eor-Qy-czk"/>
+                                </constraints>
+                                <state key="normal" title="Add to existing contact">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sba-B0-bFJ">
+                                <rect key="frame" x="16" y="208" width="290" height="100"/>
+                                <color key="backgroundColor" red="0.94082754629999998" green="0.94082754629999998" blue="0.94082754629999998" alpha="1" colorSpace="calibratedRGB"/>
+                                <state key="normal" title="Create new contact">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="sba-B0-bFJ" firstAttribute="leading" secondItem="jpf-vM-0e3" secondAttribute="leadingMargin" id="XOU-o4-Os8"/>
+                            <constraint firstItem="Ncu-C2-sMG" firstAttribute="trailing" secondItem="sba-B0-bFJ" secondAttribute="trailing" id="fjN-OE-p49"/>
+                            <constraint firstItem="sba-B0-bFJ" firstAttribute="leading" secondItem="Ncu-C2-sMG" secondAttribute="leading" id="hPx-67-96X"/>
+                            <constraint firstItem="og8-aC-9Z8" firstAttribute="top" secondItem="sba-B0-bFJ" secondAttribute="bottom" constant="248" id="ngl-Dk-Une"/>
+                            <constraint firstItem="Ncu-C2-sMG" firstAttribute="top" secondItem="04l-Sk-dpx" secondAttribute="bottom" constant="29" id="vVX-Ux-v0o"/>
+                            <constraint firstItem="sba-B0-bFJ" firstAttribute="top" secondItem="Ncu-C2-sMG" secondAttribute="bottom" constant="15" id="vty-AO-RU8"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="UFk-Po-yzd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2502" y="635"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="cOf-dL-5z2">
+            <objects>
+                <viewController id="DNK-03-LAE" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="ymK-gX-MsC"/>
+                        <viewControllerLayoutGuide type="bottom" id="5Qt-jA-O02"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="EbS-v5-5zZ">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Je2-sz-KLr" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2324" y="1400"/>
         </scene>
         <!--New Message View Controller-->
         <scene sceneID="YGd-3a-L7z">
@@ -457,6 +525,6 @@
         <image name="messageMenuIcon" width="30" height="30"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="XUi-kl-MnI"/>
+        <segue reference="Vkc-5X-M1X"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -333,6 +333,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                         })
                 })
 
+                //you may want to get rid of this
                 Message.deleteMessagesFromAPI(ids, completionHandler: { (responseObject, error) -> () in
                     if responseObject {
                         println("something went right :)")

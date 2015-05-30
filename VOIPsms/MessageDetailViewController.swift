@@ -136,6 +136,27 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         CoreContact.updateMessagesToRead(moc, contactId: contactId, did: did)
         startTimer()
         compressedTableViewHeight = self.tableView.frame.size.height
+        
+//        UIBarButtonItem *flipButton = [[UIBarButtonItem alloc]
+//            initWithTitle:@"Flip"
+//        style:UIBarButtonItemStyleBordered
+//        target:self
+//        action:@selector(flipView:)];
+//        self.navigationItem.rightBarButtonItem = flipButton;
+        
+        
+        let contactDetailButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
+        self.navigationItem.rightBarButtonItem = contactDetailButton
+    }
+    
+    func segueToContactDetails(sender: UIBarButtonItem) {
+        Contact().getContactsDict { (contacts) -> () in
+            if contacts[self.contactId] != nil {
+                self.performSegueWithIdentifier("showExistingContactDetailSegue", sender: self)
+            } else {
+                self.performSegueWithIdentifier("showContactDetailSegue", sender: self)
+            }
+        }
     }
     
     func dataSourceRefreshTimerDidFire(sender: NSTimer) {
