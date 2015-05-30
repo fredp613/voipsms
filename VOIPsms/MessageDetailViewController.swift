@@ -76,8 +76,6 @@ struct IOSModel {
 }
 
 
-
-
 class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScrollViewDelegate, UITextViewDelegate {
 
 //    @IBOutlet weak var textMessage: UITextField!
@@ -100,6 +98,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     var titleText = String()
     var tableData : [Message] = [Message]()
     var timer : NSTimer = NSTimer()
+    var compressedTableViewHeight : CGFloat = CGFloat()
     
 //    var coreDid = CoreDID()
 //    var delegate:UpdateMessagesTableViewDelegate? = nil
@@ -117,7 +116,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         tableView.separatorStyle = .None
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
         
 //        tableView.keyboardDismissMode = .Interactive
 //        let modelName = UIDevice.currentDevice().modelName
@@ -136,6 +135,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
 
         CoreContact.updateMessagesToRead(moc, contactId: contactId, did: did)
         startTimer()
+        compressedTableViewHeight = self.tableView.frame.size.height
     }
     
     func dataSourceRefreshTimerDidFire(sender: NSTimer) {
@@ -179,7 +179,14 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func startTimer() {
-        timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
+        if Reachability.isConnectedToNetwork() {
+            timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
+        } else {
+            let alert = UIAlertView(title: "Netword Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
+            alert.show()
+        }
+        
+
     }
     
     func stopTimer() {
@@ -344,6 +351,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
         scrollView.contentInset = contentInsets;
         scrollView.scrollIndicatorInsets = contentInsets;
+//        if self.tableViewHeightConstraint.constant < compressedTableViewHeight {
+//            self.tableViewHeightConstraint.constant = compressedTableViewHeight
+//        }
+
     }
 
     func adjustForKeyboard(notification: NSNotification) {
@@ -356,11 +367,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             scrollView.contentInset = UIEdgeInsetsZero
         } else {
             
-            if notification.name == UIKeyboardWillShowNotification {
+            if notification.name == UIKeyboardWillChangeFrameNotification {
 
                 if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
-                    if allCellHeight < keyboardSize.height  {
-                        tableViewHeightConstraint.constant = IOSModel(model: self.model).compressedHeight // keyboardSize.height + (keyboardSize.height * 0.17)
+                    if allCellHeight < keyboardScreenEndFrame.height  {
+                        tableViewHeightConstraint.constant = compressedTableViewHeight - (keyboardViewEndFrame.height - 80)
                         let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
                         scrollView.contentInset = contentInsets;
                         scrollView.scrollIndicatorInsets = contentInsets;

@@ -170,6 +170,36 @@ class CoreContact: NSManagedObject {
             })
     }
     
+    class func findAllContactsByName(moc: NSManagedObjectContext, searchTerm: String, existingContacts: [CoreContact], completionHandler: ([ContactStruct]?)->()) {
+        
+        var coreContacts = existingContacts
+        var contactResult = [ContactStruct]()
+        
+        for c in coreContacts {
+            var contact = ContactStruct()
+            contact.contactId = c.contactId
+            contactResult.append(contact)
+        }
+        
+        
+        Contact().getContactsDict({ (contacts) -> () in
+            if contacts.count > 0 {
+                for (key,value) in contacts {
+                    let numberStr = String(key)
+                    if (value.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) || (numberStr.rangeOfString(searchTerm.lowercaseString) != nil) {
+                        var contactStruct = ContactStruct()
+                        contactStruct.contactId = key
+                        contactStruct.contactName = value
+                        if !contains(contactResult.map({$0.contactId}), key) {
+                            contactResult.append(contactStruct)
+                        }
+                    }
+                }
+                return completionHandler(contactResult)
+            }
+        })
+    }
+    
     
     
     

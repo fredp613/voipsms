@@ -12,6 +12,7 @@
 		2A3ACCB11AEAF0630005193B /* UIDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */; };
 		2A5E35991B0047AA0099F69B /* CoreDeleteMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */; };
 		2A7FA6331AEB4BDD00011C6C /* CoreDID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */; };
+		2A9298DB1B1A1AC300FC4676 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9298DA1B1A1AC300FC4676 /* Reachability.swift */; };
 		2A98D42F1ADB665C003D3512 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A98D42E1ADB665C003D3512 /* AppDelegate.swift */; };
 		2A98D4321ADB665C003D3512 /* VOIPsms.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2A98D4301ADB665C003D3512 /* VOIPsms.xcdatamodeld */; };
 		2A98D4341ADB665C003D3512 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A98D4331ADB665C003D3512 /* ViewController.swift */; };
@@ -58,6 +59,7 @@
 		2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIDeviceExtension.swift; sourceTree = "<group>"; };
 		2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDeleteMessage.swift; sourceTree = "<group>"; };
 		2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDID.swift; sourceTree = "<group>"; };
+		2A9298DA1B1A1AC300FC4676 /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		2A98D4291ADB665C003D3512 /* VOIPsms.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VOIPsms.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A98D42D1ADB665C003D3512 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A98D42E1ADB665C003D3512 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -152,6 +154,7 @@
 				2AE76D341AE2C24900A6E84D /* extensions */,
 				2AE76D321AE2B91D00A6E84D /* MessageDetailViewController.swift */,
 				2ABFAEDE1AE0AA4900EFABBD /* Message.swift */,
+				2A9298DA1B1A1AC300FC4676 /* Reachability.swift */,
 				2A98D45B1ADB6A97003D3512 /* CoreDataStack.swift */,
 				2A98D4581ADB689E003D3512 /* CoreModels */,
 				2A98D4531ADB66A6003D3512 /* external_libs */,
@@ -438,6 +441,7 @@
 				2ABFAED91AE08DBC00EFABBD /* MessagesViewController.swift in Sources */,
 				2AE0DE5E1AE72946008EC08E /* MessageBubbleCell.swift in Sources */,
 				2ADBA1CB1AFED4460048972E /* StringExtension.swift in Sources */,
+				2A9298DB1B1A1AC300FC4676 /* Reachability.swift in Sources */,
 				2A98D45C1ADB6A97003D3512 /* CoreDataStack.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -33,7 +33,6 @@ class ViewController: UIViewController, UIAlertViewDelegate, MessageViewDelegate
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        self.delegate?.updateMessagesTableView!()
     }
     
     func updateMessagesTableView() {
@@ -54,6 +53,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, MessageViewDelegate
                 alert.show()
                 self.dismissViewControllerAnimated(true, completion: nil)
                 self.dismissAlert(alert)
+                self.delegate?.updateMessagesTableView!()
 
             } else {
                 let alert = UIAlertView(title: "Invalid Login Credentials", message: "Please try again", delegate: self, cancelButtonTitle: "Ok")

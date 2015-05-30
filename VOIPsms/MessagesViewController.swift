@@ -26,10 +26,10 @@ struct ContactStruct {
 }
 
 
-
-
 class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UITableViewDataSource, MessageViewDelegate {
 
+    @IBOutlet weak var logoutButton: UIBarButtonItem!
+    @IBOutlet weak var newMessageButton: UIBarButtonItem!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var searchBarTextField: UISearchBar!
@@ -42,33 +42,29 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     var didView : UIPickerView = UIPickerView()
     var titleBtn : UIButton = UIButton()
     var contactForSegue = String()
-//    var contactsDict : [String: String] = [String: String]()
     var contactsArray = [ContactStruct]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
         self.tableView.dataSource = self
-//        startTimer()
         if self.searchBar.text != "" {
-//            self.search(self.searchBar.text)
             timer.invalidate()
         }
-//        viewSetup()
-//        startTimer()
         
     }
     
     func updateMessagesTableView() {
         println("delegate called")
+        viewSetup(true)
     }
     
     func triggerSegue(contact: String) {
         self.contactForSegue = contact
-        println("delegate called trigger")
         self.performSegueWithIdentifier("showMessagesSegue", sender: self)
     }
     
+
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
         
@@ -80,13 +76,27 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             titleBtn.setTitleColor(UIColor.lightGrayColor(), forState: UIControlState.Normal)
             self.navigationController?.navigationBar.topItem?.titleView = titleBtn
         }
-//        if self.contacts.count == 0 {
-//            self.activityIndicator.startAnimating()
-//        }
-         var initialMessageCount = CoreMessage.getMessages(moc, ascending: false).count
-        var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
+       
+        if CoreUser.userExists(moc) {
+            
+            let currentUser = CoreUser.currentUser(moc)
+            let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
+            
+            if currentUser?.remember == false {
+                performSegueWithIdentifier("showLoginSegue", sender: self)
+            }
+            
+            CoreUser.authenticate(moc, email: currentUser!.email, password: pwd!, completionHandler: { (success) -> Void in
+                if success == false || currentUser?.remember == false {
+                    self.performSegueWithIdentifier("showLoginSegue", sender: self)
+                }
+            })
+            
+        } else {
+            performSegueWithIdentifier("showLoginSegue", sender: self)
+        }
         
-        viewSetup()
+        viewSetup(false)
         startTimer()
         
         if self.searchBar.text != "" {
@@ -98,14 +108,23 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
+
     }
     
-    func viewSetup() {
+    
+    func viewSetup(fromSegue: Bool) {
         if CoreUser.userExists(moc) {
             if self.contacts.count == 0 {
-                self.activityIndicator.startAnimating()
+                if self.activityIndicator != nil {
+                    self.activityIndicator.startAnimating()
+                }
             }
-            var searchTerm = self.searchBar.text
+            var searchTerm = ""
+            if self.searchBar != nil {
+                searchTerm = self.searchBar.text
+            }
+            
+            
             CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm, completionHandler: { (responseObject, error) -> () in
                 self.contacts = responseObject as! [CoreContact]
                 CoreContact.findByName(self.moc, searchTerm: searchTerm, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
@@ -128,14 +147,27 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
                         var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
                         let indexSet = NSIndexSet(index: 0)
-                        self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
+                        if self.tableView != nil {
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                if !fromSegue {
+                                    self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.Automatic)
+                                }
+                            })
+                        }
+                    
                 })
             })
         }
     }
     
     func startTimer() {
-        timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+        if Reachability.isConnectedToNetwork() {
+            timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+        } else {
+           let alert = UIAlertView(title: "Netword Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
+            alert.show()
+        }
+
     }
     
     func timerDidFire(sender: NSTimer) {
@@ -346,6 +378,15 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
     }
     
+    @IBAction func logoutWasPressed(sender: AnyObject) {
+        let currentUser = CoreUser.currentUser(moc)
+        CoreUser.logoutUser(moc, coreUser: currentUser!)
+        self.performSegueWithIdentifier("showLoginSegue", sender: self)
+    }
+    
+    @IBAction func newMessageWasPressed(sender: AnyObject) {
+    }
+    
     //MARK: - PickerView delegate methods
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
@@ -367,7 +408,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             self.did = dids[row].did
             CoreDID.toggleSelected(moc, did: self.did)
             titleBtn.setTitle(self.did.northAmericanPhoneNumberFormat(), forState: UIControlState.Normal)
-            viewSetup()
+            viewSetup(false)
         }
         didView.removeFromSuperview()
         maskView.removeFromSuperview()
@@ -475,8 +516,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 
+        if (segue.identifier == "showLoginSegue") {
+            var loginVC = segue.destinationViewController as? ViewController
+            loginVC?.delegate = self
+        }
+        
         if (segue.identifier == "showMessagesSegue") {
-            
             self.searchBar.resignFirstResponder()
             var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
             if let indexPath = self.tableView.indexPathForSelectedRow() {
@@ -487,6 +532,11 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             
             detailSegue.did = self.did
             timer.invalidate()
+        }
+        
+        if segue.identifier == "newMessageSegue" {
+            var newMsgVC = segue.destinationViewController as? NewMessageViewController
+            newMsgVC?.delegate = self
         }
        
     }
