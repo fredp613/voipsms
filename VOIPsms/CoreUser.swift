@@ -40,7 +40,8 @@ class CoreUser: NSManagedObject {
     
     class func logoutUser(managedObjectContext: NSManagedObjectContext, coreUser: CoreUser) {
         coreUser.remember = false
-        managedObjectContext.save(nil)
+        if managedObjectContext.save(nil) {
+        }
     }
     
     

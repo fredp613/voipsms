@@ -340,9 +340,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                         println("something went wrong")
                     }
                 })
-
             })
-            println("deleting")
         }
     }
     

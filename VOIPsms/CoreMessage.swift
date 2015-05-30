@@ -94,6 +94,28 @@ class CoreMessage: NSManagedObject {
         
         return false
     }
+    
+    class func deleteStaleMsgInManagedObjectContext(moc: NSManagedObjectContext, coreId: NSNumber) -> Bool {
+        
+        let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
+        let entity = NSEntityDescription.entityForName("CoreMessage", inManagedObjectContext: moc)
+        let predicate = NSPredicate(format: "coreId == %@", coreId)
+        fetchRequest.predicate = predicate
+        fetchRequest.entity = entity
+        fetchRequest.returnsObjectsAsFaults = false
+        var coreMessages = [CoreMessage]()
+        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        if fetchResults?.count > 0 {
+            coreMessages = fetchResults!
+        }
+        for cm in coreMessages {
+            moc.deleteObject(cm)
+            moc.save(nil)
+            return true
+        }
+        
+        return false
+    }
 
     class func isExistingMessageById(moc: NSManagedObjectContext, id: String) -> Bool {
         if let messageExists = CoreMessage.getMessageById(moc, Id: id) {

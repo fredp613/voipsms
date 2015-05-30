@@ -106,13 +106,17 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
                     } else {
                         CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
                     }
+                    
+                    var cm = responseObject
+                    Message.sendMessageAPI(contact, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
+                        if responseObject["status"].stringValue == "success" {
+                            CoreMessage.deleteStaleMsgInManagedObjectContext(self.moc, coreId: cm!.coreId)
+                        }
+                    })
+                    
                     //run the send message in the background
 
-                        Message.sendMessageAPI(contact, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
-                            if responseObject["status"].stringValue == "success" {
-                                println("all good")
-                            }
-                        })
+                    
                     
 //                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
 //                    let controllerToPush: AnyObject! = storyBoard.instantiateViewControllerWithIdentifier("messageDetailView")
