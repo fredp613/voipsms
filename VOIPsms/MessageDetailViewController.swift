@@ -137,17 +137,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         startTimer()
         compressedTableViewHeight = self.tableView.frame.size.height
         
-//        UIBarButtonItem *flipButton = [[UIBarButtonItem alloc]
-//            initWithTitle:@"Flip"
-//        style:UIBarButtonItemStyleBordered
-//        target:self
-//        action:@selector(flipView:)];
-//        self.navigationItem.rightBarButtonItem = flipButton;
-        
-        
         let contactDetailButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
         self.navigationItem.rightBarButtonItem = contactDetailButton
+
     }
+    
     
     func segueToContactDetails(sender: UIBarButtonItem) {
         Contact().getContactsDict { (contacts) -> () in

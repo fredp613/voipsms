@@ -16,6 +16,7 @@ class CoreUser: NSManagedObject {
     @NSManaged var apiPassword: String
     @NSManaged var token: String
     @NSManaged var remember: NSNumber
+    @NSManaged var initialLogon: NSNumber
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, email: String, pwd: String) -> Bool {
         
@@ -23,6 +24,7 @@ class CoreUser: NSManagedObject {
         
         coreUser.email = email
         coreUser.remember = true
+        coreUser.initialLogon = true
         
         if managedObjectContext.save(nil) {
 
@@ -44,6 +46,11 @@ class CoreUser: NSManagedObject {
         }
     }
     
+    class func updateInManagedObjectContext(moc: NSManagedObjectContext, coreUser: CoreUser) {
+        coreUser.initialLogon = false
+        if moc.save(nil) {
+        }
+    }
     
     class func currentUser(managedObjectContext: NSManagedObjectContext) -> CoreUser? {
         //        let moc = CoreDataStack().managedObjectContext!

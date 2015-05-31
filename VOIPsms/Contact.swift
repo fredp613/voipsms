@@ -35,6 +35,17 @@ class Contact {
         }
     }
     
+    func requestAccess() {
+        ABAddressBookRequestAccessWithCompletion(addressBook, { success, error in
+            if success {
+                println("success")
+            }
+            else {
+                println("error")
+            }
+        })
+    }
+    
     func createContact(phone: String, firstName: String, lastName: String) -> Bool {
         var error: Unmanaged<CFErrorRef>? = nil
         

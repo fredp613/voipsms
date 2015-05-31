@@ -67,7 +67,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        
+                       
         titleBtn = UIButton(frame: CGRectMake(0, 0, 100, 40))
         if let selectedDID = CoreDID.getSelectedDID(moc) {
             self.did = selectedDID.did
@@ -113,6 +113,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     
     func viewSetup(fromSegue: Bool) {
+        
+        
+        
         if CoreUser.userExists(moc) {
             if self.contacts.count == 0 {
                 if self.activityIndicator != nil {
@@ -127,35 +130,59 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             
             CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm, completionHandler: { (responseObject, error) -> () in
                 self.contacts = responseObject as! [CoreContact]
-                CoreContact.findByName(self.moc, searchTerm: searchTerm, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
-                        self.contacts = contacts!
-                        self.contactsArray = [ContactStruct]()
-                        for c in self.contacts {
-                            var contact = ContactStruct()
-                            contact.contactId = c.contactId
-                            
-                            if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
-                                let d = contactLastMessage.date
-                                contact.lastMsgDate = d
-                                contact.lastMsg = contactLastMessage.message
-                                contact.lastMsgType = contactLastMessage.type
-                                contact.lastMsgFlag = contactLastMessage.flag
-                                contact.did = self.did
-                            }
-                                self.contactsArray.append(contact)
-                        }
-
-                        var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
-                        let indexSet = NSIndexSet(index: 0)
-                        if self.tableView != nil {
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                if !fromSegue {
-                                    self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.Automatic)
-                                }
-                            })
-                        }
+                self.contactsArray = [ContactStruct]()
+                for c in self.contacts {
+                    var contact = ContactStruct()
+                    contact.contactId = c.contactId
                     
-                })
+                    if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
+                        let d = contactLastMessage.date
+                        contact.lastMsgDate = d
+                        contact.lastMsg = contactLastMessage.message
+                        contact.lastMsgType = contactLastMessage.type
+                        contact.lastMsgFlag = contactLastMessage.flag
+                        contact.did = self.did
+                    }
+                    self.contactsArray.append(contact)
+                }
+                
+                var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
+                let indexSet = NSIndexSet(index: 0)
+                if self.tableView != nil {
+                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                        if !fromSegue {
+                            self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.Automatic)
+                        }
+                    })
+                }
+//                CoreContact.findByName(self.moc, searchTerm: searchTerm, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
+//                        self.contacts = contacts!
+//                        self.contactsArray = [ContactStruct]()
+//                        for c in self.contacts {
+//                            var contact = ContactStruct()
+//                            contact.contactId = c.contactId
+//                            
+//                            if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
+//                                let d = contactLastMessage.date
+//                                contact.lastMsgDate = d
+//                                contact.lastMsg = contactLastMessage.message
+//                                contact.lastMsgType = contactLastMessage.type
+//                                contact.lastMsgFlag = contactLastMessage.flag
+//                                contact.did = self.did
+//                            }
+//                                self.contactsArray.append(contact)
+//                        }
+//
+//                        var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
+//                        let indexSet = NSIndexSet(index: 0)
+//                        if self.tableView != nil {
+//                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                                if !fromSegue {
+//                                    self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.Automatic)
+//                                }
+//                            })
+//                        }
+//                })
             })
         }
     }
@@ -171,6 +198,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     }
     
     func timerDidFire(sender: NSTimer) {
+
         var initialMessageCount = CoreMessage.getMessages(moc, ascending: false).count
         if CoreUser.userExists(moc) {
             if let str = CoreDID.getSelectedDID(moc) {
@@ -178,12 +206,23 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 if fromStr == nil && self.contacts.count > 0 {
                     self.activityIndicator.startAnimating()
                 }
-                Message.getMessagesFromAPI(self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
+//                println("wefs")
+                Message.getMessagesFromAPI(false, moc: self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
                     if responseObject.count > 0 {
+
                         CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message: self.searchBar.text, completionHandler: { (responseObject, error) -> () in
                             self.contacts = responseObject as! [CoreContact]
-                            CoreContact.findByName(self.moc, searchTerm: self.searchBar.text, existingContacts: self.contacts, completionHandler: { (contacts) -> () in
-                                
+                            
+
+                            var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
+                            var initialLogon = false
+                            if let cu = CoreUser.currentUser(self.moc) {
+                                if cu.initialLogon == true {
+                                    initialLogon = true
+                                }
+                            }
+                            if (initialMessageCount < newMessageCount) || initialLogon {
+                                println("hey")
                                 self.contactsArray = [ContactStruct]()
                                 for c in self.contacts {
                                     var contact = ContactStruct()
@@ -197,30 +236,25 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                                         contact.did = self.did
                                     }
                                     self.contactsArray.append(contact)
+
                                 }
                                 
-                                var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
-                                if initialMessageCount < newMessageCount {//
-                                    self.contacts = contacts!
-                                    self.contactsArray = [ContactStruct]()
-                                    for c in self.contacts {
-                                        var contact = ContactStruct()
-                                        contact.contactId = c.contactId
-                                        if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
-                                            let d = contactLastMessage.date
-                                            contact.lastMsgDate = d
-                                            contact.lastMsg = contactLastMessage.message
-                                            contact.lastMsgType = contactLastMessage.type
-                                            contact.lastMsgFlag = contactLastMessage.flag
-                                            contact.did = self.did
-                                        }
-                                        self.contactsArray.append(contact)
-                                    }
-                                    let indexSet = NSIndexSet(index: 0)
+                                
+                                let indexSet = NSIndexSet(index: 0)
+                                dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                     self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
+                                })
+                            }
+                            if let currentUser = CoreUser.currentUser(self.moc) {
+                                if currentUser.initialLogon.boolValue {
+                                    CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
                                 }
+                            }
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 self.activityIndicator.stopAnimating()
                             })
+                            
+                           
                         })
                         
                     } else {
@@ -259,20 +293,26 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
         var contact = self.contactsArray[indexPath.row]
-        
         var contactName = String()
-        Contact().getContactsDict { (contacts) -> () in
-            let contStr = contact.contactId as String
-            if contacts[contact.contactId] != nil {
-               cell.textLabel?.text = contacts[contact.contactId]
-            } else {
-                if (contact.contactId.toInt() != nil) {
-                   cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+        
+        if Contact().checkAccess() {
+            Contact().getContactsDict { (contacts) -> () in
+                let contStr = contact.contactId as String
+                if contacts[contact.contactId] != nil {
+                    cell.textLabel?.text = contacts[contact.contactId]
                 } else {
-                    cell.textLabel?.text = contact.contactId
+                    if (contact.contactId.toInt() != nil) {
+                        cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+                    } else {
+                        cell.textLabel?.text = contact.contactId
+                    }
                 }
             }
+        } else {
+            cell.textLabel?.text = contact.contactId
         }
+        
+        
 
         
         cell.detailTextLabel?.text = "\(contact.lastMsg)"
@@ -308,29 +348,48 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message:
                     self.searchBar.text, completionHandler: { (responseObject, error) -> () in
                         self.contacts = responseObject as! [CoreContact]
-                        CoreContact.findByName(self.moc, searchTerm: "", existingContacts: self.contacts, completionHandler: { (contacts) -> () in
-                            self.contacts = responseObject as! [CoreContact]
-                            self.contactsArray = [ContactStruct]()
-                            for c in self.contacts {
-                                var contact = ContactStruct()
-                                contact.contactId = c.contactId
-                                
-                                if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
-                                    let d = contactLastMessage.date
-                                    contact.lastMsgDate = d
-                                    contact.lastMsg = contactLastMessage.message
-                                    contact.lastMsgType = contactLastMessage.type
-                                    contact.lastMsgFlag = contactLastMessage.flag
-                                    contact.did = self.did
-                                }
-                                self.contactsArray.append(contact)
+                        self.contactsArray = [ContactStruct]()
+                        for c in self.contacts {
+                            var contact = ContactStruct()
+                            contact.contactId = c.contactId
+                            
+                            if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
+                                let d = contactLastMessage.date
+                                contact.lastMsgDate = d
+                                contact.lastMsg = contactLastMessage.message
+                                contact.lastMsgType = contactLastMessage.type
+                                contact.lastMsgFlag = contactLastMessage.flag
+                                contact.did = self.did
                             }
-                            self.tableView.beginUpdates()
-                            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
-                            self.tableView.endUpdates()
-//                            self.startTimer()
-
-                        })
+                            self.contactsArray.append(contact)
+                        }
+                        self.tableView.beginUpdates()
+                        self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
+                        self.tableView.endUpdates()
+                        
+//                        CoreContact.findByName(self.moc, searchTerm: "", existingContacts: self.contacts, completionHandler: { (contacts) -> () in
+//                            self.contacts = responseObject as! [CoreContact]
+//                            self.contactsArray = [ContactStruct]()
+//                            for c in self.contacts {
+//                                var contact = ContactStruct()
+//                                contact.contactId = c.contactId
+//                                
+//                                if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
+//                                    let d = contactLastMessage.date
+//                                    contact.lastMsgDate = d
+//                                    contact.lastMsg = contactLastMessage.message
+//                                    contact.lastMsgType = contactLastMessage.type
+//                                    contact.lastMsgFlag = contactLastMessage.flag
+//                                    contact.did = self.did
+//                                }
+//                                self.contactsArray.append(contact)
+//                            }
+//                            self.tableView.beginUpdates()
+//                            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
+//                            self.tableView.endUpdates()
+////                            self.startTimer()
+//
+//                        })
                 })
 
                 //you may want to get rid of this

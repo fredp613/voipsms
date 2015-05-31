@@ -105,20 +105,22 @@ class CoreContact: NSManagedObject {
             }
             
             if let name = name {
-                Contact().getContactsDict({ (contacts) -> () in
-                    var closureContacts : [CoreContact] = coreContacts
-                    if contacts.count > 0 {
-                        for (key,value) in contacts {
-                            if (value.rangeOfString(name) != nil) {
-                                if let contact1 = CoreContact.currentContact(moc, contactId: key) {
-                                    if !contains(coreContacts, contact1) {
-                                        coreContacts.append(contact1)
+                if Contact().checkAccess() {
+                    Contact().getContactsDict({ (contacts) -> () in
+                        var closureContacts : [CoreContact] = coreContacts
+                        if contacts.count > 0 {
+                            for (key,value) in contacts {
+                                if (value.rangeOfString(name) != nil) {
+                                    if let contact1 = CoreContact.currentContact(moc, contactId: key) {
+                                        if !contains(coreContacts, contact1) {
+                                            coreContacts.append(contact1)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                })
+                    })
+                }
             }
             
             if (dst == nil && name == nil && message == nil) || (dst == "" && name == "" && message == "")  {

@@ -28,7 +28,7 @@ class Message {
         
     }
     
-    class func getMessagesFromAPI(moc: NSManagedObjectContext, from: String!, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
+    class func getMessagesFromAPI(fromAppDelegate: Bool, moc: NSManagedObjectContext, from: String!, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "YYYY-MM-dd"
@@ -73,7 +73,10 @@ class Message {
                 
                 if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
-                        //check if contact exists
+                        if (type && fromAppDelegate) {                            
+                            Message.sendPushNotification(contact, message: message)
+                        }
+                        
                         if CoreContact.isExistingContact(moc, contactId: contact) {
                             CoreContact.updateInManagedObjectContext(moc, contactId: contact, lastModified: date)
                         } else {
@@ -84,7 +87,33 @@ class Message {
             }
             return completionHandler(responseObject: json, error: nil)
         }
-        
+    }
+    class func sendPushNotification(contact: String, message: String) {
+       
+        var contactStr = contact
+        if Contact().checkAccess() {
+            Contact().getContactsDict { (contacts) -> () in
+                
+                if contacts[contact] != nil {
+                    contactStr = contacts[contact]!
+                } else {
+                    contactStr = contact.northAmericanPhoneNumberFormat()
+                }
+                var boldText  = contactStr
+                var attrs = [NSFontAttributeName : UIFont.boldSystemFontOfSize(15)]
+                var boldString = NSMutableAttributedString(string:boldText, attributes:attrs)
+                var localNotification = UILocalNotification()
+                localNotification.alertBody = "\(contactStr)\r\n\(message)"
+                UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
+            }
+        } else {
+            var boldText  = contactStr
+            var attrs = [NSFontAttributeName : UIFont.boldSystemFontOfSize(15)]
+            var boldString = NSMutableAttributedString(string:boldText, attributes:attrs)
+            var localNotification = UILocalNotification()
+            localNotification.alertBody = "\(contactStr)\r\n\(message)"
+            UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
+        }
         
     }
     
@@ -133,6 +162,9 @@ class Message {
                 let did = t["did"].stringValue
                 if CoreMessage.isExistingMessageById(moc, id: id) == false {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
+                        
+//                        Message.sendPushNotification(contact, message: message)
+                        
                         //check if contact exists
                         if CoreContact.isExistingContact(moc, contactId: contact) {
                             CoreContact.updateInManagedObjectContext(moc, contactId: contact, lastModified: date)
