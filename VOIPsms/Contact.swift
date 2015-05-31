@@ -16,11 +16,13 @@ class Contact {
     var access = APAddressBook.access()
     var searchTerm = String()
     var coreContacts = [CoreContact]()
+    var addressBook1: ABAddressBookRef?
 
     init() {
         self.addressBook = APAddressBook()
-        self.access = APAddressBook.access()
+        self.access = APAddressBook.access()      
     }
+
     
     func checkAccess() -> Bool {
         
@@ -35,16 +37,6 @@ class Contact {
         }
     }
     
-    func requestAccess() {
-        ABAddressBookRequestAccessWithCompletion(addressBook, { success, error in
-            if success {
-                println("success")
-            }
-            else {
-                println("error")
-            }
-        })
-    }
     
     func createContact(phone: String, firstName: String, lastName: String) -> Bool {
         var error: Unmanaged<CFErrorRef>? = nil
@@ -144,6 +136,7 @@ class Contact {
         return nil
         
     }
+    
     
 //    if let name = name {
 //        Contact().getContactsDict({ (contacts) -> () in

@@ -45,6 +45,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     var contactsArray = [ContactStruct]()
     
     override func viewDidLoad() {
+        
         super.viewDidLoad()
         self.tableView.delegate = self
         self.tableView.dataSource = self
@@ -52,6 +53,67 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             timer.invalidate()
         }
         
+        checkAllPermissions()
+        
+    }
+    
+    func checkAllPermissions() {
+        
+        if let currentUser = CoreUser.currentUser(moc) {
+            if currentUser.initialLogon.boolValue == false {
+                if Contact().checkAccess() == true {
+                    println("has access")
+                    askPermissionForNotifications()
+                } else {
+                    var alertController = UIAlertController(title: "No contact access", message: "In order to link to your messages to your contacts, voip.ms sms requires access to your contacts. You will need to grant access for this app to sync with your phone contacts in your phone settings", preferredStyle: .Alert)
+                    
+                    var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
+                        UIAlertAction in
+                        println("pressed")
+                        self.askPermissionForNotifications()
+                    }
+                    var cancelAction = UIAlertAction(title: "No, do not sync my contacts", style: UIAlertActionStyle.Cancel) {
+                        UIAlertAction in
+                        println("cancelled")
+                    }
+                    alertController.addAction(okAction)
+                    alertController.addAction(cancelAction)
+                    self.presentViewController(alertController, animated: true, completion: nil)
+                    
+                }
+
+            }
+        }
+    }
+ 
+    
+    func askPermissionForNotifications() -> Bool {
+        var application = UIApplication.sharedApplication()
+        if application.respondsToSelector("isRegisteredForRemoteNotifications")
+        {
+           
+            application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Badge | .Sound | .Alert, categories: nil))
+            let grantSettings = application.currentUserNotificationSettings()
+            if grantSettings.types == UIUserNotificationType.None {
+                println("not registered for local notifications")
+                var alertController = UIAlertController(title: "Notifications", message: "This app has not been granted permission to send you notifications - if you want to recieve notifications when a user sends you a message please go into your phone settings and allow notifications for this app", preferredStyle: .Alert)
+                var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
+                    UIAlertAction in
+                    println("pressed")
+                    
+                }
+                alertController.addAction(okAction)
+                self.presentViewController(alertController, animated: true, completion: nil)
+            } else {
+                println("registered for local notifications")
+                
+            }
+            return true
+        }else{
+            // iOS < 8 Notifications
+            application.registerForRemoteNotificationTypes(.Badge | .Sound | .Alert)
+        }
+        return false
     }
     
     func updateMessagesTableView() {
@@ -144,6 +206,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                         contact.did = self.did
                     }
                     self.contactsArray.append(contact)
+
                 }
                 
                 var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
@@ -151,6 +214,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 if self.tableView != nil {
                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
                         if !fromSegue {
+                            self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
                             self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.Automatic)
                         }
                     })
@@ -185,6 +249,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 //                })
             })
         }
+
     }
     
     func startTimer() {
@@ -239,7 +304,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
                                 }
                                 
-                                
+                                self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
                                 let indexSet = NSIndexSet(index: 0)
                                 dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                     self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
@@ -263,7 +328,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 })
             }
         }
-        self.contactsArray.count
+
     }
 
 
@@ -301,15 +366,15 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 if contacts[contact.contactId] != nil {
                     cell.textLabel?.text = contacts[contact.contactId]
                 } else {
-                    if (contact.contactId.toInt() != nil) {
-                        cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
-                    } else {
-                        cell.textLabel?.text = contact.contactId
-                    }
+                    cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
                 }
             }
         } else {
-            cell.textLabel?.text = contact.contactId
+//            if (contact.contactId.toInt() != nil) {
+                cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+//            } else {
+//                cell.textLabel?.text = contact.contactId
+//            }
         }
         
         
@@ -402,6 +467,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 })
             })
         }
+        self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -534,6 +600,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     }
                     self.contactsArray.append(contact)
                 }
+                self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
                 self.tableView.reloadData()
             })
         }
@@ -561,6 +628,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                             }
                             self.contactsArray.append(contact)
                         }
+                        self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
                         let indexSet = NSIndexSet(index: 0)
                         self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.Automatic)
                     }

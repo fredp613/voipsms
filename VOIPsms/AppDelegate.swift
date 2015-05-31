@@ -17,13 +17,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
-
-
-        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: []))
+//        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: []))
+        
+        //-- Set Notification
         
         return true
     }
-    
     
     func application(application: UIApplication, didReceiveLocalNotification notification: UILocalNotification) {
         println("received notification")

@@ -130,7 +130,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         for m in self.messages {
             var message = Message(contact: m.contactId, message: m.message, type: m.type, date: m.date, id: m.id)
-            tableData.append(message)
+            var existingMessage = tableData.filter({$0.id == message.id})
+            if existingMessage.count == 0 {
+                tableData.append(message)
+                self.tableData.sort({$0.date < $1.date})
+            }
+
         }
 
         CoreContact.updateMessagesToRead(moc, contactId: contactId, did: did)
@@ -175,13 +180,19 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                             if !contains(filteredArray.map {$0.id}, m.id) {
                                 dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                     var message = Message(contact: m.contactId, message: m.message, type: true, date: m.date, id: m.id)
-                                    self.tableData.append(message)
-                                    self.tableView.beginUpdates()
-                                    let indexPath = NSIndexPath(forItem: self.tableData.endIndex - 1, inSection: 0)
-                                    self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
-                                    self.tableView.endUpdates()
-                                    self.tableViewScrollToBottomAnimated(true)
-                                    CoreContact.updateMessagesToRead(self.moc, contactId: self.contactId, did: self.did)
+                                        var existingMessage = self.tableData.filter({$0.id == message.id})
+                                        if existingMessage.count == 0 {
+                                            self.tableData.append(message)
+//                                            images.sort({ $0.fileID > $1.fileID })
+                                            self.tableData.sort({$0.date < $1.date})
+                                            self.tableView.beginUpdates()
+                                            let indexPath = NSIndexPath(forItem: self.tableData.endIndex - 1, inSection: 0)
+                                            self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+                                            self.tableView.endUpdates()
+                                            self.tableViewScrollToBottomAnimated(true)
+                                        }
+                                    
+                                   CoreContact.updateMessagesToRead(self.moc, contactId: self.contactId, did: self.did)
                                 })
                             }
                         }
@@ -211,7 +222,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
         self.tableViewScrollToBottomAnimated(false)
-       
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -222,12 +232,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 self.navigationController?.navigationBar.topItem?.title = contacts[self.contactId]
                 
             } else {
-                if (self.contactId.toInt() != nil) {
-                    self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat()
-                } else {
-                    self.navigationController?.navigationBar.topItem?.title = self.contactId
-                }
-                
+                self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat()
             }
         })
 
@@ -271,8 +276,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
         scrollView.contentInset = contentInsets;
         scrollView.scrollIndicatorInsets = contentInsets;
-        
-
     }
     
 
