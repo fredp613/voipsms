@@ -10,6 +10,7 @@
 		2A1648251ADCBB7E00E8DF91 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1648241ADCBB7E00E8DF91 /* MainTabBarController.swift */; };
 		2A287D381AF724380078F0F7 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A287D371AF724380078F0F7 /* AddressBook.framework */; };
 		2A3ACCB11AEAF0630005193B /* UIDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */; };
+		2A3E8B621B1D42B10063A4B3 /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A3E8B611B1D42B10063A4B3 /* AddressBookUI.framework */; };
 		2A5E35991B0047AA0099F69B /* CoreDeleteMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */; };
 		2A7FA6331AEB4BDD00011C6C /* CoreDID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */; };
 		2A9298DB1B1A1AC300FC4676 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9298DA1B1A1AC300FC4676 /* Reachability.swift */; };
@@ -27,6 +28,9 @@
 		2A98D45C1ADB6A97003D3512 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A98D45B1ADB6A97003D3512 /* CoreDataStack.swift */; };
 		2A98D45E1ADB6B0B003D3512 /* APIUrls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A98D45D1ADB6B0B003D3512 /* APIUrls.swift */; };
 		2A99162B1B0183FA0025F8D2 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A99162A1B0183FA0025F8D2 /* ProfileViewController.swift */; };
+		2AA6CAF21B1B9653006C7D39 /* NewContactViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA6CAF11B1B9653006C7D39 /* NewContactViewController.swift */; };
+		2AA6CAF41B1B9A1D006C7D39 /* ContactActionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA6CAF31B1B9A1D006C7D39 /* ContactActionViewController.swift */; };
+		2AA6CAF61B1BF277006C7D39 /* NewExistingContactViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA6CAF51B1BF277006C7D39 /* NewExistingContactViewController.swift */; };
 		2ABFAED91AE08DBC00EFABBD /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAED81AE08DBC00EFABBD /* MessagesViewController.swift */; };
 		2ABFAEDD1AE09FD700EFABBD /* CoreMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAEDC1AE09FD700EFABBD /* CoreMessage.swift */; };
 		2ABFAEDF1AE0AA4900EFABBD /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAEDE1AE0AA4900EFABBD /* Message.swift */; };
@@ -57,6 +61,7 @@
 		2A287D361AF723F20078F0F7 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		2A287D371AF724380078F0F7 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIDeviceExtension.swift; sourceTree = "<group>"; };
+		2A3E8B611B1D42B10063A4B3 /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
 		2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDeleteMessage.swift; sourceTree = "<group>"; };
 		2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDID.swift; sourceTree = "<group>"; };
 		2A9298DA1B1A1AC300FC4676 /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
@@ -78,6 +83,9 @@
 		2A98D45B1ADB6A97003D3512 /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		2A98D45D1ADB6B0B003D3512 /* APIUrls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIUrls.swift; sourceTree = "<group>"; };
 		2A99162A1B0183FA0025F8D2 /* ProfileViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		2AA6CAF11B1B9653006C7D39 /* NewContactViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewContactViewController.swift; sourceTree = "<group>"; };
+		2AA6CAF31B1B9A1D006C7D39 /* ContactActionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactActionViewController.swift; sourceTree = "<group>"; };
+		2AA6CAF51B1BF277006C7D39 /* NewExistingContactViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewExistingContactViewController.swift; sourceTree = "<group>"; };
 		2ABFAED81AE08DBC00EFABBD /* MessagesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
 		2ABFAEDC1AE09FD700EFABBD /* CoreMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreMessage.swift; sourceTree = "<group>"; };
 		2ABFAEDE1AE0AA4900EFABBD /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
@@ -100,6 +108,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A3E8B621B1D42B10063A4B3 /* AddressBookUI.framework in Frameworks */,
 				2A287D381AF724380078F0F7 /* AddressBook.framework in Frameworks */,
 				3F5D98D6E542995CB565C109 /* libPods-VOIPsms.a in Frameworks */,
 			);
@@ -119,6 +128,7 @@
 		17965F0CC1115CDBC8602C86 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2A3E8B611B1D42B10063A4B3 /* AddressBookUI.framework */,
 				2A287D371AF724380078F0F7 /* AddressBook.framework */,
 				DA95F86EF11BE1445350DAA5 /* libPods-VOIPsms.a */,
 				255C57A492F6184F53AFAD80 /* libPods-VOIPsmsTests.a */,
@@ -149,6 +159,9 @@
 		2A98D42B1ADB665C003D3512 /* VOIPsms */ = {
 			isa = PBXGroup;
 			children = (
+				2AA6CAF51B1BF277006C7D39 /* NewExistingContactViewController.swift */,
+				2AA6CAF11B1B9653006C7D39 /* NewContactViewController.swift */,
+				2AA6CAF31B1B9A1D006C7D39 /* ContactActionViewController.swift */,
 				2ADBA1C71AFED01E0048972E /* Helpers */,
 				2AC251C41AF6F40700A47AD0 /* NewMessageViewController.swift */,
 				2AE76D341AE2C24900A6E84D /* extensions */,
@@ -429,11 +442,13 @@
 				2A98D4571ADB6891003D3512 /* CoreUser.swift in Sources */,
 				2A98D4551ADB66EE003D3512 /* SwiftyJSON.swift in Sources */,
 				2ABFAEDD1AE09FD700EFABBD /* CoreMessage.swift in Sources */,
+				2AA6CAF41B1B9A1D006C7D39 /* ContactActionViewController.swift in Sources */,
 				2A5E35991B0047AA0099F69B /* CoreDeleteMessage.swift in Sources */,
 				2AD58ACE1B02DA34000FABDE /* Contact.swift in Sources */,
 				2A98D45E1ADB6B0B003D3512 /* APIUrls.swift in Sources */,
 				2A98D45A1ADB69D0003D3512 /* KeyChainHelper.swift in Sources */,
 				2ABFAEDF1AE0AA4900EFABBD /* Message.swift in Sources */,
+				2AA6CAF21B1B9653006C7D39 /* NewContactViewController.swift in Sources */,
 				2A99162B1B0183FA0025F8D2 /* ProfileViewController.swift in Sources */,
 				2A7FA6331AEB4BDD00011C6C /* CoreDID.swift in Sources */,
 				2A98D4321ADB665C003D3512 /* VOIPsms.xcdatamodeld in Sources */,
@@ -441,6 +456,7 @@
 				2ABFAED91AE08DBC00EFABBD /* MessagesViewController.swift in Sources */,
 				2AE0DE5E1AE72946008EC08E /* MessageBubbleCell.swift in Sources */,
 				2ADBA1CB1AFED4460048972E /* StringExtension.swift in Sources */,
+				2AA6CAF61B1BF277006C7D39 /* NewExistingContactViewController.swift in Sources */,
 				2A9298DB1B1A1AC300FC4676 /* Reachability.swift in Sources */,
 				2A98D45C1ADB6A97003D3512 /* CoreDataStack.swift in Sources */,
 			);

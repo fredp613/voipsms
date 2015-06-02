@@ -75,7 +75,6 @@ struct IOSModel {
     
 }
 
-
 class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScrollViewDelegate, UITextViewDelegate {
 
 //    @IBOutlet weak var textMessage: UITextField!
@@ -461,8 +460,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        if (segue.identifier == "showContactDetailSegue") {
+            var actionSegue : ContactActionViewController = segue.destinationViewController as! ContactActionViewController
+            actionSegue.contactId = self.contactId
+            timer.invalidate()
+        }
     }
 
 }
