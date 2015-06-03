@@ -50,14 +50,24 @@ class NewContactViewController: UIViewController, UITextFieldDelegate, ContactAc
     //MARK: - Buton Actions
     
     @IBAction func doneWasPressed(sender: AnyObject) {
+//        let btn : UIButton = sender.anyObject() as UIButton
+         performSave(sender)
+    }
+    
+    func performSave(sender: AnyObject) -> Bool {
         if self.textFirstName.text != "" {
             Contact().createContact(contactId, firstName: self.textFirstName.text, lastName: self.textLastName.text)
             self.dismissContactActionVC()
             self.dismissViewControllerAnimated(true, completion: { () -> Void in
             })
+            return true
         } else {
-            self.dismissViewControllerAnimated(true, completion: nil)
+            if sender.isKindOfClass(UIButton) {
+                self.dismissViewControllerAnimated(true, completion: { () -> Void in })
+            }
         }
+        
+        return false
     }
     
     func dismissContactActionVC() {
@@ -73,6 +83,23 @@ class NewContactViewController: UIViewController, UITextFieldDelegate, ContactAc
             self.doneButton.setTitle("Cancel", forState: UIControlState.Normal)
         }
     }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+
+        var nextTag = textField.tag + 1
+        if let nextResponder = textField.superview?.viewWithTag(nextTag) {
+            nextResponder.becomeFirstResponder()
+        } else {
+            textField.resignFirstResponder()
+            if !self.performSave(UITextField) {
+                self.textFirstName.becomeFirstResponder()
+            }
+        }
+       
+        return false
+    }
+    
+
 
     
     // MARK: - Navigation

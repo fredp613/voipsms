@@ -143,6 +143,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         let contactDetailButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
         self.navigationItem.rightBarButtonItem = contactDetailButton
+        
+        if let currentUser = CoreUser.currentUser(self.moc) {
+            if currentUser.initialLoad.boolValue == true {
+                currentUser.initialLoad = false
+                CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
+            }
+        }
 
     }
     

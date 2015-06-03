@@ -41,12 +41,29 @@ class Message {
             fromStr = CoreDID.getSelectedDID(moc)!.registeredOn
         }
         
-        let params = [
-            "method" : "getSMS",
-            "from" : fromStr.strippedDateFromString(),
-            "to" : dateFormatter.stringFromDate(NSDate()) as String,
-            "limit" : "1000000"
-        ]
+        var params = [String : String]()
+        
+        if let currentUser = CoreUser.currentUser(moc) {
+            println(currentUser.initialLoad.boolValue)
+            println(currentUser.initialLogon.boolValue)
+            if (currentUser.initialLogon.boolValue == true) || (currentUser.initialLoad.boolValue == true) {
+                params = [
+                    "method" : "getSMS",
+                    "from" : fromStr.strippedDateFromString(),
+                    "to" : dateFormatter.stringFromDate(NSDate()) as String,
+                    "limit" : "1000000"
+                ]
+            } else {
+                params = [
+                    "method" : "getSMS"
+                ]
+            }
+            
+            
+        }
+        
+        println(params)
+        
 
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
@@ -127,17 +144,37 @@ class Message {
         } else {
             fromStr = CoreDID.getSelectedDID(moc)!.registeredOn
         }
+        
+        var params = [String:String]()
+        
+        if let currentUser = CoreUser.currentUser(moc) {
+            println(currentUser.initialLoad.boolValue)
+            println(currentUser.initialLogon.boolValue)
+            if (currentUser.initialLogon.boolValue == true) || (currentUser.initialLoad.boolValue == true) {
+                params = [
+                    "method" : "getSMS",
+                    "from" : fromStr.strippedDateFromString(),
+                    "type" : "1",
+                    "did" : did,
+                    "contact" : contact,
+                    "to" : dateFormatter.stringFromDate(NSDate()) as String,
+                    "limit" : "1000000"
+                ]
+            } else {
+                params = [
+                    "method" : "getSMS",
+                    "type" : "1",
+                    "did" : did,
+                    "contact" : contact
+                ]
+            }
+            
+            
+        }
+        println(params)
 
         
-        let params = [
-            "method" : "getSMS",
-            "from" : fromStr.strippedDateFromString(),
-            "type" : "1",
-            "did" : did,
-            "contact" : contact,
-            "to" : dateFormatter.stringFromDate(NSDate()) as String,
-            "limit" : "1000000"
-        ]
+        
         
         
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in

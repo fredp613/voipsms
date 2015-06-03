@@ -52,6 +52,10 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         if self.searchBar.text != "" {
             timer.invalidate()
         }
+        if let currentUser = CoreUser.currentUser(self.moc) {
+            currentUser.initialLoad = true
+            CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
+        }
         
         checkAllPermissions()
         
@@ -259,7 +263,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                                 }
                             }
                             if (initialMessageCount < newMessageCount) || initialLogon {
-                                println("hey")
                                 self.contactsArray = [ContactStruct]()
                                 for c in self.contacts {
                                     var contact = ContactStruct()
@@ -283,9 +286,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                                 })
                             }
                             if let currentUser = CoreUser.currentUser(self.moc) {
+                                currentUser.initialLoad = false
                                 if currentUser.initialLogon.boolValue {
-                                    CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
+                                    currentUser.initialLoad = true
+                                    currentUser.initialLogon = false
                                 }
+                                CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
                             }
                             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 self.activityIndicator.stopAnimating()

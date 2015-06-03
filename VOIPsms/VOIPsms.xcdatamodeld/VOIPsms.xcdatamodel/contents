@@ -28,6 +28,7 @@
     <entity name="CoreUser" representedClassName="VOIPsms.CoreUser" syncable="YES">
         <attribute name="apiPassword" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="initialLoad" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="initialLogon" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="remember" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="token" optional="YES" attributeType="String" syncable="YES"/>
@@ -37,6 +38,6 @@
         <element name="CoreDeleteMessage" positionX="-54" positionY="72" width="128" height="60"/>
         <element name="CoreDID" positionX="-54" positionY="45" width="128" height="105"/>
         <element name="CoreMessage" positionX="-63" positionY="9" width="128" height="180"/>
-        <element name="CoreUser" positionX="-63" positionY="-18" width="128" height="120"/>
+        <element name="CoreUser" positionX="-63" positionY="-18" width="128" height="135"/>
     </elements>
 </model>

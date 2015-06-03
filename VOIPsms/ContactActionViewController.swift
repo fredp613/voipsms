@@ -44,9 +44,7 @@ class ContactActionViewController: UIViewController, ContactActionViewController
     }
 
     
-    @IBAction func testAction(sender: AnyObject) {
-   
-    }
+
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation

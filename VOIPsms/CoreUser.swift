@@ -17,6 +17,7 @@ class CoreUser: NSManagedObject {
     @NSManaged var token: String
     @NSManaged var remember: NSNumber
     @NSManaged var initialLogon: NSNumber
+    @NSManaged var initialLoad: NSNumber
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, email: String, pwd: String) -> Bool {
         
@@ -47,7 +48,7 @@ class CoreUser: NSManagedObject {
     }
     
     class func updateInManagedObjectContext(moc: NSManagedObjectContext, coreUser: CoreUser) {
-        coreUser.initialLogon = false
+//        coreUser.initialLogon = false
         if moc.save(nil) {
         }
     }
