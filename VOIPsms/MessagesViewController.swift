@@ -59,6 +59,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         
         checkAllPermissions()
         
+        
     }
     
     func checkAllPermissions() {
@@ -67,7 +68,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             if currentUser.initialLogon.boolValue == false {
                 if Contact().checkAccess() == true {
                     println("has access")
-//                    askPermissionForNotifications()
+                    if currentUser.initialLoad.boolValue == true {
+//                        self.askPermissionForNotifications()
+                    }
                 } else {
                     var alertController = UIAlertController(title: "No contact access", message: "In order to link to your messages to your contacts, voip.ms sms requires access to your contacts. You will need to grant access for this app to sync with your phone contacts in your phone settings", preferredStyle: .Alert)
                     
@@ -79,6 +82,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     var cancelAction = UIAlertAction(title: "No, do not sync my contacts", style: UIAlertActionStyle.Cancel) {
                         UIAlertAction in
                         println("cancelled")
+//                        self.askPermissionForNotifications()
                     }
                     alertController.addAction(okAction)
                     alertController.addAction(cancelAction)
@@ -92,24 +96,46 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
  
     
     func askPermissionForNotifications() -> Bool {
+        
+        
         var application = UIApplication.sharedApplication()
         if application.respondsToSelector("isRegisteredForRemoteNotifications")
         {
            
             application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Badge | .Sound | .Alert, categories: nil))
             let grantSettings = application.currentUserNotificationSettings()
-            if grantSettings.types == UIUserNotificationType.None {
-                println("not registered for local notifications")
+            var cu = true
+            if let currentUser = CoreUser.currentUser(self.moc) {
+                if currentUser.notificationsFlag.boolValue == true {
+                    cu = true
+                } else {
+                    cu = false
+                }
+            }
+            
+            if grantSettings.types == UIUserNotificationType.None && cu.boolValue == true {
+//                println("not registered for local notifications")
                 var alertController = UIAlertController(title: "Notifications", message: "This app has not been granted permission to send you notifications - if you want to recieve notifications when a user sends you a message please go into your phone settings and allow notifications for this app", preferredStyle: .Alert)
                 var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
                     UIAlertAction in
                     println("pressed")
                     
                 }
+                var cancelAction = UIAlertAction(title: "Dont ask me again", style: UIAlertActionStyle.Default) {
+                    UIAlertAction in
+                    if let currentUser = CoreUser.currentUser(self.moc) {
+                        currentUser.notificationsFlag = false
+                        CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
+                    }
+                    println("cancel pressed")
+                    
+                }
                 alertController.addAction(okAction)
+                alertController.addAction(cancelAction)
+                
                 self.presentViewController(alertController, animated: true, completion: nil)
             } else {
-                println("registered for local notifications")
+//                println("registered for local notifications")
             }
             return true
         }else{
@@ -143,11 +169,10 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         }
        
         if CoreUser.userExists(moc) {
-            
             let currentUser = CoreUser.currentUser(moc)
             let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
             
-            if currentUser?.remember == false {
+            if currentUser?.remember.boolValue == false  {
                 performSegueWithIdentifier("showLoginSegue", sender: self)
             }
             
@@ -168,9 +193,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             self.search(self.searchBar.text)
             timer.invalidate()
         }
-        
-        askPermissionForNotifications()
-        
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -409,30 +431,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                         self.tableView.beginUpdates()
                         self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
                         self.tableView.endUpdates()
-                        
-//                        CoreContact.findByName(self.moc, searchTerm: "", existingContacts: self.contacts, completionHandler: { (contacts) -> () in
-//                            self.contacts = responseObject as! [CoreContact]
-//                            self.contactsArray = [ContactStruct]()
-//                            for c in self.contacts {
-//                                var contact = ContactStruct()
-//                                contact.contactId = c.contactId
-//                                
-//                                if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
-//                                    let d = contactLastMessage.date
-//                                    contact.lastMsgDate = d
-//                                    contact.lastMsg = contactLastMessage.message
-//                                    contact.lastMsgType = contactLastMessage.type
-//                                    contact.lastMsgFlag = contactLastMessage.flag
-//                                    contact.did = self.did
-//                                }
-//                                self.contactsArray.append(contact)
-//                            }
-//                            self.tableView.beginUpdates()
-//                            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
-//                            self.tableView.endUpdates()
-////                            self.startTimer()
-//
-//                        })
+
                 })
 
                 //you may want to get rid of this

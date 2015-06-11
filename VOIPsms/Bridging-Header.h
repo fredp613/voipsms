@@ -10,5 +10,7 @@
 #define VOIPsms_Bridging_Header_h
 
 #import "APAddressBook-Bridging.h"
+#import "TPKeyboardAvoidingTableView.h"
+#import "UIScrollView+TPKeyboardAvoidingAdditions.h"
 
 #endif

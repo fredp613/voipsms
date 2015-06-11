@@ -12,6 +12,10 @@
 		2A3ACCB11AEAF0630005193B /* UIDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */; };
 		2A3E8B621B1D42B10063A4B3 /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A3E8B611B1D42B10063A4B3 /* AddressBookUI.framework */; };
 		2A5E35991B0047AA0099F69B /* CoreDeleteMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */; };
+		2A640C6D1B266D40009A77D0 /* UIScrollView+TPKeyboardAvoidingAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A640C651B266D40009A77D0 /* UIScrollView+TPKeyboardAvoidingAdditions.m */; };
+		2A640C6E1B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A640C661B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.m */; };
+		2A640C6F1B266D40009A77D0 /* TPKeyboardAvoidingTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A640C671B266D40009A77D0 /* TPKeyboardAvoidingTableView.m */; };
+		2A640C701B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A640C681B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m */; };
 		2A7FA6331AEB4BDD00011C6C /* CoreDID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */; };
 		2A9298DB1B1A1AC300FC4676 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9298DA1B1A1AC300FC4676 /* Reachability.swift */; };
 		2A98D42F1ADB665C003D3512 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A98D42E1ADB665C003D3512 /* AppDelegate.swift */; };
@@ -63,6 +67,14 @@
 		2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIDeviceExtension.swift; sourceTree = "<group>"; };
 		2A3E8B611B1D42B10063A4B3 /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
 		2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDeleteMessage.swift; sourceTree = "<group>"; };
+		2A640C651B266D40009A77D0 /* UIScrollView+TPKeyboardAvoidingAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+TPKeyboardAvoidingAdditions.m"; sourceTree = "<group>"; };
+		2A640C661B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPKeyboardAvoidingCollectionView.m; sourceTree = "<group>"; };
+		2A640C671B266D40009A77D0 /* TPKeyboardAvoidingTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPKeyboardAvoidingTableView.m; sourceTree = "<group>"; };
+		2A640C681B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPKeyboardAvoidingScrollView.m; sourceTree = "<group>"; };
+		2A640C691B266D40009A77D0 /* UIScrollView+TPKeyboardAvoidingAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIScrollView+TPKeyboardAvoidingAdditions.h"; sourceTree = "<group>"; };
+		2A640C6A1B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingCollectionView.h; sourceTree = "<group>"; };
+		2A640C6B1B266D40009A77D0 /* TPKeyboardAvoidingScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingScrollView.h; sourceTree = "<group>"; };
+		2A640C6C1B266D40009A77D0 /* TPKeyboardAvoidingTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingTableView.h; sourceTree = "<group>"; };
 		2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDID.swift; sourceTree = "<group>"; };
 		2A9298DA1B1A1AC300FC4676 /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		2A98D4291ADB665C003D3512 /* VOIPsms.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VOIPsms.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -134,6 +146,21 @@
 				255C57A492F6184F53AFAD80 /* libPods-VOIPsmsTests.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		2A640C641B266D2F009A77D0 /* TPKeyboardAvoiding */ = {
+			isa = PBXGroup;
+			children = (
+				2A640C651B266D40009A77D0 /* UIScrollView+TPKeyboardAvoidingAdditions.m */,
+				2A640C661B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.m */,
+				2A640C671B266D40009A77D0 /* TPKeyboardAvoidingTableView.m */,
+				2A640C681B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m */,
+				2A640C691B266D40009A77D0 /* UIScrollView+TPKeyboardAvoidingAdditions.h */,
+				2A640C6A1B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.h */,
+				2A640C6B1B266D40009A77D0 /* TPKeyboardAvoidingScrollView.h */,
+				2A640C6C1B266D40009A77D0 /* TPKeyboardAvoidingTableView.h */,
+			);
+			name = TPKeyboardAvoiding;
 			sourceTree = "<group>";
 		};
 		2A98D4201ADB665C003D3512 = {
@@ -217,6 +244,7 @@
 		2A98D4531ADB66A6003D3512 /* external_libs */ = {
 			isa = PBXGroup;
 			children = (
+				2A640C641B266D2F009A77D0 /* TPKeyboardAvoiding */,
 				2A98D4591ADB69D0003D3512 /* KeyChainHelper.swift */,
 				2A98D4541ADB66EE003D3512 /* SwiftyJSON.swift */,
 			);
@@ -436,10 +464,13 @@
 				2A98D4521ADB6690003D3512 /* VoipAPI.swift in Sources */,
 				2A3ACCB11AEAF0630005193B /* UIDeviceExtension.swift in Sources */,
 				2A98D4341ADB665C003D3512 /* ViewController.swift in Sources */,
+				2A640C6D1B266D40009A77D0 /* UIScrollView+TPKeyboardAvoidingAdditions.m in Sources */,
 				2A1648251ADCBB7E00E8DF91 /* MainTabBarController.swift in Sources */,
 				2A98D42F1ADB665C003D3512 /* AppDelegate.swift in Sources */,
 				2AC251C51AF6F40700A47AD0 /* NewMessageViewController.swift in Sources */,
+				2A640C701B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m in Sources */,
 				2A98D4571ADB6891003D3512 /* CoreUser.swift in Sources */,
+				2A640C6E1B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.m in Sources */,
 				2A98D4551ADB66EE003D3512 /* SwiftyJSON.swift in Sources */,
 				2ABFAEDD1AE09FD700EFABBD /* CoreMessage.swift in Sources */,
 				2AA6CAF41B1B9A1D006C7D39 /* ContactActionViewController.swift in Sources */,
@@ -447,6 +478,7 @@
 				2AD58ACE1B02DA34000FABDE /* Contact.swift in Sources */,
 				2A98D45E1ADB6B0B003D3512 /* APIUrls.swift in Sources */,
 				2A98D45A1ADB69D0003D3512 /* KeyChainHelper.swift in Sources */,
+				2A640C6F1B266D40009A77D0 /* TPKeyboardAvoidingTableView.m in Sources */,
 				2ABFAEDF1AE0AA4900EFABBD /* Message.swift in Sources */,
 				2AA6CAF21B1B9653006C7D39 /* NewContactViewController.swift in Sources */,
 				2A99162B1B0183FA0025F8D2 /* ProfileViewController.swift in Sources */,

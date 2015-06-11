@@ -392,7 +392,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         } else {
             
             if notification.name == UIKeyboardWillChangeFrameNotification {
-
+                
                 if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
                     if allCellHeight < keyboardScreenEndFrame.height  {
                         tableViewHeightConstraint.constant = compressedTableViewHeight - (keyboardViewEndFrame.height - 80)

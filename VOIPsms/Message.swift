@@ -44,8 +44,7 @@ class Message {
         var params = [String : String]()
         
         if let currentUser = CoreUser.currentUser(moc) {
-            println(currentUser.initialLoad.boolValue)
-            println(currentUser.initialLogon.boolValue)
+
             if (currentUser.initialLogon.boolValue == true) || (currentUser.initialLoad.boolValue == true) {
                 params = [
                     "method" : "getSMS",
@@ -61,15 +60,11 @@ class Message {
             
             
         }
-        
-        println(params)
-        
 
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
             
             let json = responseObject
-//            println(json)
             for (key: String, t: JSON) in json["sms"] {
                 
                 let contact = t["contact"].stringValue
@@ -148,8 +143,7 @@ class Message {
         var params = [String:String]()
         
         if let currentUser = CoreUser.currentUser(moc) {
-            println(currentUser.initialLoad.boolValue)
-            println(currentUser.initialLogon.boolValue)
+
             if (currentUser.initialLogon.boolValue == true) || (currentUser.initialLoad.boolValue == true) {
                 params = [
                     "method" : "getSMS",
@@ -171,11 +165,7 @@ class Message {
             
             
         }
-        println(params)
 
-        
-        
-        
         
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
             

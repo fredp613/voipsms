@@ -15,12 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // Override point for customization after application launch.
-//        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: []))
-        
-        //-- Set Notification
-        
+    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {        
         return true
     }
     
@@ -36,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: []))
+//        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: []))
         if let currentUser = CoreUser.currentUser(moc) {
             if !currentUser.initialLogon.boolValue {
                 println("not inital logon")
@@ -54,10 +49,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func applicationWillEnterForeground(application: UIApplication) {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-        let app = UIApplication.sharedApplication()
+//        let app = UIApplication.sharedApplication()
 //        let oldNotifications = app.scheduledLocalNotifications
 //        if oldNotifications.count > 0 {
-        app.cancelAllLocalNotifications()
+//        app.cancelAllLocalNotifications()
 
 //        }
     }

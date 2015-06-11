@@ -17,6 +17,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     @IBOutlet weak var tableViewHeighConstraint: NSLayoutConstraint!
     @IBOutlet weak var sendButton: UIButton!
     
+    @IBOutlet weak var cancelButton: UIBarButtonItem!
     let addressBook = APAddressBook()
     var model = ModelSize()
     var contacts : [ContactStruct] = [ContactStruct]()
@@ -37,14 +38,15 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         compressedTableViewHeight = self.tableView.frame.size.height
 
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
-        
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
-        
-
+//        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
+//        
+//        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
         
 
-        self.textContacts.becomeFirstResponder()
+        
+
+//        self.textContacts.becomeFirstResponder()
+        self.textMessage.becomeFirstResponder()
         scrollView.bounces = false
         scrollView.bringSubviewToFront(tableView)
         scrollView.bringSubviewToFront(textMessage)
@@ -79,7 +81,6 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     }
 
     @IBAction func cancelWasPressed(sender: AnyObject) {
-        
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
@@ -228,8 +229,27 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             scrollView.contentInset = UIEdgeInsetsZero
         } else {
             if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
+//                println(model.rawValue)
+//                case IPHONE_4 = 480
+//                case IPHONE_5 = 568
+//                case IPHONE_6 = 667
+//                case IPHONE_6P = 736
+                var offsetHeight = CGFloat()
+                switch model.rawValue {
+                case 480:
+                    offsetHeight = keyboardScreenEndFrame.height + 115
+                case 568:
+                    offsetHeight = keyboardScreenEndFrame.height + 30
+                case 667:
+                    offsetHeight = keyboardScreenEndFrame.height + 150
+                case 736:
+                    offsetHeight = keyboardScreenEndFrame.height - 120
+                default:
+                     offsetHeight = keyboardScreenEndFrame.height - 60
+                }
+                
                 if notification.name == UIKeyboardWillChangeFrameNotification {
-                    self.tableViewHeighConstraint.constant = compressedTableViewHeight - (keyboardViewEndFrame.height) - 30
+                    self.tableViewHeighConstraint.constant = compressedTableViewHeight - offsetHeight
                     let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
                     scrollView.contentInset = contentInsets;
                 }

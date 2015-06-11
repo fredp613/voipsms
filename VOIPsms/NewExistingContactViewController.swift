@@ -9,10 +9,8 @@
 import UIKit
 
 class NewExistingContactViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UITableViewDataSource, ContactActionViewControllerDelegate {
-
     
     @IBOutlet weak var tableView: UITableView!
-    
     @IBOutlet weak var searchBar: UISearchBar!
     var contacts : [AddressBookContactStruct] = [AddressBookContactStruct]()
     var contactId : String = String()
@@ -74,7 +72,7 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
         if Contact().addPhoneToExistingContact(self.contacts[indexPath.row].recordId, phone: self.contactId) {
             println("all good")
         }
-        var alertController = UIAlertController(title: "Confirm", message: "Are you sure you want to add \(self.contactId) to this contact: \(self.contacts[indexPath.row].contactFullName)", preferredStyle: .Alert)
+        var alertController = UIAlertController(title: "Confirm", message: "Are you sure you want to add \(self.contactId.northAmericanPhoneNumberFormat()) to this contact: \(self.contacts[indexPath.row].contactFullName)", preferredStyle: .Alert)
         
         var okAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default) {
             UIAlertAction in
