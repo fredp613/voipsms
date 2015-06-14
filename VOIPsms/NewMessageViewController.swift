@@ -9,15 +9,16 @@
 import UIKit
 import CoreData
 
-class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFieldDelegate, UITextViewDelegate, UIScrollViewDelegate, MessageViewDelegate {
-    @IBOutlet weak var textContacts: UITextField!
+class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFieldDelegate, UITextViewDelegate, UIScrollViewDelegate, UISearchBarDelegate, MessageViewDelegate {
+    @IBOutlet weak var searchBar: UISearchBar!
+//    @IBOutlet weak var textContacts: UITextField!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var textMessage: UITextView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var tableViewHeighConstraint: NSLayoutConstraint!
     @IBOutlet weak var sendButton: UIButton!
     
-    @IBOutlet weak var cancelButton: UIBarButtonItem!
+//    @IBOutlet weak var cancelButton: UIBarButtonItem!
     let addressBook = APAddressBook()
     var model = ModelSize()
     var contacts : [ContactStruct] = [ContactStruct]()
@@ -27,37 +28,39 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     var delegate: MessageViewDelegate?
     var compressedTableViewHeight : CGFloat = CGFloat()
     var currentKeyboardSize : CGFloat = CGFloat()
+    var currentTextViewSize : CGFloat = CGFloat()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
         self.textMessage.delegate = self
-        self.textContacts.delegate = self
+//        self.textContacts.delegate = self
         self.scrollView.delegate = self
-
+        self.searchBar.delegate = self
         compressedTableViewHeight = self.tableView.frame.size.height
 
 
-//        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
-//        
-//        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
+//
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
         
 
-        
-
-//        self.textContacts.becomeFirstResponder()
-        self.textMessage.becomeFirstResponder()
+        self.textMessage.sizeToFit()
+//        self.textMessage.layoutIfNeeded()
+//        self.scrollView.bringSubviewToFront(self.textMessage)
+        currentTextViewSize = self.textMessage.contentSize.height
+//        self.textMessage.becomeFirstResponder()
+        self.searchBar.becomeFirstResponder()
         scrollView.bounces = false
         scrollView.bringSubviewToFront(tableView)
         scrollView.bringSubviewToFront(textMessage)
         scrollView.bringSubviewToFront(sendButton)
         did = CoreDID.getSelectedDID(moc)!.did
-        textContacts.addTarget(self, action: "textFieldDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+        
         
         
         let screenHeight: CGFloat = UIScreen.mainScreen().bounds.height
         model = IOSModel(screen: screenHeight).model
-
         
     }
     override func viewDidAppear(animated: Bool) {
@@ -65,7 +68,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     }
     
     override func viewWillDisappear(animated: Bool) {
-        self.textContacts.resignFirstResponder()
+        self.searchBar.resignFirstResponder()
         self.textMessage.resignFirstResponder()
     }
     
@@ -85,7 +88,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     }
     
     @IBAction func sendMessageWasPressed(sender: AnyObject) {
-  
+        self.textMessage.resignFirstResponder()
         var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         self.textMessage.text = ""
         let date = NSDate()
@@ -97,7 +100,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         if selectedContact != "" {
             contact = selectedContact
         } else {
-            contact = self.textContacts.text
+            contact = self.searchBar.text
         }
         
                 //save to core data here
@@ -135,33 +138,64 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
 //        })
     }
     
-  
-    //MARK: - textView delegate methods
-    
+    //MARK: UITextView Delegate Methods
     func textViewDidChange(textView: UITextView) {
-        
+        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+        scrollView.contentInset = contentInsets;
     }
     
-    //MARK: - textField delegate methods
+    func keyboardWillShow() {
+        if self.view.frame.origin.y >= 0 {
+            self.setViewMovedUp(true)
+        }
+        else if self.view.frame.origin.y < 0 {
+            self.setViewMovedUp(false)
+        }
+    }
+    
+    func keyboardWillHide() {
+        if self.view.frame.origin.y >= 0 {
+            self.setViewMovedUp(true)
+        }
+        else if self.view.frame.origin.y < 0 {
+            self.setViewMovedUp(false)
+        }
+    }
+    
+    func setViewMovedUp(movedUp: Bool) {
+        var rect = self.view.frame
+        if movedUp {
+            rect.origin.y -= 80
+            rect.size.height += 80
+        } else {
+            rect.origin.y += 80
+            rect.size.height -= 80
+        }
+        self.view.frame = rect
+    }
     
     
-    func textFieldDidChange(textField: UITextField) {
-        if textContacts.text != "" {
+    
+    //MARK: SearchBar Delegate Methods
+    
+    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        println(searchText)
+        if searchText != "" {
             
-            CoreContact.getContacts(moc, did: did, dst: textContacts.text, name: nil, message: nil, completionHandler: { (responseObject, error) -> () in
+            CoreContact.getContacts(moc, did: did, dst: searchText, name: nil, message: nil, completionHandler: { (responseObject, error) -> () in
                 var coreContacts = responseObject as! [CoreContact]
-                CoreContact.findAllContactsByName(self.moc, searchTerm: self.textContacts.text, existingContacts: coreContacts, completionHandler: { (contacts) -> () in
+                CoreContact.findAllContactsByName(self.moc, searchTerm: searchText, existingContacts: coreContacts, completionHandler: { (contacts) -> () in
                     self.contacts = contacts!
                     self.tableView.reloadData()
                 })
             })
-
+            
         } else {
             self.contacts = [ContactStruct]()
             self.tableView.reloadData()
         }
-        
     }
+ 
     
     //MARK: - tableview delegate methods
     
@@ -203,7 +237,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         //update text field to show contact
         self.selectedContact = self.contacts[indexPath.row].contactId
         let cell = self.tableView.cellForRowAtIndexPath(indexPath)
-        self.textContacts.text = cell?.textLabel?.text
+        self.searchBar.text = cell?.textLabel?.text
         
         self.contacts = [ContactStruct]()
         self.tableView.reloadData()
@@ -241,7 +275,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
                 case 568:
                     offsetHeight = keyboardScreenEndFrame.height + 30
                 case 667:
-                    offsetHeight = keyboardScreenEndFrame.height + 150
+                    offsetHeight = keyboardScreenEndFrame.height - 70
                 case 736:
                     offsetHeight = keyboardScreenEndFrame.height - 120
                 default:
@@ -256,6 +290,27 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             }
         }
     }
+    
+//    func adjustForKeyboard(notification: NSNotification) {
+//        let userInfo = notification.userInfo!
+//        
+//        let keyboardScreenEndFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
+//        let keyboardViewEndFrame = view.convertRect(keyboardScreenEndFrame, fromView: view.window)
+//        
+//        if notification.name == UIKeyboardWillHideNotification {
+//            scrollView.contentInset = UIEdgeInsetsZero
+//        } else {
+//            if notification.name == UIKeyboardWillChangeFrameNotification || notification.name == UIKeyboardWillShowNotification {
+//                println("hi")
+//                if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
+//                    
+////                    scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height, right: 0)
+////                    scrollView.scrollIndicatorInsets = scrollView.contentInset
+//                    self.tableViewHeighConstraint.constant = keyboardSize.height 
+//                }
+//            }
+//        }
+//    }
    
     
 

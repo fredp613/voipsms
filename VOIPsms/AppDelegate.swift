@@ -37,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 println("not inital logon")
                 var timer : NSTimer = NSTimer()
                 if Reachability.isConnectedToNetwork() {
-                    timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+                    timer = NSTimer.scheduledTimerWithTimeInterval(20, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
                 }
             } else {
                 println("is initial logon")

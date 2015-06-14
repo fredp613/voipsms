@@ -252,7 +252,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     func startTimer() {
         if Reachability.isConnectedToNetwork() {
-            timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+            timer = NSTimer.scheduledTimerWithTimeInterval(5, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         } else {
            let alert = UIAlertView(title: "Netword Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
             alert.show()
@@ -383,11 +383,15 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         cell.detailTextLabel?.text = "\(contact.lastMsg)"
         if contact.lastMsgType == true || contact.lastMsgType == 1 {
             if contact.lastMsgFlag == message_status.PENDING.rawValue {
-                cell.detailTextLabel?.textColor = UIColor.blueColor()
+                cell.textLabel?.textColor = UIColor(red: 220/255, green: 170/255, blue: 11/255, alpha: 1)
+                cell.detailTextLabel?.textColor = UIColor(red: 220/255, green: 170/255, blue: 77/255, alpha: 1)
+//                cell.detailTextLabel?.font = UIFont.boldSystemFontOfSize(16)
             } else {
-                cell.detailTextLabel?.textColor = UIColor.blackColor()
+                cell.textLabel?.textColor = UIColor.blackColor()
+                cell.detailTextLabel?.textColor = UIColor.blackColor() 
             }
         } else {
+            cell.textLabel?.textColor = UIColor.blackColor()
             cell.detailTextLabel?.textColor = UIColor.blackColor()
         }
         

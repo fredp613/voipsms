@@ -22,6 +22,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, MessageViewDelegate
         txtUserName.text = "hiphopshop@gmail.com"
         txtPwd.text = "DPG613yg"
         loginBtn.layer.cornerRadius = 10
+        
 
      
         // Do any additional setup after loading the view, typically from a nib.
@@ -45,6 +46,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, MessageViewDelegate
     }
 
     @IBAction func loginWasPressed(sender: AnyObject) {
+        println("hey")
         CoreUser.authenticate(moc, email: self.txtUserName.text, password: self.txtPwd.text) { (success) -> Void in
             if success {
                 let alert = UIAlertView(title: "Login successful", message: "Start sms'ing!!", delegate: self, cancelButtonTitle: nil)

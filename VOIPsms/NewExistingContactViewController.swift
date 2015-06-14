@@ -8,8 +8,9 @@
 
 import UIKit
 
-class NewExistingContactViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UITableViewDataSource, ContactActionViewControllerDelegate {
+class NewExistingContactViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UITableViewDataSource, ContactActionViewControllerDelegate, UIBarPositioningDelegate {
     
+    @IBOutlet weak var navBar: UINavigationBar!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchBar: UISearchBar!
     var contacts : [AddressBookContactStruct] = [AddressBookContactStruct]()
@@ -28,10 +29,21 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
         
         self.contacts = Contact().getAllContacts(nil)
         self.tableView.reloadData()
+//        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+        
+
+//        [[UIApplication sharedApplication] setStatusBarHidden:YES
+//            withAnimation:UIStatusBarAnimationFade];
+
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
+                UIApplication.sharedApplication().setStatusBarHidden(true, withAnimation: UIStatusBarAnimation.None)
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        self.searchBar.resignFirstResponder()
     }
 
     override func didReceiveMemoryWarning() {
@@ -121,6 +133,11 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
 //        })
         self.contacts = Contact().getAllContacts(nil)
         searchBar.resignFirstResponder()
+    }
+    
+    //MARK: UIBarPositioningDelegates
+    func positionForBar(bar: UIBarPositioning) -> UIBarPosition {
+        return UIBarPosition.TopAttached
     }
     
 

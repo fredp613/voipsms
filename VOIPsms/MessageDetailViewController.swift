@@ -111,6 +111,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             sendButton.enabled = false
         }
         self.textMessage.delegate = self
+//        [myTextView sizeToFit]; //added
+//        [myTextView layoutIfNeeded]; //added
+        self.textMessage.sizeToFit()
+        
+    
+        
 //        self.textMessage.addTarget(self, action: "textFieldChange:", forControlEvents: UIControlEvents.EditingChanged)
         tableView.separatorStyle = .None
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
