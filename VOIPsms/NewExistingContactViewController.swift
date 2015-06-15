@@ -75,7 +75,7 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
         var contact = self.contacts[indexPath.row]
-        cell.textLabel?.text = contact.contactFullName + "-" + contact.recordId
+        cell.textLabel?.text = contact.contactFullName //+ "-" + contact.recordId
         return cell
     }
     

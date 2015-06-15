@@ -356,7 +356,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
+        
+        var cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
+       
         var contact = self.contactsArray[indexPath.row]
         var contactName = String()
         
@@ -378,8 +380,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         }
         
         
-
-        
         cell.detailTextLabel?.text = "\(contact.lastMsg)"
         if contact.lastMsgType == true || contact.lastMsgType == 1 {
             if contact.lastMsgFlag == message_status.PENDING.rawValue {
@@ -395,8 +395,34 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             cell.detailTextLabel?.textColor = UIColor.blackColor()
         }
         
+        let font:UIFont? = UIFont(name: "Arial", size: 13.0)
+        let dateStr = NSAttributedString(string: contact.lastMsgDate.dateFormattedString(), attributes:
+            [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
+                NSFontAttributeName: font!])
+        let dateFrame = CGRectMake(cell.frame.origin.x, cell.detailTextLabel!.frame.origin.x, cell.frame.width - 30, cell.textLabel!.frame.height)
+        let dateLbl = UILabel(frame: dateFrame)
+        dateLbl.attributedText = dateStr
+        dateLbl.textAlignment = NSTextAlignment.Right
+        dateLbl.tag = 3
+        
+        if cell.contentView.viewWithTag(3) != nil {
+            cell.contentView.viewWithTag(3)?.removeFromSuperview()
+        }
+        cell.contentView.addSubview(dateLbl)
+        
         return cell
         
+    }
+    
+    func getDayOfWeek(today:String)->Int {
+        
+        let formatter  = NSDateFormatter()
+        formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
+        let todayDate = formatter.dateFromString(today)!
+        let myCalendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
+        let myComponents = myCalendar.components(.CalendarUnitWeekday, fromDate: todayDate)
+        let weekDay = myComponents.weekday
+        return weekDay
     }
     
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPth: NSIndexPath) -> Bool {

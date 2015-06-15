@@ -194,9 +194,6 @@ class CoreMessage: NSManagedObject {
     }
     
     
-    
- 
-    
     class func getMessagesByDID(moc: NSManagedObjectContext, did: String) -> [CoreMessage] {
         
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")

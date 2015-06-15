@@ -41,12 +41,15 @@ class MessageBubbleCell: UITableViewCell {
     }
     
     func configureWithMessage(message: Message) {
-        let font:UIFont? = UIFont(name: "Arial", size: 9.0)
-        let dateStr = NSAttributedString(string: message.date, attributes:
+        let font:UIFont? = UIFont(name: "Arial", size: 12.0)
+        var mutableStr = NSMutableAttributedString()
+        let dateStr = NSAttributedString(string: "\n\n\(message.date)", attributes:
             [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
                 NSFontAttributeName: font!])
-
-        messageLabel.text = "\(message.message) \r\n \(dateStr.string)"
+        let messageStr = NSAttributedString(string: message.message)
+        mutableStr.appendAttributedString(messageStr)
+//        mutableStr.appendAttributedString(dateStr)
+        messageLabel.attributedText = mutableStr //"\(message.message) \r\n \(dateStr.string)"
         
             var layoutAttribute: NSLayoutAttribute
             var layoutConstant: CGFloat
