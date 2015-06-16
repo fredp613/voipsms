@@ -56,7 +56,10 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         scrollView.bringSubviewToFront(textMessage)
         scrollView.bringSubviewToFront(sendButton)
         did = CoreDID.getSelectedDID(moc)!.did
-        
+
+        if self.textMessage.text == "" {
+            self.sendButton.enabled = false
+        }
         
         
         let screenHeight: CGFloat = UIScreen.mainScreen().bounds.height
@@ -181,7 +184,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
         println(searchText)
         if searchText != "" {
-            
+            self.sendButton.enabled = true
             CoreContact.getContacts(moc, did: did, dst: searchText, name: nil, message: nil, completionHandler: { (responseObject, error) -> () in
                 var coreContacts = responseObject as! [CoreContact]
                 CoreContact.findAllContactsByName(self.moc, searchTerm: searchText, existingContacts: coreContacts, completionHandler: { (contacts) -> () in
@@ -191,6 +194,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             })
             
         } else {
+            self.sendButton.enabled = false
             self.contacts = [ContactStruct]()
             self.tableView.reloadData()
         }

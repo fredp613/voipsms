@@ -33,15 +33,14 @@ extension String {
         let tempDate = tempDateFormatter.dateFromString(self)
         
         let dateFormatterWeek = NSDateFormatter()
-        dateFormatterWeek.dateFormat = "EEEE HH:mm:ss"
+        dateFormatterWeek.dateFormat = "EEEE HH:mm"
         
         let dateFormatterToday = NSDateFormatter()
-        dateFormatterToday.dateFormat = "HH:mm:ss"
+        dateFormatterToday.dateFormat = "HH:mm"
         
         let dateFormatterPast = NSDateFormatter()
-        dateFormatterPast.dateFormat = "YYYY-MM-dd HH:mm:ss"
-        
-        
+        dateFormatterPast.dateFormat = "YYYY-MM-dd HH:mm"
+                
         let todaysDateFormmater = NSDateFormatter()
         todaysDateFormmater.dateFormat = "YYYY-MM-dd"
         let todaysDate = todaysDateFormmater.stringFromDate(NSDate())

@@ -414,19 +414,16 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         
     }
     
-    func getDayOfWeek(today:String)->Int {
-        
-        let formatter  = NSDateFormatter()
-        formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
-        let todayDate = formatter.dateFromString(today)!
-        let myCalendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)!
-        let myComponents = myCalendar.components(.CalendarUnitWeekday, fromDate: todayDate)
-        let weekDay = myComponents.weekday
-        return weekDay
-    }
-    
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPth: NSIndexPath) -> Bool {
         return true
+    }
+    
+    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        println("start")
+    }
+    
+    func tableView(tableView: UITableView, didEndDisplayingCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        println("end")
     }
     
     
