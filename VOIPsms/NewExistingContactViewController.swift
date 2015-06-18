@@ -7,42 +7,31 @@
 //
 
 import UIKit
+import CoreData
 
-class NewExistingContactViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UITableViewDataSource, ContactActionViewControllerDelegate, UIBarPositioningDelegate {
+class NewExistingContactViewController: UIViewController, UITableViewDelegate, UISearchBarDelegate, UITableViewDataSource, ContactActionViewControllerDelegate {
     
-    @IBOutlet weak var navBar: UINavigationBar!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchBar: UISearchBar!
     var contacts : [AddressBookContactStruct] = [AddressBookContactStruct]()
     var contactId : String = String()
     var delegate: ContactActionViewControllerDelegate? = nil
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
         self.searchBar.delegate = self
+        self.contacts = Contact().getAllContacts(nil)
         
-//        Contact().getAllContacts(nil, completionHandler: { (contacts) -> () in
-//            self.contacts = contacts
+//        Contact().getContactsTest("", completionHandler: { (contacts) -> () in
+//            self.contacts = contacts!
 //            self.tableView.reloadData()
 //        })
-        
-        self.contacts = Contact().getAllContacts(nil)
-        self.tableView.reloadData()
-//        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
-        
-
-//        [[UIApplication sharedApplication] setStatusBarHidden:YES
-//            withAnimation:UIStatusBarAnimationFade];
-
     }
-    
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(true)
-                UIApplication.sharedApplication().setStatusBarHidden(true, withAnimation: UIStatusBarAnimation.None)
-    }
-    
+
     override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(true)
         self.searchBar.resignFirstResponder()
     }
 
@@ -51,7 +40,8 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
         // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func cancelWasPressed(sender: AnyObject) {        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func cancelWasPressed(sender: AnyObject) {
+        self.dismissViewControllerAnimated(true, completion: nil)
     }
     
     //MARK: - tableview delegate methods
@@ -110,36 +100,19 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     //MARK: - Searchbar delegate methods
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text != "" {
-//            Contact().getAllContacts(searchBar.text, completionHandler: { (contacts) -> () in
-//                self.contacts = contacts
-//                self.tableView.reloadData()
-//            })
-            self.contacts = Contact().getAllContacts(searchBar.text)
+//            self.contacts = Contact().getAllContacts(searchBar.text)
         } else {
-//            Contact().getAllContacts(nil, completionHandler: { (contacts) -> () in
-//                self.contacts = contacts
-//                self.tableView.reloadData()
-//            })
-            self.contacts = Contact().getAllContacts(nil)
+//            self.contacts = Contact().getAllContacts(nil)
         }
         self.tableView.reloadData()        
     }
     
     func searchBarCancelButtonClicked(searchBar: UISearchBar) {
         searchBar.text = ""
-//        Contact().getAllContacts(nil, completionHandler: { (contacts) -> () in
-//            self.contacts = contacts
-//            self.tableView.reloadData()
-//        })
         self.contacts = Contact().getAllContacts(nil)
         searchBar.resignFirstResponder()
     }
-    
-    //MARK: UIBarPositioningDelegates
-    func positionForBar(bar: UIBarPositioning) -> UIBarPosition {
-        return UIBarPosition.TopAttached
-    }
-    
+
 
     
     //MARK: - Keyboard delegates

@@ -239,7 +239,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
 
         Contact().getContactsDict({ (contacts) -> () in
             if contacts[self.contactId] != nil {
-                self.navigationController?.navigationBar.topItem?.title = contacts[self.contactId]
+                let cText = contacts[self.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+                self.navigationController?.navigationBar.topItem?.title = cText
                 
             } else {
                 self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat()

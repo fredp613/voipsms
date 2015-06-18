@@ -227,7 +227,8 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             
             let contStr = contact.contactId as String
             if contacts[contact.contactId] != nil {
-                cell.textLabel?.text = contacts[contact.contactId]
+                let cText = contacts[contact.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+                cell.textLabel?.text = cText
             } else {
                 cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
             }

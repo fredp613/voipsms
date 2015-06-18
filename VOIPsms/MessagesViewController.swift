@@ -67,7 +67,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         if let currentUser = CoreUser.currentUser(moc) {
             if currentUser.initialLogon.boolValue == false {
                 if Contact().checkAccess() == true {
-                    println("has access")
+//                    println("has access")
                     if currentUser.initialLoad.boolValue == true {
 //                        self.askPermissionForNotifications()
                     }
@@ -76,12 +76,12 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     
                     var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
                         UIAlertAction in
-                        println("pressed")
+//                        println("pressed")
 //                        self.askPermissionForNotifications()
                     }
                     var cancelAction = UIAlertAction(title: "No, do not sync my contacts", style: UIAlertActionStyle.Cancel) {
                         UIAlertAction in
-                        println("cancelled")
+//                        println("cancelled")
 //                        self.askPermissionForNotifications()
                     }
                     alertController.addAction(okAction)
@@ -118,7 +118,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 var alertController = UIAlertController(title: "Notifications", message: "This app has not been granted permission to send you notifications - if you want to recieve notifications when a user sends you a message please go into your phone settings and allow notifications for this app", preferredStyle: .Alert)
                 var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
                     UIAlertAction in
-                    println("pressed")
+//                    println("pressed")
                     
                 }
                 var cancelAction = UIAlertAction(title: "Dont ask me again", style: UIAlertActionStyle.Default) {
@@ -127,7 +127,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                         currentUser.notificationsFlag = false
                         CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
                     }
-                    println("cancel pressed")
+//                    println("cancel pressed")
                     
                 }
                 alertController.addAction(okAction)
@@ -146,7 +146,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     }
     
     func updateMessagesTableView() {
-        println("delegate called")
+//        println("delegate called")
         viewSetup(true)
     }
     
@@ -275,8 +275,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
                         CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message: self.searchBar.text, completionHandler: { (responseObject, error) -> () in
                             self.contacts = responseObject as! [CoreContact]
-                            
-
                             var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
                             var initialLogon = false
                             if let cu = CoreUser.currentUser(self.moc) {
@@ -339,6 +337,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     //MARK: - tableview delegate methods
     
+    
+    
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         return 80
     }
@@ -366,7 +366,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             Contact().getContactsDict { (contacts) -> () in
                 let contStr = contact.contactId as String
                 if contacts[contact.contactId] != nil {
-                    cell.textLabel?.text = contacts[contact.contactId]
+                    let cText = contacts[contact.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+                    cell.textLabel?.text = cText
                 } else {
                     cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
                 }
@@ -419,11 +420,11 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     }
     
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        println("start")
+//        println("start")
     }
     
     func tableView(tableView: UITableView, didEndDisplayingCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        println("end")
+//        println("end")
     }
     
     
@@ -464,9 +465,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 //you may want to get rid of this
                 Message.deleteMessagesFromAPI(ids, completionHandler: { (responseObject, error) -> () in
                     if responseObject {
-                        println("something went right :)")
+//                        println("something went right :)")
                     } else {
-                        println("something went wrong")
+//                        println("something went wrong")
                     }
                 })
             })
@@ -634,6 +635,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                         }
                         self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
                         let indexSet = NSIndexSet(index: 0)
+//                        let t  = self.tableView.indexPathsForVisibleRows()
+//                        self.tableView.reloadRowsAtIndexPaths(t!, withRowAnimation: UITableViewRowAnimation.None)
                         self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.Automatic)
                     }
                 })

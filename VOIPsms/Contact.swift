@@ -10,9 +10,12 @@ import Foundation
 import UIKit
 import CoreData
 
-struct AddressBookContactStruct {
-    var contactFullName = String()
-    var recordId = String()
+class AddressBookContactStruct {
+    var contactFullName : String = String()
+    var recordId : String = String()
+    init() {
+
+    }
 }
 
 class Contact {
@@ -26,7 +29,7 @@ class Contact {
 
     init() {
         self.addressBook = APAddressBook()
-        self.access = APAddressBook.access()      
+        self.access = APAddressBook.access()
     }
 
     
@@ -102,7 +105,7 @@ class Contact {
                                 options: nil, range: NSMakeRange(0, pStr.length))
                             let mappedResults = map(results) { pStr.substringWithRange($0.range)}
                             let strRepresentationResults = "".join(mappedResults)
-                            contactsDict.updateValue("\(c.firstName) \(c.lastName)", forKey: strRepresentationResults)
+                            contactsDict.updateValue("\(c.firstName) \(c.lastName)", forKey:strRepresentationResults)
                         }
                     }
                     return completionHandler(contactsDict)
@@ -110,60 +113,77 @@ class Contact {
         })
     }
     func getAllContacts(keyword: String?) -> [AddressBookContactStruct] {
-//        self.addressBook.loadContacts { (contacts : [AnyObject]!, error: NSError!) in
-//            //do some
-//            for c in contacts {
-//                if let keyword = keyword {
-//                    var fullName = "\(c.firstName) \(c.lastName)" as String
-//                    if fullName.lowercaseString.rangeOfString(keyword.lowercaseString) != nil {
-//                        var abContact = AddressBookContactStruct()
-//                        abContact.contactFullName = fullName
-//                        abContact.recordId = ""
-//                        self.contactsArr.append(abContact)
+
+        
+//        let addressBook : ABAddressBookRef? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()
+//        ABAddressBookRequestAccessWithCompletion(addressBook, { (granted:Bool, error: CFError!) -> Void in
+//            if granted == true {
+//                let allContacts : NSArray = ABAddressBookCopyArrayOfAllPeople(addressBook).takeRetainedValue()
+//                for contactRef: ABRecordRef in allContacts {
+//                    println(contactRef)
+//                    if let firstName = ABRecordCopyValue(contactRef, kABPersonFirstNameProperty)?.takeRetainedValue() as? NSString {
+//                        println(firstName)
 //                    }
-//                } else {
-//                    var fullName = "\(c.firstName) \(c.lastName)" as String
-//                    var abContact = AddressBookContactStruct()
-//                    abContact.contactFullName = fullName
-//                    abContact.recordId = ""
-//                    self.contactsArr.append(abContact)
 //                }
 //            }
-//            return completionHandler(self.contactsArr)
-//            
-//            
-//
-//        }
+//        })
+//                
+//        return self.contactsArr
+        
         var tstStr = [NSString]()
         var adbk : ABAddressBook? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()
         
         let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as NSArray as [ABRecord]
         for person in people {
-           // println(ABRecordCopyCompositeName(person).takeRetainedValue())
-            //println(ABRecordGetRecordID(person))
-            var fullName: String = ABRecordCopyCompositeName(person).takeRetainedValue() as String
-    
-            if let keyword = keyword {
-
-                if fullName.lowercaseString.rangeOfString(keyword.lowercaseString) != nil {
-                    var abContact = AddressBookContactStruct()
-                    abContact.contactFullName = fullName
-                    abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
-                    self.contactsArr.append(abContact)
+            
+            
+            
+            if let fullName = ABRecordCopyCompositeName(person)?.takeRetainedValue() as? NSString {
+                if let keyword = keyword {
+                    if fullName.lowercaseString.rangeOfString(keyword.lowercaseString) != nil {
+                        var abContact = AddressBookContactStruct()
+                        abContact.contactFullName = fullName as String
+                        abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
+                        self.contactsArr.append(abContact)
+                    } else {
+                        var abContact = AddressBookContactStruct()
+                        abContact.contactFullName = fullName as String
+                        abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
+                        self.contactsArr.append(abContact)
+                    }
                 } else {
                     var abContact = AddressBookContactStruct()
-                    abContact.contactFullName = fullName
+                    abContact.contactFullName = fullName as String
                     abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
                     self.contactsArr.append(abContact)
                 }
-            } else {
-                var abContact = AddressBookContactStruct()
-                abContact.contactFullName = fullName
-                abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
-                self.contactsArr.append(abContact)
             }
         }
-         return self.contactsArr
+        return self.contactsArr
+    }
+    
+    func getContactsTest(searchTerm: String , completionHandler: ([AddressBookContactStruct]?) -> ()) -> [AddressBookContactStruct]? {
+        var contactsArray = [AddressBookContactStruct]()
+        var contactsDict = [String: String]()
+        self.addressBook.loadContacts(
+            { (contacts: [AnyObject]!, error: NSError!) in
+                
+                if (contacts != nil) {
+                    for c in contacts {
+                        for p in c.phones! {
+//                            contactsDict.updateValue("\(c.firstName) \(c.lastName)", forKey: strRepresentationResults)
+                            var contact = AddressBookContactStruct()
+                            contact.contactFullName = c.firstName + " " + c.lastName
+                            contactsArray.append(contact)
+                        }
+                    }
+                    println(contactsArray)
+                    return completionHandler(contactsArray)
+                }
+        })
+        
+        return nil
+        
     }
     
     func getContactsByName(searchTerm: String, moc: NSManagedObjectContext, completionHandler: ([CoreContact]?) -> ()) -> [CoreContact]? {
