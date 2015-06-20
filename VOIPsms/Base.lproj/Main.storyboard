@@ -144,6 +144,74 @@
             </objects>
             <point key="canvasLocation" x="595.5" y="979.5"/>
         </scene>
+        <!--Message List View Controller-->
+        <scene sceneID="Jya-fD-ZqV">
+            <objects>
+                <viewController id="Fk0-eQ-eYD" customClass="MessageListViewController" customModule="VOIPsms" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="OF1-e4-7br"/>
+                        <viewControllerLayoutGuide type="bottom" id="7IN-UO-7E9"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="sA6-uv-ibY">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="74" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="xkh-vx-lIS">
+                                <rect key="frame" x="0.0" y="45" width="600" height="555"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="Cell" textLabel="mgP-9f-0ga" detailTextLabel="U5h-Yb-sHQ" rowHeight="74" style="IBUITableViewCellStyleSubtitle" id="leX-Lu-SL5">
+                                        <rect key="frame" x="0.0" y="0.0" width="451" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="leX-Lu-SL5" id="tk3-xa-zJ2">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="mgP-9f-0ga">
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Subtitle" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="U5h-Yb-sHQ">
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="Fk0-eQ-eYD" id="1HE-91-m1v"/>
+                                    <outlet property="delegate" destination="Fk0-eQ-eYD" id="cSV-Rc-TWC"/>
+                                </connections>
+                            </tableView>
+                            <searchBar contentMode="redraw" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="btg-VL-qsv">
+                                <rect key="frame" x="0.0" y="64" width="600" height="44"/>
+                                <textInputTraits key="textInputTraits" returnKeyType="search"/>
+                            </searchBar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="xkh-vx-lIS" firstAttribute="top" secondItem="sA6-uv-ibY" secondAttribute="topMargin" constant="45" id="NjB-5M-Bwa"/>
+                            <constraint firstItem="xkh-vx-lIS" firstAttribute="leading" secondItem="btg-VL-qsv" secondAttribute="leading" id="Pii-uV-yeD"/>
+                            <constraint firstItem="btg-VL-qsv" firstAttribute="leading" secondItem="sA6-uv-ibY" secondAttribute="leading" id="UYK-J2-B9e"/>
+                            <constraint firstItem="btg-VL-qsv" firstAttribute="top" secondItem="OF1-e4-7br" secondAttribute="bottom" id="ZQ4-7B-ie9"/>
+                            <constraint firstItem="xkh-vx-lIS" firstAttribute="bottom" secondItem="7IN-UO-7E9" secondAttribute="top" id="fSZ-yi-3sP"/>
+                            <constraint firstAttribute="trailing" secondItem="btg-VL-qsv" secondAttribute="trailing" id="l17-bI-8jd"/>
+                            <constraint firstItem="xkh-vx-lIS" firstAttribute="trailing" secondItem="btg-VL-qsv" secondAttribute="trailing" id="qss-92-LtR"/>
+                        </constraints>
+                    </view>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
+                    <connections>
+                        <outlet property="tableView" destination="xkh-vx-lIS" id="Y1z-D4-nhB"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ETJ-Tb-v4b" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1068" y="-243"/>
+        </scene>
         <!--Messages View Controller-->
         <scene sceneID="VaQ-0k-BVw">
             <objects>
@@ -223,7 +291,7 @@
                         <barButtonItem key="rightBarButtonItem" title="logout" id="kTH-VV-QHZ">
                             <color key="tintColor" red="0.292948082" green="0.292948082" blue="0.292948082" alpha="1" colorSpace="calibratedRGB"/>
                             <connections>
-                                <action selector="logoutWasPressed:" destination="UIf-Jw-jJG" id="l3M-ma-Gmj"/>
+                                <segue destination="Fk0-eQ-eYD" kind="show" id="CQa-gA-zGv"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -241,7 +309,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rYL-wY-Uec" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1030" y="225"/>
+            <point key="canvasLocation" x="497" y="112"/>
         </scene>
         <!--Message Detail View Controller-->
         <scene sceneID="tgA-iS-qSG">
@@ -808,7 +876,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GpK-9c-zYX" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="218" y="225"/>
+            <point key="canvasLocation" x="-147" y="112"/>
         </scene>
     </scenes>
     <resources>

@@ -47,6 +47,7 @@
 		2AE76D331AE2B91D00A6E84D /* MessageDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE76D321AE2B91D00A6E84D /* MessageDetailViewController.swift */; };
 		2AE76D361AE2C26500A6E84D /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE76D351AE2C26500A6E84D /* ArrayExtension.swift */; };
 		2AE76D381AE2D79800A6E84D /* CoreContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AE76D371AE2D79800A6E84D /* CoreContact.swift */; };
+		2AFCFFBB1B33752700A11469 /* MessageListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AFCFFBA1B33752700A11469 /* MessageListViewController.swift */; };
 		3F5D98D6E542995CB565C109 /* libPods-VOIPsms.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA95F86EF11BE1445350DAA5 /* libPods-VOIPsms.a */; };
 		473A7393B95CAFEF115B6CEA /* libPods-VOIPsmsTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 255C57A492F6184F53AFAD80 /* libPods-VOIPsmsTests.a */; };
 /* End PBXBuildFile section */
@@ -112,6 +113,7 @@
 		2AE76D321AE2B91D00A6E84D /* MessageDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageDetailViewController.swift; sourceTree = "<group>"; };
 		2AE76D351AE2C26500A6E84D /* ArrayExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
 		2AE76D371AE2D79800A6E84D /* CoreContact.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreContact.swift; sourceTree = "<group>"; };
+		2AFCFFBA1B33752700A11469 /* MessageListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageListViewController.swift; sourceTree = "<group>"; };
 		8FAE43D590EDBB6CDA7FE0A1 /* Pods-VOIPsms.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VOIPsms.debug.xcconfig"; path = "Pods/Target Support Files/Pods-VOIPsms/Pods-VOIPsms.debug.xcconfig"; sourceTree = "<group>"; };
 		969C2905D873E9791E07F025 /* Pods-VOIPsmsTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VOIPsmsTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-VOIPsmsTests/Pods-VOIPsmsTests.release.xcconfig"; sourceTree = "<group>"; };
 		A4FDD4F4952922383B8B6166 /* Pods-VOIPsms.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VOIPsms.release.xcconfig"; path = "Pods/Target Support Files/Pods-VOIPsms/Pods-VOIPsms.release.xcconfig"; sourceTree = "<group>"; };
@@ -190,6 +192,7 @@
 		2A98D42B1ADB665C003D3512 /* VOIPsms */ = {
 			isa = PBXGroup;
 			children = (
+				2AFCFFBA1B33752700A11469 /* MessageListViewController.swift */,
 				2A3DC8741B311B1500C50BBA /* xViewController.swift */,
 				2AA6CAF51B1BF277006C7D39 /* NewExistingContactViewController.swift */,
 				2AA6CAF11B1B9653006C7D39 /* NewContactViewController.swift */,
@@ -487,6 +490,7 @@
 				2A98D45A1ADB69D0003D3512 /* KeyChainHelper.swift in Sources */,
 				2A3DC8751B311B1500C50BBA /* xViewController.swift in Sources */,
 				2A640C6F1B266D40009A77D0 /* TPKeyboardAvoidingTableView.m in Sources */,
+				2AFCFFBB1B33752700A11469 /* MessageListViewController.swift in Sources */,
 				2ABFAEDF1AE0AA4900EFABBD /* Message.swift in Sources */,
 				2AA6CAF21B1B9653006C7D39 /* NewContactViewController.swift in Sources */,
 				2A99162B1B0183FA0025F8D2 /* ProfileViewController.swift in Sources */,

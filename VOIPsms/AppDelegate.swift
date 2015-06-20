@@ -17,9 +17,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        
-        Contact().getAllContacts("")
-        
         return true
     }
     

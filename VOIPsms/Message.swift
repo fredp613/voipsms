@@ -33,6 +33,7 @@ class Message {
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "YYYY-MM-dd"
         //from should be last date in core data
+
         
         var fromStr = String()
         if from != nil {
@@ -54,11 +55,11 @@ class Message {
                 ]
             } else {
                 params = [
-                    "method" : "getSMS"
+                    "method" : "getSMS",
+                    "type" : "1",
+                    "limit" : "1"
                 ]
             }
-            
-            
         }
 
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
@@ -72,6 +73,7 @@ class Message {
                 let typeStr = t["type"].stringValue
                 var type : Bool
                 let date = t["date"].stringValue
+                println(date)
                 let message = t["message"].stringValue
                 var flagValue = String()
                 if typeStr == "0" {
@@ -87,12 +89,6 @@ class Message {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
                         if (type && fromAppDelegate) {                            
                             Message.sendPushNotification(contact, message: message)
-                        }
-                        
-                        if CoreContact.isExistingContact(moc, contactId: contact) {
-                            CoreContact.updateInManagedObjectContext(moc, contactId: contact, lastModified: date)
-                        } else {
-                            CoreContact.createInManagedObjectContext(moc, contactId: contact, lastModified: date)
                         }
                     })
                 }
@@ -193,11 +189,11 @@ class Message {
 //                        Message.sendPushNotification(contact, message: message)
                         
                         //check if contact exists
-                        if CoreContact.isExistingContact(moc, contactId: contact) {
-                            CoreContact.updateInManagedObjectContext(moc, contactId: contact, lastModified: date)
-                        } else {
-                            CoreContact.createInManagedObjectContext(moc, contactId: contact, lastModified: date)
-                        }
+//                        if CoreContact.isExistingContact(moc, contactId: contact) {
+//                            CoreContact.updateInManagedObjectContext(moc, contactId: contact, lastModified: date)
+//                        } else {
+//                            CoreContact.createInManagedObjectContext(moc, contactId: contact, lastModified: date)
+//                        }
                     })
                 }
             }

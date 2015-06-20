@@ -13,38 +13,41 @@ class CoreContact: NSManagedObject {
 
     @NSManaged var contactId: String
     @NSManaged var messages: NSSet
-    @NSManaged var lastModified: String
+    @NSManaged var lastModified: NSDate
     
     var ccs = [CoreContact]()
     
-    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?) -> Bool {
+    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?) -> CoreContact? {
         
         let contact : CoreContact = NSEntityDescription.insertNewObjectForEntityForName("CoreContact", inManagedObjectContext: managedObjectContext) as! CoreContact
         contact.contactId = contactId
         if let lastModified = lastModified {
-            contact.lastModified = lastModified
+            var formatter1: NSDateFormatter = NSDateFormatter()
+            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+            let parsedDate: NSDate = formatter1.dateFromString(lastModified)!
+            contact.lastModified = parsedDate
         } else {
-            var formatter: NSDateFormatter = NSDateFormatter()
-            formatter.dateFormat = "dd-MM-yyyy"
-            let stringDate: String = formatter.stringFromDate(NSDate())
-            contact.lastModified = stringDate
+            contact.lastModified = NSDate()
         }        
         if managedObjectContext.save(nil) {
-            return true
+            return contact
         }
-        return false
+        return nil
     }
     
     class func updateInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?) -> Bool {
         if let contact : CoreContact = CoreContact.currentContact(managedObjectContext, contactId: contactId) {
             
             if let lastModified = lastModified {
-                contact.lastModified = lastModified
+                if let cc = CoreContact.getLastMessageFromContact(managedObjectContext, contactId: contactId, did: CoreDID.getSelectedDID(managedObjectContext)!.did) {
+                    var formatter1: NSDateFormatter = NSDateFormatter()
+                    formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                    let parsedDate: NSDate = formatter1.dateFromString(cc.date)!
+                    contact.lastModified = parsedDate
+                }
             } else {
-                var formatter: NSDateFormatter = NSDateFormatter()
-                formatter.dateFormat = "dd-MM-yyyy"
-                let stringDate: String = formatter.stringFromDate(NSDate())
-                contact.lastModified = stringDate
+                println("hihihihih")
+                contact.lastModified = NSDate()
             }
             managedObjectContext.save(nil)
             return true

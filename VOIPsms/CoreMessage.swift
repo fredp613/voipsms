@@ -38,24 +38,35 @@ class CoreMessage: NSManagedObject {
             coreMessage.date = date
             coreMessage.did = did
             coreMessage.flag = flag
+        var uuid = NSNumber()
+        if CoreMessage.getMessages(managedObjectContext, ascending: false).count > 0 {
+            let lastMsgId = CoreMessage.getMessages(managedObjectContext, ascending: false)[0].coreId
+            var newMsgID = lastMsgId.intValue + 1
+            coreMessage.coreId = NSNumber(int: newMsgID)
+            uuid = NSNumber(int: newMsgID)
+        } else {
+            coreMessage.coreId = 1
+        }
         
-            var uuid = NSNumber()
-            if CoreMessage.getMessages(managedObjectContext, ascending: false).count > 0 {
-                let lastMsgId = CoreMessage.getMessages(managedObjectContext, ascending: false)[0].coreId
-                var newMsgID = lastMsgId.intValue + 1
-                coreMessage.coreId = NSNumber(int: newMsgID)
-                uuid = NSNumber(int: newMsgID)
-            } else {
-                coreMessage.coreId = 1
+        if let c = CoreContact.currentContact(managedObjectContext, contactId: contact) {
+            if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date) {
+                coreMessage.contact = c
             }
-        
-            let err = NSError()
-
-            if managedObjectContext.save(nil) {
-                return completionHandler(responseObject: coreMessage, error: nil)
-            } else {
-                return completionHandler(responseObject: nil, error: err)
+        } else {
+            if let c = CoreContact.createInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date) {
+                coreMessage.contact = c
             }
+        }
+        let err = NSError()
+        if managedObjectContext.save(nil) {
+//            if let cc = CoreContact.getLastMessageFromContact(managedObjectContext, contactId: contact, did: did) {
+//                if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: cc.date) {
+//                }
+//            }
+            return completionHandler(responseObject: coreMessage, error: nil)
+        } else {
+            return completionHandler(responseObject: nil, error: err)
+        }
     }
     
     class func deleteAllMessagesFromContact(moc: NSManagedObjectContext, contactId: String, did: String, completionHandler: (responseObject: Bool, error: NSError?)->()) {
