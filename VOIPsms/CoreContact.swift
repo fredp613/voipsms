@@ -46,7 +46,6 @@ class CoreContact: NSManagedObject {
                     contact.lastModified = parsedDate
                 }
             } else {
-                println("hihihihih")
                 contact.lastModified = NSDate()
             }
             managedObjectContext.save(nil)

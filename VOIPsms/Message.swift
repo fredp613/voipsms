@@ -73,7 +73,6 @@ class Message {
                 let typeStr = t["type"].stringValue
                 var type : Bool
                 let date = t["date"].stringValue
-                println(date)
                 let message = t["message"].stringValue
                 var flagValue = String()
                 if typeStr == "0" {

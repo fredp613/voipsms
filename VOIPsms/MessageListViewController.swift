@@ -26,7 +26,22 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         let frc = NSFetchedResultsController(
             fetchRequest: contactsFetchRequest,
             managedObjectContext: self.managedObjectContext,
-            sectionNameKeyPath: "lastModified",
+            sectionNameKeyPath: nil,
+            cacheName: nil)
+        
+        frc.delegate = self
+        
+        return frc
+        }()
+    
+    lazy var searchFetchedResultsController: NSFetchedResultsController = {
+        let contactsFetchRequest = NSFetchRequest(entityName: "CoreContact")
+        let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
+        contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
+        let frc = NSFetchedResultsController(
+            fetchRequest: contactsFetchRequest,
+            managedObjectContext: self.managedObjectContext,
+            sectionNameKeyPath: nil,
             cacheName: nil)
         
         frc.delegate = self
@@ -40,7 +55,12 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if (fetchedResultsController.performFetch(&error)==false) {
             println("An error has occurred: \(error?.localizedDescription)")
         }
-               // Do any additional setup after loading the view.
+        if let testArr = fetchedResultsController.fetchedObjects {
+            var t = NSArray(array: testArr)
+            let predicate = NSPredicate(format: "contactId contains[cd] %@", "613")
+            var results = t.filteredArrayUsingPredicate(predicate)
+            println("results are \(results)")
+        }
     }
 
     override func viewDidAppear(animated: Bool) {
@@ -109,7 +129,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         if let sections = fetchedResultsController.sections {
-            return sections.count
+//            println(sections.count)
+            return 1
+            //use the below for sections - look at sectionkeynamepath in the fetchedresultscontroller to create sections
+//            return sections.count
         }
         return 0
     }
@@ -119,6 +142,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             let currentSection = sections[section] as! NSFetchedResultsSectionInfo
             return currentSection.numberOfObjects
         }
+        
+
+        
+
         return 0
     }
     
