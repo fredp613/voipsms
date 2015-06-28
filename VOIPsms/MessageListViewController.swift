@@ -100,17 +100,13 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             let currentUser = CoreUser.currentUser(managedObjectContext)
             let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
             
-            if currentUser?.remember.boolValue == false  {
-                performSegueWithIdentifier("showLoginSegue", sender: self)
-            }
-            if currentUser?.messagesLoaded.boolValue == false || currentUser?.messagesLoaded == 0 {
-                println("wtf")
-                performSegueWithIdentifier("showDownloadMessagesSegue", sender: self)
-            }
-            
             CoreUser.authenticate(managedObjectContext, email: currentUser!.email, password: pwd!, completionHandler: { (success) -> Void in
                 if success == false || currentUser?.remember == false {
                     self.performSegueWithIdentifier("showLoginSegue", sender: self)
+                } else {
+                    if currentUser!.messagesLoaded.boolValue == false || currentUser!.messagesLoaded == 0 {
+                        self.performSegueWithIdentifier("showDownloadMessagesSegue", sender: self)
+                    }
                 }
             })
             
