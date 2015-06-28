@@ -33,7 +33,7 @@ class Message {
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "YYYY-MM-dd"
         //from should be last date in core data
-
+        
         
         var fromStr = String()
         if from != nil {
@@ -51,7 +51,7 @@ class Message {
                     "method" : "getSMS",
                     "from" : fromStr, //.strippedDateFromString(),
                     "to" : dateFormatter.stringFromDate(NSDate()) as String,
-                    "limit" : "2000"
+                    "limit" : "200"
                 ]
             } else {
                 params = [
@@ -61,9 +61,10 @@ class Message {
                 ]
             }
         }
-
+        println(APIUrls.get_request_url_contruct(params)!)
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
+            println(error)
             let json = responseObject
             for (key: String, t: JSON) in json["sms"] {
                 
@@ -86,6 +87,9 @@ class Message {
                 if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
                         println("message created")
+                        if let currentUser = CoreUser.currentUser(moc) {
+                            currentUser.initialLoad = false
+                        }
 //                        if (type && fromAppDelegate) {
 //                            Message.sendPushNotification(contact, message: message)
 //                        }

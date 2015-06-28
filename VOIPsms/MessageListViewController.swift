@@ -30,7 +30,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     lazy var fetchedResultsController: NSFetchedResultsController = {
         
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreContact")
-        let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: true)
+        let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
         
         let moc = CoreDataStack().managedObjectContext!
@@ -428,11 +428,14 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if (segue.identifier == "showMessageDetailSegue") {
             self.searchBar.resignFirstResponder()
             var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
-            if let indexPath = self.tableView.indexPathForSelectedRow() {
-                detailSegue.contactId = self.fetchedResultsController.objectAtIndexPath(indexPath).contactId as String //
-            } else {
+            if self.contactForSegue != "" {
                 detailSegue.contactId = self.contactForSegue
+            } else {
+                if let indexPath = self.tableView.indexPathForSelectedRow() {
+                    detailSegue.contactId = self.fetchedResultsController.objectAtIndexPath(indexPath).contactId as String //
+                }
             }
+            self.contactForSegue = ""
             detailSegue.did = self.did
         }
         

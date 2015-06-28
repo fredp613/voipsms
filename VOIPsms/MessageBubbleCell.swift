@@ -102,8 +102,8 @@ func bubbleImageMake() -> (incoming: UIImage, incomingHighlighed: UIImage, outgo
     let incomingHighlighted = coloredImage(maskIncoming, 206/255.0, 206/255.0, 210/255.0, 1).resizableImageWithCapInsets(capInsetsIncoming)
     
 //    UIColor(red: 179/255, green: 176/255, blue: 77/255, alpha: 1)
-    let outgoing = coloredImage(maskOutgoing, 220/255.0, 170/255.0, 11/255.0, 1).resizableImageWithCapInsets(capInsetsOutgoing)
-    let outgoingHighlighted = coloredImage(maskOutgoing, 204/255.0, 201/255.0, 39/255.0, 1).resizableImageWithCapInsets(capInsetsOutgoing)
+    let outgoing = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 177/255.0, 1).resizableImageWithCapInsets(capInsetsOutgoing)
+    let outgoingHighlighted = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 177/255.0, 0.7).resizableImageWithCapInsets(capInsetsOutgoing)
     
     return (incoming, incomingHighlighted, outgoing, outgoingHighlighted)
 }

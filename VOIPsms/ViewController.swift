@@ -11,8 +11,11 @@ import CoreData
 
 
 class ViewController: UIViewController, UIAlertViewDelegate {
-    @IBOutlet weak var txtUserName: UITextField!
-    @IBOutlet weak var txtPwd: UITextField!
+ 
+    @IBOutlet weak var textUserName: UITextView!
+    
+    @IBOutlet weak var textPwd: UITextView!
+    
     @IBOutlet weak var loginBtn: UIButton!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
 
@@ -20,8 +23,8 @@ class ViewController: UIViewController, UIAlertViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        txtUserName.text = "hiphopshop@gmail.com"
-        txtPwd.text = "DPG613yg"
+        textUserName.text = "hiphopshop@gmail.com"
+        textPwd.text = "DPG613yg"
         loginBtn.layer.cornerRadius = 10
         
 
@@ -47,7 +50,7 @@ class ViewController: UIViewController, UIAlertViewDelegate {
     @IBAction func loginWasPressed(sender: AnyObject) {
         self.loginBtn.setTitle("", forState: UIControlState.Normal)
         self.activityIndicator.startAnimating()
-        CoreUser.authenticate(moc, email: self.txtUserName.text, password: self.txtPwd.text) { (success) -> Void in
+        CoreUser.authenticate(moc, email: self.textUserName.text, password: self.textPwd.text) { (success) -> Void in
             if success {
                 let alert = UIAlertView(title: "Login successful", message: "Start sms'ing!!", delegate: self, cancelButtonTitle: nil)
                 CoreDID.createOrUpdateDID(self.moc)
