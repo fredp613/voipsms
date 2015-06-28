@@ -26,7 +26,6 @@ class CoreMessage: NSManagedObject {
     @NSManaged var date: String
     @NSManaged var flag: String
     @NSManaged var contact: CoreContact
-
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contact: String, id: String, type: Bool, date: String, message: String, did: String, flag: String,completionHandler: (responseObject: CoreMessage?, error: NSError?) -> ()) {
 
@@ -49,7 +48,7 @@ class CoreMessage: NSManagedObject {
         }
         
         if let c = CoreContact.currentContact(managedObjectContext, contactId: contact) {
-            if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date) {
+            if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date, fullName: nil, addressBookLastModified: nil) {
                 coreMessage.contact = c
             }
         } else {
@@ -152,7 +151,7 @@ class CoreMessage: NSManagedObject {
             var formatter: NSDateFormatter = NSDateFormatter()
             formatter.dateFormat = "dd-MM-yyyy"
             let stringDate: String = formatter.stringFromDate(NSDate())
-            CoreContact.updateInManagedObjectContext(moc, contactId: cm.contactId, lastModified: stringDate)
+            CoreContact.updateInManagedObjectContext(moc, contactId: cm.contactId, lastModified: stringDate,fullName: nil, addressBookLastModified: nil)
             return cm
         }
         return nil

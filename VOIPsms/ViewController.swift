@@ -9,13 +9,14 @@
 import UIKit
 import CoreData
 
-class ViewController: UIViewController, UIAlertViewDelegate, MessageViewDelegate {
+
+class ViewController: UIViewController, UIAlertViewDelegate {
     @IBOutlet weak var txtUserName: UITextField!
     @IBOutlet weak var txtPwd: UITextField!
     @IBOutlet weak var loginBtn: UIButton!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
 
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-    var delegate: MessageViewDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,9 +37,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, MessageViewDelegate
         super.viewDidAppear(true)
     }
     
-    func updateMessagesTableView() {
-        //soemthing
-    }
+
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -46,18 +45,29 @@ class ViewController: UIViewController, UIAlertViewDelegate, MessageViewDelegate
     }
 
     @IBAction func loginWasPressed(sender: AnyObject) {
-        println("hey")
+        self.loginBtn.setTitle("", forState: UIControlState.Normal)
+        self.activityIndicator.startAnimating()
         CoreUser.authenticate(moc, email: self.txtUserName.text, password: self.txtPwd.text) { (success) -> Void in
             if success {
                 let alert = UIAlertView(title: "Login successful", message: "Start sms'ing!!", delegate: self, cancelButtonTitle: nil)
                 CoreDID.createOrUpdateDID(self.moc)
 //                self.getInitialMessages()
                 alert.show()
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.activityIndicator.stopAnimating()
+                if let currentUser = CoreUser.currentUser(self.moc) {
+                    if currentUser.initialLogon.boolValue == true {
+                        self.performSegueWithIdentifier("segueDownloadMessages", sender: self)
+                    } else {
+                        self.dismissViewControllerAnimated(true, completion: nil)
+                    }
+                }
+
+//                self.dismissViewControllerAnimated(true, completion: nil)
                 self.dismissAlert(alert)
-                self.delegate?.updateMessagesTableView!()
 
             } else {
+                self.activityIndicator.stopAnimating()
+                self.loginBtn.setTitle("Sign in", forState: UIControlState.Normal)
                 let alert = UIAlertView(title: "Invalid Login Credentials", message: "Please try again", delegate: self, cancelButtonTitle: "Ok")
                 alert.show()
             }
@@ -86,9 +96,10 @@ class ViewController: UIViewController, UIAlertViewDelegate, MessageViewDelegate
         })
     }
     
-    
-    
-    
-
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier == "segueDownloadMessages") {
+//          var dmvc = segue.destinationViewController as? DownloadMessagesViewController                
+        }
+    }
 }
 

@@ -60,6 +60,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         checkAllPermissions()
         
         
+        
+        
     }
     
     func checkAllPermissions() {
@@ -651,7 +653,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
         if (segue.identifier == "showLoginSegue") {
             var loginVC = segue.destinationViewController as? ViewController
-            loginVC?.delegate = self
+//            loginVC?.delegate = self
         }
         
         if (segue.identifier == "showMessagesSegue") {
@@ -667,10 +669,10 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             timer.invalidate()
         }
         
-        if segue.identifier == "newMessageSegue" {
-            var newMsgVC = segue.destinationViewController as? NewMessageViewController
-            newMsgVC?.delegate = self
-        }
+//        if segue.identifier == "newMessageSegue" {
+//            var newMsgVC = segue.destinationViewController as? NewMessageViewController
+//            newMsgVC?.delegate = self
+//        }
        
     }
     

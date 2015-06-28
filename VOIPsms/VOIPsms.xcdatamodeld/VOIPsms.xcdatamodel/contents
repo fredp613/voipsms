@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14D136" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="CoreContact" representedClassName="VOIPsms.CoreContact" syncable="YES">
+        <attribute name="addressBookSyncLastModified" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="contactId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="fullName" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="lastModified" optional="YES" attributeType="Date" syncable="YES"/>
         <relationship name="messages" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CoreMessage" inverseName="contact" inverseEntity="CoreMessage" syncable="YES"/>
     </entity>
@@ -30,15 +32,16 @@
         <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="initialLoad" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="initialLogon" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="messagesLoaded" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="notificationsFlag" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="remember" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="token" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="CoreContact" positionX="-63" positionY="27" width="128" height="88"/>
+        <element name="CoreContact" positionX="-63" positionY="27" width="128" height="120"/>
         <element name="CoreDeleteMessage" positionX="214" positionY="54" width="128" height="60"/>
         <element name="CoreDID" positionX="160" positionY="165" width="128" height="105"/>
         <element name="CoreMessage" positionX="115" positionY="-189" width="128" height="180"/>
-        <element name="CoreUser" positionX="376" positionY="-144" width="128" height="150"/>
+        <element name="CoreUser" positionX="376" positionY="-144" width="128" height="165"/>
     </elements>
 </model>

@@ -18,6 +18,7 @@ class CoreUser: NSManagedObject {
     @NSManaged var remember: NSNumber
     @NSManaged var initialLogon: NSNumber
     @NSManaged var initialLoad: NSNumber
+    @NSManaged var messagesLoaded: NSNumber
     @NSManaged var notificationsFlag: NSNumber
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, email: String, pwd: String) -> Bool {
@@ -28,6 +29,7 @@ class CoreUser: NSManagedObject {
         coreUser.remember = true
         coreUser.initialLogon = true
         coreUser.notificationsFlag = true
+        coreUser.messagesLoaded = false
         
         if managedObjectContext.save(nil) {
 
@@ -50,7 +52,6 @@ class CoreUser: NSManagedObject {
     }
     
     class func updateInManagedObjectContext(moc: NSManagedObjectContext, coreUser: CoreUser) {
-//        coreUser.initialLogon = false
         if moc.save(nil) {
         }
     }

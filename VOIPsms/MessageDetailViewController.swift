@@ -451,7 +451,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             if responseObject["status"].stringValue == "success" {
                 //save to core data here
                 CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: responseObject["sms"].stringValue, type: false, date: message.date, message: message.message, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
-                    CoreContact.updateInManagedObjectContext(self.moc, contactId: self.contactId, lastModified: dateStr)
+                    CoreContact.updateInManagedObjectContext(self.moc, contactId: self.contactId, lastModified: dateStr, fullName: nil, addressBookLastModified: nil)
                     println("saved to core data")
                 })
             }

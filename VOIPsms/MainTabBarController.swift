@@ -75,12 +75,12 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         var messagesVC = self.viewControllers?[0] as! MessagesViewController!
         if (segue.identifier == "showLoginSegue") {
                 var loginVC = segue.destinationViewController as? ViewController
-                loginVC?.delegate = messagesVC!
+//                loginVC?.delegate = messagesVC!
         }
         
-        if segue.identifier == "newMessageSegue" {
-            var newMsgVC = segue.destinationViewController as? NewMessageViewController
-            newMsgVC?.delegate = messagesVC!
-        }
+//        if segue.identifier == "newMessageSegue" {
+//            var newMsgVC = segue.destinationViewController as? NewMessageViewController
+//            newMsgVC?.delegate = messagesVC!
+//        }
     }
 }

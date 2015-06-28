@@ -17,6 +17,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        if Contact().checkAccess() {
+            Contact().syncAddressBook1()
+        }
+        
+        if let currentUser = CoreUser.currentUser(moc) {
+            currentUser.initialLoad = 1
+            CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
+        }
+        
         return true
     }
     

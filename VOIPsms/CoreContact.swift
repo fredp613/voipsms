@@ -14,28 +14,32 @@ class CoreContact: NSManagedObject {
     @NSManaged var contactId: String
     @NSManaged var messages: NSSet
     @NSManaged var lastModified: NSDate
-    
+    @NSManaged var addressBookSyncLastModified: NSDate!
+    @NSManaged var fullName: String!
     var ccs = [CoreContact]()
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?) -> CoreContact? {
-        
         let contact : CoreContact = NSEntityDescription.insertNewObjectForEntityForName("CoreContact", inManagedObjectContext: managedObjectContext) as! CoreContact
         contact.contactId = contactId
         if let lastModified = lastModified {
+
             var formatter1: NSDateFormatter = NSDateFormatter()
             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
             let parsedDate: NSDate = formatter1.dateFromString(lastModified)!
             contact.lastModified = parsedDate
         } else {
             contact.lastModified = NSDate()
-        }        
+        }
+        let error : NSError? = nil
         if managedObjectContext.save(nil) {
+            println("contact saved")
             return contact
         }
+
         return nil
     }
     
-    class func updateInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?) -> Bool {
+    class func updateInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?, fullName: String?, addressBookLastModified: NSDate?) -> Bool {
         if let contact : CoreContact = CoreContact.currentContact(managedObjectContext, contactId: contactId) {
             
             if let lastModified = lastModified {
@@ -46,12 +50,36 @@ class CoreContact: NSManagedObject {
                     contact.lastModified = parsedDate
                 }
             } else {
-                contact.lastModified = NSDate()
+                if fullName == nil {
+                    contact.lastModified = NSDate()
+                }
+            }
+            if let fullName = fullName {
+                contact.fullName = fullName
+            }
+            if let sync = addressBookLastModified {
+                contact.addressBookSyncLastModified = sync
             }
             managedObjectContext.save(nil)
             return true
         }
         return false
+    }
+    
+    class func getAllContacts(managedObjectContext: NSManagedObjectContext) -> [CoreContact]? {
+        let fetchRequest = NSFetchRequest(entityName: "CoreContact")
+        var coreContacts = [CoreContact]()
+        var error : NSError? = nil
+        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: &error) as? [CoreContact] {
+            coreContacts = fetchResults
+            if fetchResults.count > 0 {
+                return coreContacts
+            }
+        } else {
+            println("\(error?.userInfo)")
+        }
+        
+        return nil
     }
     
     class func currentContact(managedObjectContext: NSManagedObjectContext, contactId: String) -> CoreContact? {

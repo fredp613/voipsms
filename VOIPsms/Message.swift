@@ -25,8 +25,8 @@ class Message {
         self.type = type
         self.date = date
         self.id = id
-        
     }
+
     
     class func getMessagesFromAPI(fromAppDelegate: Bool, moc: NSManagedObjectContext, from: String!, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         
@@ -49,9 +49,9 @@ class Message {
             if (currentUser.initialLogon.boolValue == true) || (currentUser.initialLoad.boolValue == true) {
                 params = [
                     "method" : "getSMS",
-                    "from" : fromStr.strippedDateFromString(),
+                    "from" : fromStr, //.strippedDateFromString(),
                     "to" : dateFormatter.stringFromDate(NSDate()) as String,
-                    "limit" : "1000000"
+                    "limit" : "2000"
                 ]
             } else {
                 params = [
@@ -64,7 +64,6 @@ class Message {
 
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
-            
             let json = responseObject
             for (key: String, t: JSON) in json["sms"] {
                 
@@ -86,9 +85,10 @@ class Message {
                 
                 if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
-                        if (type && fromAppDelegate) {                            
-                            Message.sendPushNotification(contact, message: message)
-                        }
+                        println("message created")
+//                        if (type && fromAppDelegate) {
+//                            Message.sendPushNotification(contact, message: message)
+//                        }
                     })
                 }
             }

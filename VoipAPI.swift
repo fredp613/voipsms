@@ -18,7 +18,6 @@ enum httpMethodEnum : String {
     case UPDATE = "UPDATE"
 }
 
-
 class VoipAPI : NSObject, UIAlertViewDelegate {
     
     class func APIAuthenticatedRequest(httpMethod: httpMethodEnum, url: String, params: [String:String!]?, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
@@ -37,12 +36,11 @@ class VoipAPI : NSObject, UIAlertViewDelegate {
             }
         }
         
-        
         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response, data, error) -> Void in
             if let err = error {
                 
-                let alert = UIAlertView(title: "Something went wrong please try again", message: "Connection error", delegate: self, cancelButtonTitle: "Ok")
-                alert.show()
+//                let alert = UIAlertView(title: "Something went wrong please try again", message: "Connection error", delegate: self, cancelButtonTitle: "Ok")
+//                alert.show()
                 return
             }
             
@@ -80,8 +78,8 @@ class VoipAPI : NSObject, UIAlertViewDelegate {
         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response, data, error) -> Void in
             if let err = error {
                 
-                let alert = UIAlertView(title: "Something went wrong please try again", message: "Connection error", delegate: self, cancelButtonTitle: "Ok")
-                alert.show()
+//                let alert = UIAlertView(title: "Something went wrong please try again", message: "Connection error", delegate: self, cancelButtonTitle: "Ok")
+//                alert.show()
                 return
             }
             

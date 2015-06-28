@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class NewContactViewController: UIViewController, UITextFieldDelegate, ContactActionViewControllerDelegate {
 
@@ -56,7 +57,16 @@ class NewContactViewController: UIViewController, UITextFieldDelegate, ContactAc
     
     func performSave(sender: AnyObject) -> Bool {
         if self.textFirstName.text != "" {
-            Contact().createContact(contactId, firstName: self.textFirstName.text, lastName: self.textLastName.text)
+            var fullName = String()
+            if self.textLastName.text != "" {
+                fullName = self.textFirstName.text + " " + self.textLastName.text
+            } else {
+                fullName = self.textFirstName.text
+            }
+            if Contact().createContact(contactId, firstName: self.textFirstName.text, lastName: self.textLastName.text) {
+                var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+                CoreContact.updateInManagedObjectContext(moc, contactId: contactId, lastModified: nil, fullName: fullName, addressBookLastModified: NSDate())
+            }
             self.dismissContactActionVC()
             self.dismissViewControllerAnimated(true, completion: { () -> Void in
             })
