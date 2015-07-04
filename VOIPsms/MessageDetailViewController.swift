@@ -75,7 +75,7 @@ struct IOSModel {
     
 }
 
-class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScrollViewDelegate, UITextViewDelegate {
+class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScrollViewDelegate, UITextViewDelegate, NSFetchedResultsControllerDelegate {
 
 //    @IBOutlet weak var textMessage: UITextField!
     @IBOutlet weak var tableView: UITableView!
@@ -101,28 +101,48 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
 //    var coreDid = CoreDID()
 //    var delegate:UpdateMessagesTableViewDelegate? = nil
+    
+    lazy var messageFetchedResultsController: NSFetchedResultsController = {
+        let messagesFetchRequest = NSFetchRequest(entityName: "CoreMessage")
+        let primarySortDescriptor = NSSortDescriptor(key: "date", ascending: true)
+        messagesFetchRequest.sortDescriptors = [primarySortDescriptor]
+        
+        let msgDIDPredicate = NSPredicate(format: "did == %@", self.did)
+        let contactPredicate = NSPredicate(format: "contactId == %@", self.contactId)
+        let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [msgDIDPredicate, contactPredicate])
+        messagesFetchRequest.predicate = compoundPredicate
+        
+        
+        let frc = NSFetchedResultsController(
+            fetchRequest: messagesFetchRequest,
+            managedObjectContext: self.moc,
+            sectionNameKeyPath: nil,
+            cacheName: nil)
+        
+        frc.delegate = self
+        
+        return frc
+        }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
         self.scrollView.delegate = self
-        self.messages = CoreContact.getMsgsByContact(moc, contactId: self.contactId, did: did)
+        if let selectedDID = CoreDID.getSelectedDID(moc) {
+            println(selectedDID.did)
+            self.did = selectedDID.did
+        }
+
         if textMessage.text == "" {
             sendButton.enabled = false
         }
         self.textMessage.delegate = self
-//        [myTextView sizeToFit]; //added
-//        [myTextView layoutIfNeeded]; //added
         self.textMessage.sizeToFit()
-                    
-//        self.textMessage.addTarget(self, action: "textFieldChange:", forControlEvents: UIControlEvents.EditingChanged)
+        
         tableView.separatorStyle = .None
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
-        
-//        tableView.keyboardDismissMode = .Interactive
-//        let modelName = UIDevice.currentDevice().modelName
         
         let screenHeight: CGFloat = UIScreen.mainScreen().bounds.height
         model = IOSModel(screen: screenHeight).model
@@ -130,15 +150,21 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         scrollView.bounces = false
         scrollView.bringSubviewToFront(tableView)
         
+//        self.messages = CoreContact.getMsgsByContact(moc, contactId: self.contactId, did: self.did)
         
-        for m in self.messages {
-            var message = Message(contact: m.contactId, message: m.message, type: m.type, date: m.date, id: m.id)
-            var existingMessage = tableData.filter({$0.id == message.id})
-            if existingMessage.count == 0 {
-                tableData.append(message)
-                self.tableData.sort({$0.date < $1.date})
-            }
-
+//        for m in self.messages {
+//            var message = Message(contact: m.contactId, message: m.message, type: m.type, date: m.date, id: m.id)
+//            var existingMessage = tableData.filter({$0.id == message.id})
+//            if existingMessage.count == 0 {
+//                tableData.append(message)
+//                self.tableData.sort({$0.date < $1.date})
+//            }
+//
+//        }
+        
+        var error : NSError? = nil
+        if (messageFetchedResultsController.performFetch(&error)==false) {
+            println("An error has occurred: \(error?.localizedDescription)")
         }
 
         CoreContact.updateMessagesToRead(moc, contactId: contactId, did: did)
@@ -154,6 +180,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
             }
         }
+        self.tableView.reloadData()
 
     }
     
@@ -170,43 +197,18 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func dataSourceRefreshTimerDidFire(sender: NSTimer) {
 
-        var messageReceived = [Message]()
-
-        for m in self.tableData {
-            if m.type.boolValue == true || m.type == 1 {
-                messageReceived.append(m)
-            }
-        }
-        var filteredArray : [Message] = tableData.filter() { $0.type == true }
-        var lastMessage = tableData[tableData.endIndex - 1]
+        var error : NSError? = nil
+        var lastMessage = messageFetchedResultsController.fetchedObjects?.last! as! CoreMessage
         if let lastMsg = CoreContact.getLastIncomingMessageFromContact(moc, contactId: contactId, did: did) {
             let lastMsgDate = lastMsg.date
             Message.getIncomingMessagesFromAPI(self.moc, did: did, contact: contactId, from: lastMsgDate.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
                 if responseObject.count > 0 {
-                    self.messages = CoreContact.getIncomingMsgsByContact(self.moc, contactId: self.contactId, did: self.did)
-                    if self.messages.count > filteredArray.count {
-                        var newMessages = []
-                        for m in self.messages {
-                            if !contains(filteredArray.map {$0.id}, m.id) {
-                                dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                    var message = Message(contact: m.contactId, message: m.message, type: true, date: m.date, id: m.id)
-                                        var existingMessage = self.tableData.filter({$0.id == message.id})
-                                        if existingMessage.count == 0 {
-                                            self.tableData.append(message)
-//                                            images.sort({ $0.fileID > $1.fileID })
-                                            self.tableData.sort({$0.date < $1.date})
-                                            self.tableView.beginUpdates()
-                                            let indexPath = NSIndexPath(forItem: self.tableData.endIndex - 1, inSection: 0)
-                                            self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
-                                            self.tableView.endUpdates()
-                                            self.tableViewScrollToBottomAnimated(true)
-                                        }
-                                    
-                                   CoreContact.updateMessagesToRead(self.moc, contactId: self.contactId, did: self.did)
-                                })
-                            }
-                        }
+                    var error: NSError? = nil
+                    if (self.messageFetchedResultsController.performFetch(&error)==false) {
+                        println("An error has occurred: \(error?.localizedDescription)")
                     }
+                    self.tableViewScrollToBottomAnimated(true)
+
                 }
                 
             })
@@ -217,10 +219,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     func startTimer() {
         if Reachability.isConnectedToNetwork() {
             timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
-        } else {
-            let alert = UIAlertView(title: "Netword Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
-            alert.show()
-        }
+        } //else {
+//            let alert = UIAlertView(title: "Network Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
+//            alert.show()
+//        }
         
 
     }
@@ -231,6 +233,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
+        self.tableViewScrollToBottomAnimated(false)
         self.tableViewScrollToBottomAnimated(false)
     }
     
@@ -251,7 +254,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             self.tableViewScrollToBottomAnimated(false)
             self.tableViewScrollToBottomAnimated(false)
         })
-        self.tableView.reloadData()
+//        self.tableView.reloadData()
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -289,24 +292,57 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         scrollView.scrollIndicatorInsets = contentInsets;
     }
     
-
+    //MARK: Core Data Delegates
+    
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        self.tableView.beginUpdates()
+    }
+    
+    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        
+        if controller == messageFetchedResultsController {
+            switch type {
+            case .Insert:
+                println("insert")
+                self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+            case .Delete:
+                self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+            case .Update:
+                self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+            default:
+                println("default change object")
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        //        self.tableView.reloadData()
+        self.tableView.endUpdates()
+    }
     
 
     
     //MARK: -tableView delegates
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // #warning Potentially incomplete method implementation.
-        // Return the number of sections.
-        return 1
+        if let sections = messageFetchedResultsController.sections {
+            //use the below for sections - look at sectionkeynamepath in the fetchedresultscontroller to create sections
+            return sections.count
+        }
+        return 0
+    }
+    
+    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        //
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete method implementation.
-        // Return the number of rows in the section.
-//        return messages.count
-        return tableData.count
+        if let sections = messageFetchedResultsController.sections {
+            let currentSection = sections[section] as! NSFetchedResultsSectionInfo
+            return currentSection.numberOfObjects
+        }
+        return 0
     }
-    
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
         
@@ -322,7 +358,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
 //                cell.bubbleImageView.addGestureRecognizer(doubleTapGestureRecognizer)
 //                cell.bubbleImageView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: action))
             }
-            let message : Message = self.tableData[indexPath.row]
+            let message = messageFetchedResultsController.objectAtIndexPath(indexPath) as! CoreMessage
         
             cell.configureWithMessage(message)
             var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
@@ -399,15 +435,15 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             if notification.name == UIKeyboardWillChangeFrameNotification {
                 
                 if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
-                    if allCellHeight < keyboardScreenEndFrame.height  {
-                        tableViewHeightConstraint.constant = compressedTableViewHeight - (keyboardViewEndFrame.height - 80)
-                        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
-                        scrollView.contentInset = contentInsets;
-                        scrollView.scrollIndicatorInsets = contentInsets;
-                    } else {
+//                    if allCellHeight < keyboardScreenEndFrame.height  {
+//                        tableViewHeightConstraint.constant = compressedTableViewHeight - (keyboardViewEndFrame.height - 80)
+//                        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+//                        scrollView.contentInset = contentInsets;
+//                        scrollView.scrollIndicatorInsets = contentInsets;
+//                    } else {
                         scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height, right: 0)
                         scrollView.scrollIndicatorInsets = scrollView.contentInset
-                    }
+//                    }
                 }
             }
            
@@ -420,12 +456,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     func tableViewScrollToBottomAnimated(animated: Bool) {
         let numberOfRows = tableView.numberOfRowsInSection(0)
         if numberOfRows > 0 {
-            let indexPath = NSIndexPath(forRow: self.tableData.endIndex - 1, inSection: 0)
-            tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: UITableViewScrollPosition.Top,
+//        let indexPath = NSIndexPath(forRow: self.tableData.endIndex - 1, inSection: 0)
+        var lastMessage = messageFetchedResultsController.fetchedObjects?.last as! CoreMessage
+        let indexPath = messageFetchedResultsController.indexPathForObject(lastMessage)
+            tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Top,
                 animated: animated)
         }
     }
-    
     
     //MARK: - Button actions
     @IBAction func sendWasPressed(sender: AnyObject) {
@@ -437,25 +474,35 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)
-    
-        var message = Message(contact: self.contactId, message: msgForCoreData, type: 0, date: dateStr, id: "")
-        tableData.append(message)
-        self.tableView.beginUpdates()
-        let indexPath = NSIndexPath(forItem: tableData.count - 1, inSection: 0)
-        self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
-        self.tableView.endUpdates()
         self.tableViewScrollToBottomAnimated(true)
+        
         NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
     
-        Message.sendMessageAPI(self.contactId, messageText: msg, did: did, completionHandler: { (responseObject, error) -> () in
-            if responseObject["status"].stringValue == "success" {
-                //save to core data here
-                CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: responseObject["sms"].stringValue, type: false, date: message.date, message: message.message, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
-                    CoreContact.updateInManagedObjectContext(self.moc, contactId: self.contactId, lastModified: dateStr, fullName: nil, addressBookLastModified: nil)
-                    println("saved to core data")
-                })
+        CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: "", type: false, date: dateStr, message: msgForCoreData, did: self.did, flag: message_status.PENDING.rawValue) { (responseObject, error) -> () in
+            if error == nil {
+                if let cm = responseObject {
+                    self.messageFetchedResultsController.performFetch(nil)
+//                    self.tableView.reloadData()
+                    let coreMessage = cm as CoreMessage
+                    Message.sendMessageAPI(self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
+                        if responseObject["status"].stringValue == "success" {
+                            cm.id = responseObject["sms"].stringValue
+                            cm.flag = message_status.DELIVERED.rawValue
+                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+                            
+                                                    
+//                            CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: responseObject["sms"].stringValue, type: false, date: dateStr, message: msgForCoreData, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
+//                                CoreContact.updateInManagedObjectContext(self.moc, contactId: self.contactId, lastModified: dateStr, fullName: nil, addressBookLastModified: nil)
+//                                println("saved to core data")
+//                            })
+                        }
+                    })
+                }
+                
             }
-        })
+        }
+        
+        
     }
     
     func timerDidFire(sender: NSTimer) {

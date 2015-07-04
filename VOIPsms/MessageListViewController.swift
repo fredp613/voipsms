@@ -32,14 +32,11 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreContact")
         let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
-        
-        let moc = CoreDataStack().managedObjectContext!
-        if let did = CoreDID.getSelectedDID(moc) {
-            println("selected did is \(did.did)")
-            var contactIDs = CoreMessage.getMessagesByDID(moc, did: did.did).map({$0.contactId})
+        if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
+            self.did = did.did
+            var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
             let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
             contactsFetchRequest.predicate = contactPredicate
-            self.did = did.did
         }
         
         let frc = NSFetchedResultsController(
@@ -57,6 +54,12 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreMessage")
         let primarySortDescriptor = NSSortDescriptor(key: "id", ascending: false)
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
+        
+        if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
+            let msgDIDPredicate = NSPredicate(format: "did == %@", self.did)
+            contactsFetchRequest.predicate = msgDIDPredicate
+        }
+        
         let frc = NSFetchedResultsController(
             fetchRequest: contactsFetchRequest,
             managedObjectContext: self.managedObjectContext,
@@ -67,11 +70,17 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         return frc
         }()
+    
+   
 
     override func viewDidLoad() {
         super.viewDidLoad()
         var error: NSError? = nil
         if (fetchedResultsController.performFetch(&error)==false) {
+            println("An error has occurred: \(error?.localizedDescription)")
+        }
+        
+        if (messageFetchedResultsController.performFetch(&error)==false) {
             println("An error has occurred: \(error?.localizedDescription)")
         }
         
@@ -118,7 +127,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func startTimer() {
         if Reachability.isConnectedToNetwork() {
-            timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+            timer = NSTimer.scheduledTimerWithTimeInterval(5, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         }
     }
     
@@ -130,20 +139,18 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                     var ogCount = cm.count
                     if currentUser.initialLogon.boolValue == false {
                         var from = ""
-//                        if currentUser.initialLoad.boolValue == true {
                             if let lastMessage = cm.first as? CoreMessage {
                                 from = lastMessage.date
                                 Message.getMessagesFromAPI(false, moc: managedObjectContext, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
+                                    var error: NSError? = nil
+                                    if (self.fetchedResultsController.performFetch(&error)==false) {
+                                        println("An error has occurred: \(error?.localizedDescription)")
+                                    }
+                                    self.tableView.reloadData()
+
                                 })
                             }
-//                        }
-                        
-//                    } else {
-//                        Message.getMessagesFromAPI(false, moc: managedObjectContext, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
-//                            error) -> () in
-//                        })
                     }
-//                    CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
                 }
                 
             }
@@ -164,6 +171,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+
         if controller == fetchedResultsController {
             switch type {
             case .Insert:
@@ -206,54 +214,23 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             let currentSection = sections[section] as! NSFetchedResultsSectionInfo
             return currentSection.numberOfObjects
         }
-        return 1
+        return 0
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
         let contact = fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
         
-        let didPredicate = NSPredicate(format: "did == %@", self.did)
-        var filteredMessages = contact.messages.filteredSetUsingPredicate(didPredicate)
-        
-        
-        let primarySortDescriptor = NSSortDescriptor(key: "id", ascending: false)
-        var sortedMessages = contact.messages.sortedArrayUsingDescriptors([primarySortDescriptor])
         var message : CoreMessage!
-        if self.did != "" {
-            if (sortedMessages.first != nil) {
-                message = sortedMessages.filter({$0.did == self.did}).first! as! CoreMessage
-                cell.detailTextLabel?.text = message.message
-            }
-        } else {
-            if (sortedMessages.first != nil) {
-                message = sortedMessages.first! as! CoreMessage
-                cell.detailTextLabel?.text = message.message
-            }
-            if message.type.boolValue == true || message.type == 1 {
-                if message.flag == message_status.PENDING.rawValue {
-                    cell.textLabel?.textColor = UIColor(red: 220/255, green: 170/255, blue: 11/255, alpha: 1)
-                    cell.detailTextLabel?.textColor = UIColor(red: 220/255, green: 170/255, blue: 77/255, alpha: 1)
-                } else {
-                    cell.textLabel?.textColor = UIColor.blackColor()
-                    cell.detailTextLabel?.textColor = UIColor.blackColor()
-                }
-            } else {
-                cell.textLabel?.textColor = UIColor.blackColor()
-                cell.detailTextLabel?.textColor = UIColor.blackColor()
-            }
             
-        }
-        
-        if contact.fullName != nil {
-            cell.textLabel?.text = contact.fullName
-        } else {
-            cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
-        }
-        
-//        if message != nil {
-        
-            
+        let predicate = NSPredicate(format: "did == %@", self.did)
+        let contactPredicate = NSPredicate(format: "contactId == %@", contact.contactId)
+        let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [predicate, contactPredicate])
+        messageFetchedResultsController.fetchRequest.predicate = compoundPredicate
+        messageFetchedResultsController.performFetch(nil)
+        var messages = messageFetchedResultsController.fetchedObjects
+        if let message = messages?.first as? CoreMessage {
+            cell.detailTextLabel?.text = message.message
             let font:UIFont? = UIFont(name: "Arial", size: 13.0)
             let dateStr = NSAttributedString(string: message.date.dateFormattedString(), attributes:
                 [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
@@ -267,10 +244,15 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 cell.contentView.viewWithTag(3)?.removeFromSuperview()
             }
             cell.contentView.addSubview(dateLbl)
-//        }
+        }
         
+        if contact.fullName != nil {
+            cell.textLabel?.text = contact.fullName
+        } else {
+            cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+        }
         
-        
+       
         return cell
     }
     
@@ -293,27 +275,34 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         if let dids = CoreDID.getDIDs(self.managedObjectContext) {
             self.did = dids[row].did
-            CoreDID.toggleSelected(self.managedObjectContext, did: self.did)
+            CoreDID.toggleSelected(self.managedObjectContext, did: dids[row].did)
+
             titleBtn.setTitle(self.did.northAmericanPhoneNumberFormat(), forState: UIControlState.Normal)
             if let newDID = CoreDID.getSelectedDID(self.managedObjectContext) {
                 self.did = newDID.did
                 let predicate = NSPredicate(format: "did == %@", self.did)
-                println(self.did)
                 messageFetchedResultsController.fetchRequest.predicate = predicate
                 messageFetchedResultsController.performFetch(nil)
+
                 var contactIDs = [String]()
                 if let contactMessages = messageFetchedResultsController.fetchedObjects {
                     contactIDs += contactMessages.map({$0.contactId})
                     let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
                     fetchedResultsController.fetchRequest.predicate = contactPredicate
                     fetchedResultsController.performFetch(nil)
+//                    let lastMessage = messageFetchedResultsController.fetchedObjects?.last as! CoreMessage
+//                    let lastMessageDate = lastMessage.date
+                    //CoreContact.updateInMoc()
+
+                    self.tableView.reloadData()
                 }
-                self.tableView.reloadData()
+
             }
             
         }
         maskView.removeFromSuperview()
         didView.removeFromSuperview()
+        startTimer()
     }
     
     //MARK: Search Bar Delegate Methods
@@ -424,24 +413,26 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 
-        timer.invalidate()
         if (segue.identifier == "showMessageDetailSegue") {
             self.searchBar.resignFirstResponder()
             var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
-            if self.contactForSegue != "" {
-                detailSegue.contactId = self.contactForSegue
+            if let indexPath = self.tableView.indexPathForSelectedRow() {
+                detailSegue.contactId = self.fetchedResultsController.objectAtIndexPath(indexPath).contactId as String
             } else {
-                if let indexPath = self.tableView.indexPathForSelectedRow() {
-                    detailSegue.contactId = self.fetchedResultsController.objectAtIndexPath(indexPath).contactId as String //
-                }
+                detailSegue.contactId = self.contactForSegue
             }
-            self.contactForSegue = ""
+
+            if let selectedDID = CoreDID.getSelectedDID(self.managedObjectContext) {
+                self.did = selectedDID.did
+            }
             detailSegue.did = self.did
         }
         
         if segue.identifier == "segueToNewMessage" {
             var newMsgVC = segue.destinationViewController as? NewMessageViewController
+            newMsgVC?.did = self.did
             newMsgVC?.delegate = self
         }
+        timer.invalidate()
     }
 }

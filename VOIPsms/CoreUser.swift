@@ -106,6 +106,7 @@ class CoreUser: NSManagedObject {
                 }
                 
             } else {
+                println(error)
                 return completionHandler(false)
             }
         })

@@ -51,12 +51,12 @@ class Message {
                     "method" : "getSMS",
                     "from" : fromStr, //.strippedDateFromString(),
                     "to" : dateFormatter.stringFromDate(NSDate()) as String,
-                    "limit" : "200"
+                    "limit" : "2000"
                 ]
             } else {
                 params = [
                     "method" : "getSMS",
-                    "type" : "1",
+//                    "type" : "1",
                     "limit" : "1"
                 ]
             }
@@ -216,7 +216,10 @@ class Message {
             ]
                         
             VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
+                println(responseObject)
+                
                 return completionHandler(responseObject: responseObject, error: nil)
+                
             }
 
     }

@@ -51,15 +51,15 @@ class CoreDID: NSManagedObject {
         let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDID]
         if fetchResults?.count > 0 {
             coreDIDs = fetchResults!
-        }
-        
-        for c in coreDIDs {
-            if c.did == did {
-                c.currentlySelected = true
-            } else {
-                c.currentlySelected = false
+            for c in coreDIDs {
+                if c.did == did {
+                    c.currentlySelected = 1
+                    println(c.did + " is currently selected")
+                } else {
+                    c.currentlySelected = 0
+                }
+                moc.save(nil)
             }
-            moc.save(nil)
         }
     }
     

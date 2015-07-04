@@ -40,16 +40,16 @@ class MessageBubbleCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configureWithMessage(message: Message) {
+    func configureWithMessage(message: CoreMessage) {
         let font:UIFont? = UIFont(name: "Arial", size: 12.0)
         var mutableStr = NSMutableAttributedString()
         let dateStr = NSAttributedString(string: "\n\n\(message.date)", attributes:
             [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
                 NSFontAttributeName: font!])
-        let messageStr = NSAttributedString(string: message.message)
+        let messageStr = NSAttributedString(string: message.message + " " + message.id)
         mutableStr.appendAttributedString(messageStr)
 //        mutableStr.appendAttributedString(dateStr)
-        messageLabel.attributedText = mutableStr //"\(message.message) \r\n \(dateStr.string)"
+        messageLabel.attributedText = mutableStr  //"\(message.message) \r\n \(dateStr.string)"
         
             var layoutAttribute: NSLayoutAttribute
             var layoutConstant: CGFloat

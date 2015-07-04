@@ -38,7 +38,6 @@ class DownloadMessagesViewController: UIViewController {
     
     //MARK: Custom Methods
     func getMessages() {
-//        startTimer()
         if let dids = CoreDID.getDIDs(moc) {
             if let str = dids.filter({$0.currentlySelected.boolValue == true}).first {
                 if let currentUser = CoreUser.currentUser(self.moc) {
@@ -53,13 +52,6 @@ class DownloadMessagesViewController: UIViewController {
                     })
                 }
             }
-        }
-    }
-    
-    
-    func startTimer() {
-        if Reachability.isConnectedToNetwork() {
-            timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "updateMessageCounter:", userInfo: nil, repeats: true)
         }
     }
     

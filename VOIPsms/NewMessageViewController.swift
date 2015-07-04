@@ -29,6 +29,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     var compressedTableViewHeight : CGFloat = CGFloat()
     var currentKeyboardSize : CGFloat = CGFloat()
     var currentTextViewSize : CGFloat = CGFloat()
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,7 +56,6 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         scrollView.bringSubviewToFront(tableView)
         scrollView.bringSubviewToFront(textMessage)
         scrollView.bringSubviewToFront(sendButton)
-        did = CoreDID.getSelectedDID(moc)!.did
 
         if self.textMessage.text == "" {
             self.sendButton.enabled = false
@@ -108,41 +108,36 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)
         self.textMessage.text = ""
-        
-        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-        dispatch_async(backgroundQueue, { () -> Void in
-            //save to core data here
-            CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msg, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
-                if (CoreContact.currentContact(self.moc, contactId: contact) != nil) {
-                    CoreContact.updateInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr,fullName: nil, addressBookLastModified: nil)
-                } else {
-                    CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
-                }
-                
-                var cm = responseObject
-                Message.sendMessageAPI(contact, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
-                    if responseObject["status"].stringValue == "success" {
-                        CoreMessage.deleteStaleMsgInManagedObjectContext(self.moc, coreId: cm!.coreId)
-                    }
-                })
-                
-                //run the send message in the background
-                
-                //                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                //                    let controllerToPush: AnyObject! = storyBoard.instantiateViewControllerWithIdentifier("messageDetailView")
-                //                    self.navigationController?.setViewControllers([controllerToPush], animated: true)
+        CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msg, did: self.did, flag: message_status.PENDING.rawValue, completionHandler: { (responseObject, error) -> () in
+            if (CoreContact.currentContact(self.moc, contactId: contact) != nil) {
+                CoreContact.updateInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr,fullName: nil, addressBookLastModified: nil)
+            } else {
+                CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
+            }
+            self.delegate?.triggerSegue!(contact)
+            self.dismissViewControllerAnimated(false, completion: { () -> Void in
             })
+            let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+            dispatch_async(backgroundQueue, { () -> Void in
+                if let cm = responseObject {
+                    Message.sendMessageAPI(contact, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
+                        if responseObject["status"].stringValue == "success" {
+                           cm.id = responseObject["sms"].stringValue
+                           cm.flag = message_status.DELIVERED.rawValue
+                           CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+                            //                        CoreMessage.deleteStaleMsgInManagedObjectContext(self.moc, coreId: cm!.coreId)
+                            
+                        }
+                    })
+                }
+            })
+            
+            
+            //                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+            //                    let controllerToPush: AnyObject! = storyBoard.instantiateViewControllerWithIdentifier("messageDetailView")
+            //                    self.navigationController?.setViewControllers([controllerToPush], animated: true)
         })
-
-        self.delegate?.triggerSegue!(contact)
-        self.dismissViewControllerAnimated(false, completion: { () -> Void in
-        })
-//            } else {
-//               // do something else
-//            }
-        
-//        })
     }
     
     //MARK: UITextView Delegate Methods
