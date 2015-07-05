@@ -72,7 +72,6 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         }()
     
    
-
     override func viewDidLoad() {
         super.viewDidLoad()
         var error: NSError? = nil
@@ -91,6 +90,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         let addMessageButton = UIBarButtonItem(title: "New", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToNewMessage:")
         self.navigationItem.rightBarButtonItem = addMessageButton
+
         
     }
 
@@ -175,21 +175,18 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if controller == fetchedResultsController {
             switch type {
             case .Insert:
-                println("insert")
                 self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
             case .Delete:
                 self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
             case .Update:
                 self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
             default:
-                println("default change object")
                 self.tableView.reloadData()
             }
         }
     }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-//        self.tableView.reloadData()
         self.tableView.endUpdates()
     }
     
@@ -249,7 +246,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if contact.fullName != nil {
             cell.textLabel?.text = contact.fullName
         } else {
-            cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+            cell.textLabel?.text = contact.contactId //.northAmericanPhoneNumberFormat()
         }
         
        
@@ -290,10 +287,6 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                     let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
                     fetchedResultsController.fetchRequest.predicate = contactPredicate
                     fetchedResultsController.performFetch(nil)
-//                    let lastMessage = messageFetchedResultsController.fetchedObjects?.last as! CoreMessage
-//                    let lastMessageDate = lastMessage.date
-                    //CoreContact.updateInMoc()
-
                     self.tableView.reloadData()
                 }
 
@@ -324,8 +317,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     //MARK: Custom Methods
     
     func search() {
-        if self.searchBar.text != "" {
-            
+        if self.searchBar.text != "" {            
             
             var messagePredicate : NSPredicate?
             if let messages = CoreMessage.getMessagesByString(managedObjectContext, message: self.searchBar.text, did: self.did) {
@@ -405,6 +397,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func triggerSegue(contact: String) {
         self.contactForSegue = contact
+        self.fetchedResultsController.performFetch(nil)
         self.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
     }
         

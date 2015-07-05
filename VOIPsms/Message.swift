@@ -51,7 +51,7 @@ class Message {
                     "method" : "getSMS",
                     "from" : fromStr, //.strippedDateFromString(),
                     "to" : dateFormatter.stringFromDate(NSDate()) as String,
-                    "limit" : "2000"
+                    "limit" : "500"
                 ]
             } else {
                 params = [

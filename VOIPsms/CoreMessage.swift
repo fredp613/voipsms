@@ -12,6 +12,7 @@ import CoreData
 enum message_status : String {
     case PENDING = "pending"
     case DELIVERED = "delivered"
+    case UNDELIVERED = "undelivered"
     case READ = "read"
 }
 

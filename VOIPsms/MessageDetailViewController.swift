@@ -98,7 +98,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     var tableData : [Message] = [Message]()
     var timer : NSTimer = NSTimer()
     var compressedTableViewHeight : CGFloat = CGFloat()
-    
+
 //    var coreDid = CoreDID()
 //    var delegate:UpdateMessagesTableViewDelegate? = nil
     
@@ -180,6 +180,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
             }
         }
+        
+        //refactor this - only call this when user navigates from new message
+        let lastMessage = messageFetchedResultsController.fetchedObjects?.last! as! CoreMessage
+        if lastMessage.flag == message_status.PENDING.rawValue {
+            self.processMessage(lastMessage)
+        }
         self.tableView.reloadData()
 
     }
@@ -207,8 +213,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                     if (self.messageFetchedResultsController.performFetch(&error)==false) {
                         println("An error has occurred: \(error?.localizedDescription)")
                     }
-                    self.tableViewScrollToBottomAnimated(true)
-
                 }
                 
             })
@@ -246,7 +250,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 self.navigationController?.navigationBar.topItem?.title = cText
                 
             } else {
-                self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat()
+                self.navigationController?.navigationBar.topItem?.title = self.contactId //self.contactId.northAmericanPhoneNumberFormat()
             }
         })
 
@@ -317,7 +321,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        //        self.tableView.reloadData()
         self.tableView.endUpdates()
     }
     
@@ -344,27 +347,26 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         return 0
     }
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-
         
-            let cellIdentifier = NSStringFromClass(MessageBubbleCell)
-            var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as! MessageBubbleCell!
-            if cell == nil {
-                cell = MessageBubbleCell(style: .Default, reuseIdentifier: cellIdentifier)
-                
-                // Add gesture recognizers #CopyMessage
+        let cellIdentifier = NSStringFromClass(MessageBubbleCell)
+        var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as! MessageBubbleCell!
+//        if cell == nil {
+            cell = MessageBubbleCell(style: .Default, reuseIdentifier: cellIdentifier)
+            
+            // Add gesture recognizers #CopyMessage
 //                let action: Selector = "messageShowMenuAction:"
 //                let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: action)
 //                doubleTapGestureRecognizer.numberOfTapsRequired = 2
 //                cell.bubbleImageView.addGestureRecognizer(doubleTapGestureRecognizer)
 //                cell.bubbleImageView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: action))
-            }
             let message = messageFetchedResultsController.objectAtIndexPath(indexPath) as! CoreMessage
-        
             cell.configureWithMessage(message)
             var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
-//            cellHeights.append(size.height + 10)
             allCellHeight += (size.height + 10)
+            self.configureAccessoryView(cell, message: message)
+//        }
 
+       
         return cell
         
     }
@@ -482,37 +484,72 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             if error == nil {
                 if let cm = responseObject {
                     self.messageFetchedResultsController.performFetch(nil)
-//                    self.tableView.reloadData()
-                    let coreMessage = cm as CoreMessage
-                    Message.sendMessageAPI(self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
-                        if responseObject["status"].stringValue == "success" {
-                            cm.id = responseObject["sms"].stringValue
-                            cm.flag = message_status.DELIVERED.rawValue
-                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-                            
-                                                    
-//                            CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: responseObject["sms"].stringValue, type: false, date: dateStr, message: msgForCoreData, did: self.did, flag: message_status.DELIVERED.rawValue, completionHandler: { (responseObject, error) -> () in
-//                                CoreContact.updateInManagedObjectContext(self.moc, contactId: self.contactId, lastModified: dateStr, fullName: nil, addressBookLastModified: nil)
-//                                println("saved to core data")
-//                            })
-                        }
-                    })
+//                    if let indexPath = self.messageFetchedResultsController.indexPathForObject(cm) {
+//                        println("hi")
+//                        if let cell = self.tableView.cellForRowAtIndexPath(indexPath) {
+//                            println("hi no")
+//                            self.activityIndicator(cell)
+//                        }
+//                    }
+                    self.processMessage(cm)
                 }
                 
             }
         }
-        
-        
     }
     
     func timerDidFire(sender: NSTimer) {
         self.tableViewScrollToBottomAnimated(true)
     }
     
- 
+    func processMessage(cm: CoreMessage) {
+        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        dispatch_async(backgroundQueue, { () -> Void in
+            Message.sendMessageAPI(self.contactId, messageText: cm.message, did: self.did, completionHandler: { (responseObject, error) -> () in
+                if responseObject["status"].stringValue == "success" {
+                    cm.id = responseObject["sms"].stringValue
+                    cm.flag = message_status.DELIVERED.rawValue
+                    CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+                } else {
+                    cm.flag = message_status.UNDELIVERED.rawValue
+                    CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+                }
+            })
+        })
+    }
     
+    func configureAccessoryView(cell: UITableViewCell, message: CoreMessage) {
+        
+        cell.accessoryView?.removeFromSuperview()
+        if message.id == "" {
+            if ((message.flag == message_status.PENDING.rawValue) && (self.isLastMessage(message))) {
+                var activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+                activityIndicator.tag = 10
+                activityIndicator.startAnimating()
+                cell.accessoryView = activityIndicator
+            }
+            if message.flag == message_status.UNDELIVERED.rawValue {
+                var btnFrame = CGRectMake(cell.frame.origin.x, cell.frame.origin.y, 24, 24)
+                var btnRetry = UIButton(frame: btnFrame)
+                btnRetry.backgroundColor = UIColor.redColor()
+                btnRetry.layer.cornerRadius = btnRetry.frame.size.width / 2
+                btnRetry.clipsToBounds = true
+                cell.accessoryView = btnRetry
+            }
+        }                
+    }
+    
+    func isLastMessage(message: CoreMessage) -> Bool {
+        var lastMessage = self.messageFetchedResultsController.fetchedObjects?.last! as! CoreMessage
+        println(lastMessage.id)
+        if message.id == lastMessage.id {
+            return true
+        }
+        return false
+    }
 
-    
+ 
     
     // MARK: - Navigation
 

@@ -112,26 +112,27 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             if (CoreContact.currentContact(self.moc, contactId: contact) != nil) {
                 CoreContact.updateInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr,fullName: nil, addressBookLastModified: nil)
             } else {
+                println("creating contact")
                 CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
             }
             self.delegate?.triggerSegue!(contact)
             self.dismissViewControllerAnimated(false, completion: { () -> Void in
             })
-            let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-            dispatch_async(backgroundQueue, { () -> Void in
-                if let cm = responseObject {
-                    Message.sendMessageAPI(contact, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
-                        if responseObject["status"].stringValue == "success" {
-                           cm.id = responseObject["sms"].stringValue
-                           cm.flag = message_status.DELIVERED.rawValue
-                           CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-                            //                        CoreMessage.deleteStaleMsgInManagedObjectContext(self.moc, coreId: cm!.coreId)
-                            
-                        }
-                    })
-                }
-            })
+//            let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+//            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+//            dispatch_async(backgroundQueue, { () -> Void in
+//                if let cm = responseObject {
+//                    Message.sendMessageAPI(contact, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
+//                        if responseObject["status"].stringValue == "success" {
+//                           cm.id = responseObject["sms"].stringValue
+//                           cm.flag = message_status.DELIVERED.rawValue
+//                           CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+//                            //                        CoreMessage.deleteStaleMsgInManagedObjectContext(self.moc, coreId: cm!.coreId)
+//                            
+//                        }
+//                    })
+//                }
+//            })
             
             
             //                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
@@ -229,7 +230,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
                 let cText = contacts[contact.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
                 cell.textLabel?.text = cText! + " " + contact.contactId
             } else {
-                cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+                cell.textLabel?.text = contact.contactId //.northAmericanPhoneNumberFormat()
             }
         }
         
