@@ -90,12 +90,11 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         let addMessageButton = UIBarButtonItem(title: "New", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToNewMessage:")
         self.navigationItem.rightBarButtonItem = addMessageButton
-
         
     }
 
     override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(true)
+//        self.pokeFetchedResultsController()
         titleBtn = UIButton(frame: CGRectMake(navigationController!.navigationBar.center.x, navigationController!.navigationBar.center.y, 100, 40))
         if let selectedDID = CoreDID.getSelectedDID(managedObjectContext) {
             self.did = selectedDID.did
@@ -122,7 +121,13 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         } else {
             performSegueWithIdentifier("showLoginSegue", sender: self)
         }
+        
         startTimer()
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        super.viewDidDisappear(true)
+//        self.fetchedResultsController.delegate = nil
     }
     
     func startTimer() {
@@ -133,7 +138,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func timerDidFire(sender: NSTimer) {
         if let str = CoreDID.getSelectedDID(managedObjectContext) {
-            messageFetchedResultsController.performFetch(nil)
+
             if let cm = messageFetchedResultsController.fetchedObjects {
                 if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
                     var ogCount = cm.count
@@ -393,11 +398,24 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         self.performSegueWithIdentifier("segueToNewMessage", sender: sender)
     }
     
+    func pokeFetchedResultsController() {
+        
+        fetchedResultsController.fetchRequest.predicate = nil
+        if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
+            self.did = did.did
+            var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
+            let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
+            fetchedResultsController.fetchRequest.predicate = contactPredicate
+        }
+        fetchedResultsController.performFetch(nil)
+
+    }
+    
     //MARK: Class Delegate Methods
     
     func triggerSegue(contact: String) {
         self.contactForSegue = contact
-        self.fetchedResultsController.performFetch(nil)
+        self.pokeFetchedResultsController()
         self.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
     }
         
@@ -428,4 +446,6 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         }
         timer.invalidate()
     }
+    
+    
 }
