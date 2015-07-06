@@ -55,9 +55,8 @@ class Message {
                 ]
             } else {
                 params = [
-                    "method" : "getSMS",
-//                    "type" : "1",
-                    "limit" : "1"
+                    "method" : "getSMS" //,
+//                    "limit" : "10"
                 ]
             }
         }
@@ -224,7 +223,7 @@ class Message {
 
     }
     
-    class func deleteMessagesFromAPI(ids: [String], completionHandler: (responseObject: Bool, error: NSError?)->()) {
+    class func deleteMessagesFromAPI(ids: [String]!, completionHandler: (responseObject: Bool, error: NSError?)->()) {
         
         for id in ids {
             let params = [

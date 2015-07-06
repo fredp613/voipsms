@@ -43,12 +43,13 @@ class CoreContact: NSManagedObject {
         if let contact : CoreContact = CoreContact.currentContact(managedObjectContext, contactId: contactId) {
             
             if let lastModified = lastModified {
-                if let cc = CoreContact.getLastMessageFromContact(managedObjectContext, contactId: contactId, did: CoreDID.getSelectedDID(managedObjectContext)!.did) {
-                    var formatter1: NSDateFormatter = NSDateFormatter()
-                    formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                    let parsedDate: NSDate = formatter1.dateFromString(cc.date)!
-                    contact.lastModified = parsedDate
-                }
+                
+//                if let cc = CoreContact.getLastMessageFromContact(managedObjectContext, contactId: contactId, did: CoreDID.getSelectedDID(managedObjectContext)!.did) {
+//                    var formatter1: NSDateFormatter = NSDateFormatter()
+//                    formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+//                    let parsedDate: NSDate = formatter1.dateFromString(cc.date)!
+//                    contact.lastModified = parsedDate
+//                }
             } else {
                 if fullName == nil {
                     contact.lastModified = NSDate()
@@ -64,6 +65,10 @@ class CoreContact: NSManagedObject {
             return true
         }
         return false
+    }
+    
+    class func updateContactInMOC(moc: NSManagedObjectContext) {
+        moc.save(nil)
     }
     
     class func getAllContacts(managedObjectContext: NSManagedObjectContext) -> [CoreContact]? {

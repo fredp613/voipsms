@@ -98,6 +98,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     var tableData : [Message] = [Message]()
     var timer : NSTimer = NSTimer()
     var compressedTableViewHeight : CGFloat = CGFloat()
+    var deleteMenuActivated : Bool = false
+    var dynamicBarButton : UIBarButtonItem = UIBarButtonItem()
 
 //    var coreDid = CoreDID()
 //    var delegate:UpdateMessagesTableViewDelegate? = nil
@@ -150,18 +152,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         scrollView.bounces = false
         scrollView.bringSubviewToFront(tableView)
         
-//        self.messages = CoreContact.getMsgsByContact(moc, contactId: self.contactId, did: self.did)
-        
-//        for m in self.messages {
-//            var message = Message(contact: m.contactId, message: m.message, type: m.type, date: m.date, id: m.id)
-//            var existingMessage = tableData.filter({$0.id == message.id})
-//            if existingMessage.count == 0 {
-//                tableData.append(message)
-//                self.tableData.sort({$0.date < $1.date})
-//            }
-//
-//        }
-        
         var error : NSError? = nil
         if (messageFetchedResultsController.performFetch(&error)==false) {
             println("An error has occurred: \(error?.localizedDescription)")
@@ -171,8 +161,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         startTimer()
         compressedTableViewHeight = self.tableView.frame.size.height
         
-        let contactDetailButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
-        self.navigationItem.rightBarButtonItem = contactDetailButton
+        dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
+        
+        self.navigationItem.rightBarButtonItem = dynamicBarButton
         
         if let currentUser = CoreUser.currentUser(self.moc) {
             if currentUser.initialLoad.boolValue == true {
@@ -338,7 +329,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
         //
     }
-    
+
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let sections = messageFetchedResultsController.sections {
             let currentSection = sections[section] as! NSFetchedResultsSectionInfo
@@ -350,22 +341,42 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         let cellIdentifier = NSStringFromClass(MessageBubbleCell)
         var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as! MessageBubbleCell!
-//        if cell == nil {
-            cell = MessageBubbleCell(style: .Default, reuseIdentifier: cellIdentifier)
+        
+        cell = MessageBubbleCell(style: .Default, reuseIdentifier: cellIdentifier)
+        cell.userInteractionEnabled = true;
+        // Add gesture recognizers #CopyMessage
+        let action: Selector = "messageShowMenuAction:"
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: action)
+        tapGestureRecognizer.numberOfTapsRequired = 2
+        cell.bubbleImageView.addGestureRecognizer(tapGestureRecognizer)
+        cell.bubbleImageView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: action))
+        let message = messageFetchedResultsController.objectAtIndexPath(indexPath) as! CoreMessage
+        cell.configureWithMessage(message)
+        var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
+        allCellHeight += (size.height + 10)
+        self.configureAccessoryView(cell, message: message)
+        
+        if deleteMenuActivated {
+            var btnDeleteMessage = UIButton(frame: CGRectMake(cell.frame.origin.x + 15, cell.center.y / 2, 25, 25))
+            btnDeleteMessage.layer.borderWidth = 2.0
+            btnDeleteMessage.layer.borderColor = UIColor.blueColor().CGColor
+            btnDeleteMessage.layer.cornerRadius = btnDeleteMessage.frame.size.width / 2
+            btnDeleteMessage.addTarget(self, action: "deleteMenuButtonSelected:", forControlEvents: UIControlEvents.TouchUpInside)
+            cell.accessoryView = btnDeleteMessage
             
-            // Add gesture recognizers #CopyMessage
-//                let action: Selector = "messageShowMenuAction:"
-//                let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: action)
-//                doubleTapGestureRecognizer.numberOfTapsRequired = 2
-//                cell.bubbleImageView.addGestureRecognizer(doubleTapGestureRecognizer)
-//                cell.bubbleImageView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: action))
-            let message = messageFetchedResultsController.objectAtIndexPath(indexPath) as! CoreMessage
-            cell.configureWithMessage(message)
-            var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
-            allCellHeight += (size.height + 10)
-            self.configureAccessoryView(cell, message: message)
-//        }
-
+            var deleteActionView = UIView(frame: CGRectMake(self.textMessage.frame.origin.x, self.textMessage.frame.origin.y, self.view.frame.width, self.textMessage.frame.size.height))
+            deleteActionView.backgroundColor = UIColor(red: 241/255, green: 241/255, blue: 241/255, alpha: 1)
+            deleteActionView.tag = 30
+            view.addSubview(deleteActionView)
+            
+            var btnDeleteSelectedMessages = UIButton(frame: CGRectMake(self.sendButton.frame.origin.x + 16,self.sendButton.frame.origin.y + 7, 35, 30))
+            btnDeleteSelectedMessages.setImage(UIImage(named: "trash"), forState: UIControlState.Normal)
+            btnDeleteSelectedMessages.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
+            btnDeleteSelectedMessages.enabled = false
+            btnDeleteSelectedMessages.tag = 31
+            view.addSubview(btnDeleteSelectedMessages)
+            view.bringSubviewToFront(btnDeleteSelectedMessages)
+        }
        
         return cell
         
@@ -484,13 +495,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             if error == nil {
                 if let cm = responseObject {
                     self.messageFetchedResultsController.performFetch(nil)
-//                    if let indexPath = self.messageFetchedResultsController.indexPathForObject(cm) {
-//                        println("hi")
-//                        if let cell = self.tableView.cellForRowAtIndexPath(indexPath) {
-//                            println("hi no")
-//                            self.activityIndicator(cell)
-//                        }
-//                    }
                     self.processMessage(cm)
                 }
                 
@@ -503,6 +507,16 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func processMessage(cm: CoreMessage) {
+        println(cm.date)
+        if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
+            var formatter1: NSDateFormatter = NSDateFormatter()
+            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+            let parsedDate: NSDate = formatter1.dateFromString(cm.date)!
+            currentContact.lastModified = parsedDate
+            CoreContact.updateContactInMOC(self.moc)
+        }
+        
+        
         let qualityOfServiceClass = QOS_CLASS_BACKGROUND
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
         dispatch_async(backgroundQueue, { () -> Void in
@@ -548,8 +562,80 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         }
         return false
     }
+    
+    // Handle actions #CopyMessage
+    // 1. Select row and show "Copy" menu
+    
+    
+    override func canBecomeFirstResponder() -> Bool {
+        return true
+    }
+    
+    func messageShowMenuAction(gestureRecognizer: UITapGestureRecognizer) {
+        let bubbleImageView = gestureRecognizer.view!
+        bubbleImageView.becomeFirstResponder()
+        let twoTaps = (gestureRecognizer.numberOfTapsRequired == 2)
+        let doubleTap = (twoTaps && gestureRecognizer.state == .Ended)
+        let longPress = (!twoTaps && gestureRecognizer.state == .Began)
+        if doubleTap || longPress {
+            let pressedIndexPath = tableView.indexPathForRowAtPoint(gestureRecognizer.locationInView(tableView))!
+            tableView.selectRowAtIndexPath(pressedIndexPath, animated: false, scrollPosition: .None)
+            let menuController = UIMenuController.sharedMenuController()
+            menuController.setTargetRect(bubbleImageView.frame, inView: bubbleImageView.superview!)
+            menuController.menuItems = nil
+            menuController.menuItems = [UIMenuItem(title: "Copy", action: "messageCopyTextAction:"), UIMenuItem(title: "More...", action: "activateDeleteAction:")]
+            menuController.setMenuVisible(true, animated: true)
+        }
+    }
+    // 2. Copy text to pasteboard
+    func messageCopyTextAction(menuController: UIMenuController) {
+        let selectedIndexPath = tableView.indexPathForSelectedRow()
+        let selectedMessage = messageFetchedResultsController.objectAtIndexPath(selectedIndexPath!) as! CoreMessage
+        UIPasteboard.generalPasteboard().string = selectedMessage.message
+    }
+    // 3. Deselect row
+    func menuControllerWillHide(notification: NSNotification) {
+        if let selectedIndexPath = tableView.indexPathForSelectedRow() {
+            tableView.deselectRowAtIndexPath(selectedIndexPath, animated: false)
+        }
+        (notification.object as! UIMenuController).menuItems = nil
+        dynamicBarButton.title = "Details"
+        dynamicBarButton.action = "segueToContactDetails:"
+    }
+    //4: Activate delete action
+    func activateDeleteAction(menuController: UIMenuController) {
+        deleteMenuActivated = true
+        dynamicBarButton.title = "Cancel"
+        dynamicBarButton.action = "cancelDeleteAction:"
+        self.tableView.reloadData()
+    }
+    
+    func deleteMenuButtonSelected(sender: UIButton) {
+        let btn = sender
+        if btn.backgroundColor == UIColor.lightGrayColor() {
+            btn.backgroundColor = nil
+        } else {
+            btn.backgroundColor = UIColor.lightGrayColor()
+        }
+        
+    }
+    
+    func deleteMessages(sender: UIButton) {
+        println("deleting")
+    }
+    
+    func cancelDeleteAction(sender: UIButton) {
+        deleteMenuActivated = false
+        self.tableView.reloadData()
+        dynamicBarButton.title = "Details"
+        dynamicBarButton.action = "segueToContactDetails:"
+        var btnDeleteToRemove = self.view.viewWithTag(30)
+        btnDeleteToRemove?.removeFromSuperview()
+        var deleteView = self.view.viewWithTag(31)
+        deleteView?.removeFromSuperview()
+    }
 
- 
+
     
     // MARK: - Navigation
 

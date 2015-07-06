@@ -42,7 +42,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         let frc = NSFetchedResultsController(
             fetchRequest: contactsFetchRequest,
             managedObjectContext: self.managedObjectContext,
-            sectionNameKeyPath: "lastModified",
+            sectionNameKeyPath: nil,
             cacheName: nil)
         
         frc.delegate = self
@@ -52,7 +52,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     lazy var messageFetchedResultsController: NSFetchedResultsController = {
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreMessage")
-        let primarySortDescriptor = NSSortDescriptor(key: "id", ascending: false)
+        let primarySortDescriptor = NSSortDescriptor(key: "date", ascending: false)
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
         
         if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
@@ -94,7 +94,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
 
     override func viewDidAppear(animated: Bool) {
-//        self.pokeFetchedResultsController()
+        self.pokeFetchedResultsController()
         titleBtn = UIButton(frame: CGRectMake(navigationController!.navigationBar.center.x, navigationController!.navigationBar.center.y, 100, 40))
         if let selectedDID = CoreDID.getSelectedDID(managedObjectContext) {
             self.did = selectedDID.did
@@ -132,7 +132,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func startTimer() {
         if Reachability.isConnectedToNetwork() {
-            timer = NSTimer.scheduledTimerWithTimeInterval(5, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+            timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         }
     }
     
@@ -150,6 +150,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                                     var error: NSError? = nil
                                     if (self.fetchedResultsController.performFetch(&error)==false) {
                                         println("An error has occurred: \(error?.localizedDescription)")
+                                    }
+                                    if currentUser.initialLoad.boolValue == true {
+                                        currentUser.initialLoad = 0
+                                        CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
                                     }
                                     self.tableView.reloadData()
 
@@ -180,9 +184,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if controller == fetchedResultsController {
             switch type {
             case .Insert:
-                self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+                self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
             case .Delete:
-                self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+                self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
             case .Update:
                 self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
             default:
@@ -251,12 +255,38 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if contact.fullName != nil {
             cell.textLabel?.text = contact.fullName
         } else {
-            cell.textLabel?.text = contact.contactId //.northAmericanPhoneNumberFormat()
+            cell.textLabel?.text = "\(contact.contactId)"  //.northAmericanPhoneNumberFormat()
         }
-        
+
        
         return cell
     }
+    
+    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPth: NSIndexPath) -> Bool {
+        return true
+    }
+    
+    
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        self.timer.invalidate()
+        
+        if editingStyle == UITableViewCellEditingStyle.Delete {
+            
+            var contact = fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
+            var messages = messageFetchedResultsController.fetchedObjects?.filter({$0.contactId == contact.contactId}) as! [CoreMessage]
+            
+            CoreMessage.deleteAllMessagesFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
+                
+                self.pokeFetchedResultsController()
+                
+                Message.deleteMessagesFromAPI(messages.map({$0.id}), completionHandler: { (responseObject, error) -> () in
+                    //println
+                })
+            })
+            
+        }
+    }
+
     
     //MARK: - PickerView delegate methods
     
@@ -341,14 +371,14 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             }
             
             self.fetchedResultsController.performFetch(nil)
+            tableView.reloadData()
         } else {
             clearSearch()
         }
     }
     
     func clearSearch() {
-        fetchedResultsController.fetchRequest.predicate = nil
-        self.fetchedResultsController.performFetch(nil)
+        self.pokeFetchedResultsController()
     }
     
     func titleClicked(sender: UIButton) {
@@ -399,8 +429,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     func pokeFetchedResultsController() {
-        
+        fetchedResultsController.fetchRequest.sortDescriptors = nil
         fetchedResultsController.fetchRequest.predicate = nil
+        let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
+        fetchedResultsController.fetchRequest.sortDescriptors = [primarySortDescriptor]
         if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
             self.did = did.did
             var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
@@ -408,7 +440,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             fetchedResultsController.fetchRequest.predicate = contactPredicate
         }
         fetchedResultsController.performFetch(nil)
-
+        self.tableView.reloadData()
     }
     
     //MARK: Class Delegate Methods

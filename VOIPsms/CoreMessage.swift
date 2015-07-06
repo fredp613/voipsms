@@ -74,7 +74,7 @@ class CoreMessage: NSManagedObject {
         }
     }
     
-    class func deleteAllMessagesFromContact(moc: NSManagedObjectContext, contactId: String, did: String, completionHandler: (responseObject: Bool, error: NSError?)->()) {
+    class func deleteAllMessagesFromContact(moc: NSManagedObjectContext, contactId: String!, did: String, completionHandler: (responseObject: Bool, error: NSError?)->()) {
         
         let coreMessages = CoreContact.getMsgsByContact(moc, contactId: contactId, did: did)
         
