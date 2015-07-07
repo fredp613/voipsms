@@ -74,6 +74,15 @@ class CoreMessage: NSManagedObject {
         }
     }
     
+    class func deleteMessage(moc: NSManagedObjectContext, coreMessage: CoreMessage) {
+        if coreMessage.id != "" {
+            CoreDeleteMessage.createInManagedObjectContext(moc, id: coreMessage.id)
+        }
+
+        moc.deleteObject(coreMessage)
+        moc.save(nil)
+    }
+    
     class func deleteAllMessagesFromContact(moc: NSManagedObjectContext, contactId: String!, did: String, completionHandler: (responseObject: Bool, error: NSError?)->()) {
         
         let coreMessages = CoreContact.getMsgsByContact(moc, contactId: contactId, did: did)
