@@ -55,12 +55,12 @@ class Message {
                 ]
             } else {
                 params = [
-                    "method" : "getSMS" //,
-//                    "limit" : "10"
+                    "method" : "getSMS",
+                    "limit" : "10"
                 ]
             }
         }
-        println(APIUrls.get_request_url_contruct(params)!)
+
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
             println(error)
@@ -150,9 +150,10 @@ class Message {
                     "did" : did,
                     "contact" : contact,
                     "to" : dateFormatter.stringFromDate(NSDate()) as String,
-                    "limit" : "1000000"
+                    "limit" : "500"
                 ]
             } else {
+                println("initial load or logon")
                 params = [
                     "method" : "getSMS",
                     "type" : "1",
@@ -215,8 +216,6 @@ class Message {
             ]
                         
             VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
-                println(responseObject)
-                
                 return completionHandler(responseObject: responseObject, error: nil)
                 
             }

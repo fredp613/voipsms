@@ -43,12 +43,15 @@ class MessageBubbleCell: UITableViewCell {
     func configureWithMessage(message: CoreMessage) {
         let font:UIFont? = UIFont(name: "Arial", size: 12.0)
         var mutableStr = NSMutableAttributedString()
-        let dateStr = NSAttributedString(string: "\n\n\(message.date)", attributes:
+        let dateStr = NSAttributedString(string: "\n\(message.date)", attributes:
             [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
                 NSFontAttributeName: font!])
-        let messageStr = NSAttributedString(string: message.message + " " + message.id)
+        let messageStr = NSAttributedString(string: message.message)
         mutableStr.appendAttributedString(messageStr)
-//        mutableStr.appendAttributedString(dateStr)
+        if message.date != "" {
+            mutableStr.appendAttributedString(dateStr)
+        }
+
         messageLabel.attributedText = mutableStr  //"\(message.message) \r\n \(dateStr.string)"
         
             var layoutAttribute: NSLayoutAttribute
@@ -105,7 +108,8 @@ func bubbleImageMake() -> (incoming: UIImage, incomingHighlighed: UIImage, outgo
     let outgoing = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 177/255.0, 1).resizableImageWithCapInsets(capInsetsOutgoing)
     let outgoingHighlighted = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 177/255.0, 0.7).resizableImageWithCapInsets(capInsetsOutgoing)
     
-    return (incoming, incomingHighlighted, outgoing, outgoingHighlighted)
+//    return (incoming, incomingHighlighted, outgoing, outgoingHighlighted)
+    return (incoming, incoming, outgoing, outgoing)
 }
 
 func coloredImage(image: UIImage, red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) -> UIImage! {

@@ -15,6 +15,7 @@ import CoreData
 
 class MessageListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, UISearchBarDelegate, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource, MessageListViewDelegate {
     
+    @IBOutlet weak var btnNewMessage: UIButton!
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var titleButton: UIButton!
     @IBOutlet weak var tableView: UITableView!
@@ -88,8 +89,13 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
         }
         
-        let addMessageButton = UIBarButtonItem(title: "New", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToNewMessage:")
-        self.navigationItem.rightBarButtonItem = addMessageButton
+//        let addMessageButton = UIBarButtonItem(title: "New", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToNewMessage:")
+//        self.navigationItem.rightBarButtonItem = addMessageButton
+        
+        self.btnNewMessage.layer.cornerRadius = self.btnNewMessage.frame.size.height / 2
+        self.view.bringSubviewToFront(self.btnNewMessage)
+//        checkAllPermissions()
+        self.tableView.reloadData()
         
     }
 
@@ -121,13 +127,42 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         } else {
             performSegueWithIdentifier("showLoginSegue", sender: self)
         }
-        
+
         startTimer()
     }
     
     override func viewDidDisappear(animated: Bool) {
         super.viewDidDisappear(true)
 //        self.fetchedResultsController.delegate = nil
+    }
+    
+    func checkAllPermissions() {
+        
+        if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
+            if currentUser.initialLogon.boolValue == true {
+                if Contact().checkAccess() == true {
+                    if currentUser.initialLoad.boolValue == true {
+                        //                        self.askPermissionForNotifications()
+                    }
+                } else {
+                    var alertController = UIAlertController(title: "No contact access", message: "In order to link to your messages to your contacts, voip.ms sms requires access to your contacts. You will need to grant access for this app to sync with your phone contacts in your phone settings", preferredStyle: .Alert)
+                    
+                    var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
+                        UIAlertAction in
+                        //                        self.askPermissionForNotifications()
+                    }
+                    var cancelAction = UIAlertAction(title: "No, do not sync my contacts", style: UIAlertActionStyle.Cancel) {
+                        UIAlertAction in
+                        //                        self.askPermissionForNotifications()
+                    }
+                    alertController.addAction(okAction)
+                    alertController.addAction(cancelAction)
+                    self.presentViewController(alertController, animated: true, completion: nil)
+                    
+                }
+                
+            }
+        }
     }
     
     func startTimer() {
@@ -138,7 +173,6 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func timerDidFire(sender: NSTimer) {
         if let str = CoreDID.getSelectedDID(managedObjectContext) {
-
             if let cm = messageFetchedResultsController.fetchedObjects {
                 if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
                     var ogCount = cm.count
@@ -172,6 +206,12 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    @IBAction func newMessageWasPressed(sender: AnyObject) {
+//        segueToNewMessage
+        self.performSegueWithIdentifier("segueToNewMessage", sender: self)
+    }
+    
     
     //MARK: Core Data Delegates
     
@@ -442,6 +482,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         fetchedResultsController.performFetch(nil)
         self.tableView.reloadData()
     }
+    
     
     //MARK: Class Delegate Methods
     

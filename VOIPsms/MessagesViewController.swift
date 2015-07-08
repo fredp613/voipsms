@@ -69,7 +69,6 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         if let currentUser = CoreUser.currentUser(moc) {
             if currentUser.initialLogon.boolValue == false {
                 if Contact().checkAccess() == true {
-//                    println("has access")
                     if currentUser.initialLoad.boolValue == true {
 //                        self.askPermissionForNotifications()
                     }
@@ -78,12 +77,10 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     
                     var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
                         UIAlertAction in
-//                        println("pressed")
 //                        self.askPermissionForNotifications()
                     }
                     var cancelAction = UIAlertAction(title: "No, do not sync my contacts", style: UIAlertActionStyle.Cancel) {
                         UIAlertAction in
-//                        println("cancelled")
 //                        self.askPermissionForNotifications()
                     }
                     alertController.addAction(okAction)

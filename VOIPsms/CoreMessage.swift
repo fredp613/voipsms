@@ -284,7 +284,7 @@ class CoreMessage: NSManagedObject {
             let secondPredicate = NSPredicate(format: "id != %@", "")
             let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
             fetchRequest.predicate = predicate
-            let sortDescriptor = NSSortDescriptor(key: "id", ascending: false)
+            let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
             fetchRequest.sortDescriptors = [sortDescriptor]
             fetchRequest.fetchLimit = 1
             
