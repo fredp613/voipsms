@@ -153,7 +153,6 @@ class Message {
                     "limit" : "500"
                 ]
             } else {
-                println("initial load or logon")
                 params = [
                     "method" : "getSMS",
                     "type" : "1",

@@ -318,10 +318,13 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             CoreMessage.deleteAllMessagesFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
                 
                 self.pokeFetchedResultsController()
+//                if messages.count > 0 {
+//                    let messagesToDelete = messages.filter({$0.id != ""})
+//                    Message.deleteMessagesFromAPI(messagesToDelete.map({$0.id}), completionHandler: { (responseObject, error) -> () in
+//                        //println
+//                    })
+//                }
                 
-                Message.deleteMessagesFromAPI(messages.map({$0.id}), completionHandler: { (responseObject, error) -> () in
-                    //println
-                })
             })
             
         }

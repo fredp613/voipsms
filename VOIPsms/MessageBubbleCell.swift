@@ -43,7 +43,14 @@ class MessageBubbleCell: UITableViewCell {
     func configureWithMessage(message: CoreMessage) {
         let font:UIFont? = UIFont(name: "Arial", size: 12.0)
         var mutableStr = NSMutableAttributedString()
-        let dateStr = NSAttributedString(string: "\n\(message.date)", attributes:
+        var humanDate = String()
+        if message.date != "" {
+            humanDate = message.date.dateFormattedString()
+        } else {
+            humanDate = message.date
+        }
+        
+        let dateStr = NSAttributedString(string: "\n\(humanDate)", attributes:
             [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
                 NSFontAttributeName: font!])
         let messageStr = NSAttributedString(string: message.message)

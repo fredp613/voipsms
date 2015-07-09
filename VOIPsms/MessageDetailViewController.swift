@@ -108,6 +108,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     var deleteActionView : UIView = UIView()
     var scrollDirection = ScrollDirection()
     var tableFullyLoaded = false
+    var retrying : Bool = false
 
 //    var coreDid = CoreDID()
 //    var delegate:UpdateMessagesTableViewDelegate? = nil
@@ -214,14 +215,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                     if responseObject.count > 0 {
                     for (key: String, t: JSON) in responseObject["sms"] {
                         if let cm = CoreMessage.getMessageById(self.moc, Id: t["id"].stringValue) {
-                            println("exists")
                         } else {
                             var error: NSError? = nil
                             if (self.messageFetchedResultsController.performFetch(&error)==false) {
                                 println("An error has occurred: \(error?.localizedDescription)")
                             }
-//                            self.tableView.reloadData()
-
                         }
                     }
                   }
@@ -351,11 +349,14 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         var test = indexPaths?.last as! NSIndexPath
         if test.row == indexPath.row {
             if !self.tableFullyLoaded {
-                self.tableViewScrollToBottomAnimated(false)
-                self.tableViewScrollToBottomAnimated(false)
+                if !deleteMenuActivated {
+                    self.tableViewScrollToBottomAnimated(false)
+                    self.tableViewScrollToBottomAnimated(false)
+                }
                 self.tableFullyLoaded = true
             }
         }
+        
     
     }
     
@@ -388,6 +389,17 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                     deleteViewButton!.backgroundColor = UIColor.lightGrayColor()
                     messagesToDelete.updateValue(message, forKey: indexPath.row + 100)
                 }
+            } else {
+                //retry button exists
+                if (self.view.viewWithTag(33) != nil) {
+                    var cell = self.tableView.cellForRowAtIndexPath(self.messageFetchedResultsController.indexPathForObject(message)!)
+                    var activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+                    activityIndicator.tag = 10
+                    cell!.accessoryView = activityIndicator
+                    activityIndicator.startAnimating()
+                    self.retrying = true
+                    processMessage(message)
+                }
             }
         }
         
@@ -399,14 +411,16 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: Selector("updateView"), userInfo: nil, repeats: false)
             }
         }
+
     }
     
     func updateView() {
         if deleteMenuActivated {
             var delView = self.view.viewWithTag(selectedIndexPath.row + 100)!
             delView.backgroundColor = UIColor.lightGrayColor()
-            self.messagesToDelete.removeAll(keepCapacity: false)
+//            self.messagesToDelete.removeAll(keepCapacity: false)
             self.messagesToDelete.updateValue(self.messageFetchedResultsController.objectAtIndexPath(selectedIndexPath) as! CoreMessage, forKey: selectedIndexPath.row + 100)
+            
         } else {
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 for v in self.view.subviews {
@@ -448,10 +462,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 viewDeleteMessageIcon.layer.borderColor = UIColor.blueColor().CGColor
                 viewDeleteMessageIcon.tag = indexPath.row + 100
                 viewDeleteMessageIcon.layer.cornerRadius = viewDeleteMessageIcon.frame.size.width / 2
-                
                 cell.accessoryView = viewDeleteMessageIcon
-
-                
+                println(messagesToDelete.count)
+                if let val = messagesToDelete[indexPath.row + 100] {
+                    viewDeleteMessageIcon.backgroundColor = UIColor.lightGrayColor()
+//                    self.view.viewWithTag(indexPath.row + 100)?.backgroundColor = UIColor.lightGrayColor()
+                    //                        self.updateView2(indexPath)
+                }
                 deleteActionView = UIView(frame: CGRectMake(self.textMessage.frame.origin.x, self.textMessage.frame.origin.y, self.view.frame.width, self.textMessage.frame.size.height))
                 deleteActionView.backgroundColor = UIColor(red: 241/255, green: 241/255, blue: 241/255, alpha: 1)
                 deleteActionView.tag = 30
@@ -633,8 +650,22 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 })
             })
         } else {
-            cm.flag = message_status.UNDELIVERED.rawValue
-            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+            if !retrying {
+                cm.flag = message_status.UNDELIVERED.rawValue
+                CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+            } else {
+                let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+                let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+                dispatch_async(backgroundQueue, { () -> Void in
+                    sleep(1)
+                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                        let cell = self.tableView.cellForRowAtIndexPath(self.messageFetchedResultsController.indexPathForObject(cm)!)
+                        self.configureAccessoryView(cell!, message: cm)
+                    })
+                })
+            }
+            
+            
         }
        
     }
@@ -651,13 +682,20 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             }
             if message.flag == message_status.UNDELIVERED.rawValue {
                 var btnFrame = CGRectMake(cell.frame.origin.x, cell.frame.origin.y, 24, 24)
-                var btnRetry = UIButton(frame: btnFrame)
+                var btnRetry = UIView(frame: btnFrame)
                 btnRetry.backgroundColor = UIColor.redColor()
+                btnRetry.tag = 33
                 btnRetry.layer.cornerRadius = btnRetry.frame.size.width / 2
                 btnRetry.clipsToBounds = true
                 cell.accessoryView = btnRetry
             }
         }                
+    }
+    
+    func retryWasPressed(sender: UIButton) {
+        println("hi")
+//        let cm : CoreMessage = self.messageFetchedResultsController.objectAtIndexPath(self.selectedIndexPath) as! CoreMessage
+//        processMessage(cm)
     }
     
     func isLastMessage(message: CoreMessage) -> Bool {

@@ -78,9 +78,22 @@ class CoreMessage: NSManagedObject {
         if coreMessage.id != "" {
             CoreDeleteMessage.createInManagedObjectContext(moc, id: coreMessage.id)
         }
-
+        var contact = coreMessage.contactId
+        var did = coreMessage.did
+        
         moc.deleteObject(coreMessage)
         moc.save(nil)
+        
+        if let lastMessage = CoreContact.getLastMessageFromContact(moc, contactId: contact, did: did) {
+            var currentContact = CoreContact.currentContact(moc, contactId: contact)
+            var formatter1: NSDateFormatter = NSDateFormatter()
+            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+            let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
+            currentContact?.lastModified = parsedDate
+            CoreContact.updateContactInMOC(moc)
+        }
+      
+        
     }
     
     class func deleteAllMessagesFromContact(moc: NSManagedObjectContext, contactId: String!, did: String, completionHandler: (responseObject: Bool, error: NSError?)->()) {
