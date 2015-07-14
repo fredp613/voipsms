@@ -16,6 +16,7 @@ class CoreContact: NSManagedObject {
     @NSManaged var lastModified: NSDate
     @NSManaged var addressBookSyncLastModified: NSDate!
     @NSManaged var fullName: String!
+    @NSManaged var phoneLabel: String!
     var ccs = [CoreContact]()
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?) -> CoreContact? {
@@ -39,17 +40,17 @@ class CoreContact: NSManagedObject {
         return nil
     }
     
-    class func updateInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?, fullName: String?, addressBookLastModified: NSDate?) -> Bool {
+    class func updateInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?, fullName: String?, phoneLabel: String?, addressBookLastModified: NSDate?) -> Bool {
         if let contact : CoreContact = CoreContact.currentContact(managedObjectContext, contactId: contactId) {
             
             if let lastModified = lastModified {
                 
-//                if let cc = CoreContact.getLastMessageFromContact(managedObjectContext, contactId: contactId, did: CoreDID.getSelectedDID(managedObjectContext)!.did) {
-//                    var formatter1: NSDateFormatter = NSDateFormatter()
-//                    formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-//                    let parsedDate: NSDate = formatter1.dateFromString(cc.date)!
-//                    contact.lastModified = parsedDate
-//                }
+                if let cc = CoreContact.getLastMessageFromContact(managedObjectContext, contactId: contactId, did: CoreDID.getSelectedDID(managedObjectContext)!.did) {
+                    var formatter1: NSDateFormatter = NSDateFormatter()
+                    formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                    let parsedDate: NSDate = formatter1.dateFromString(cc.date)!
+                    contact.lastModified = parsedDate
+                }
             } else {
                 if fullName == nil {
                     contact.lastModified = NSDate()
@@ -57,6 +58,9 @@ class CoreContact: NSManagedObject {
             }
             if let fullName = fullName {
                 contact.fullName = fullName
+            }
+            if let phoneLabel = phoneLabel {
+                contact.phoneLabel = phoneLabel
             }
             if let sync = addressBookLastModified {
                 contact.addressBookSyncLastModified = sync
@@ -215,26 +219,44 @@ class CoreContact: NSManagedObject {
         for c in coreContacts {
             var contact = ContactStruct()
             contact.contactId = c.contactId
+            if c.phoneLabel != nil {
+                 contact.phoneLabel = c.phoneLabel
+            }
             contactResult.append(contact)
         }
         
-        
-        Contact().getContactsDict({ (contacts) -> () in
-            if contacts.count > 0 {
-                for (key,value) in contacts {
-                    let numberStr = String(key)
-                    if (value.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) || (numberStr.rangeOfString(searchTerm.lowercaseString) != nil) {
-                        var contactStruct = ContactStruct()
-                        contactStruct.contactId = key
-                        contactStruct.contactName = value
-                        if !contains(contactResult.map({$0.contactId}), key) {
-                            contactResult.append(contactStruct)
-                        }
+        Contact().loadAddressBook { (responseObject, error) -> () in
+            var contacts = responseObject
+            for c in contacts {
+                if (c.contactFullName.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) || (c.recordId.rangeOfString(searchTerm.lowercaseString) != nil) {
+                    var contactStruct = ContactStruct()
+                    contactStruct.contactId = c.recordId
+                    contactStruct.contactName = c.contactFullName
+                    contactStruct.phoneLabel = c.phoneLabel
+                    if !contains(contactResult.map({$0.contactId}), c.recordId) {
+                        contactResult.append(contactStruct)
                     }
                 }
-                return completionHandler(contactResult)
             }
-        })
+            return completionHandler(contactResult)
+        }
+        
+//        Contact().getContactsDict({ (contacts) -> () in
+//            if contacts.count > 0 {
+//                for (key,value) in contacts {
+//                    let numberStr = String(key)
+//                    if (value.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) || (numberStr.rangeOfString(searchTerm.lowercaseString) != nil) {
+//                        var contactStruct = ContactStruct()
+//                        contactStruct.contactId = key
+//                        contactStruct.contactName = value
+//                        if !contains(contactResult.map({$0.contactId}), key) {
+//                            contactResult.append(contactStruct)
+//                        }
+//                    }
+//                }
+//                return completionHandler(contactResult)
+//            }
+//        })
     }
     
     
@@ -286,12 +308,14 @@ class CoreContact: NSManagedObject {
         
         let coreMessages = CoreContact.getMsgsByContact(moc, contactId: contactId, did: did)
             for cm in coreMessages {
-                if cm.type == 1 || cm.type == true {
+                if cm.type == 1 || cm.type.boolValue == true {
                     cm.flag = message_status.READ.rawValue
                     moc.save(nil)
                 }
             }
     }
+    
+
     
     
     class func isExistingContact(managedObjectContext: NSManagedObjectContext, contactId: String) -> Bool {
@@ -315,10 +339,10 @@ class CoreContact: NSManagedObject {
         fetchRequest.returnsObjectsAsFaults = false
         let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
         let secondPredicate = NSPredicate(format: "did == %@", did)
-        let thirdPredicate = NSPredicate(format: "id != %@", "")
-        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate, thirdPredicate])
+//        let thirdPredicate = NSPredicate(format: "id != %@", "")
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
         fetchRequest.predicate = predicate
-        let sortDescriptor = NSSortDescriptor(key: "id", ascending: false)
+        let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         fetchRequest.fetchLimit = 1
         
@@ -335,14 +359,20 @@ class CoreContact: NSManagedObject {
         return nil
     }
     
-    class func getLastMessageFromContact(managedObjectContext: NSManagedObjectContext, contactId: String, did: String) -> CoreMessage? {
+    class func getLastMessageFromContact(managedObjectContext: NSManagedObjectContext, contactId: String, did: String?) -> CoreMessage? {
         
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         fetchRequest.returnsObjectsAsFaults = false
         let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
-        let secondPredicate = NSPredicate(format: "did == %@", did)
-        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
-        fetchRequest.predicate = predicate
+        
+        if let did = did {
+            var secondPredicate = NSPredicate(format: "did == %@", did)
+            let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
+            fetchRequest.predicate = predicate
+        } else {
+            fetchRequest.predicate = firstPredicate
+        }
+        
         let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         fetchRequest.fetchLimit = 1

@@ -15,6 +15,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+    var timer : NSTimer = NSTimer()
+    var backgroundTaskID : UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier()
+
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         if Contact().checkAccess() {
@@ -25,6 +28,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
         }
+        
+        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: nil))
+        
+        timer.invalidate()
         
         return true
     }
@@ -37,23 +44,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
     }
+    
 
     func applicationDidEnterBackground(application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-//        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: []))
-        if let currentUser = CoreUser.currentUser(moc) {
-            if !currentUser.initialLogon.boolValue {
-                println("not inital logon")
-                var timer : NSTimer = NSTimer()
-                if Reachability.isConnectedToNetwork() {
-                    timer = NSTimer.scheduledTimerWithTimeInterval(20, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
-                }
-            } else {
-                println("is initial logon")
-            }
-            
+        self.backgroundTaskID = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
+            UIApplication.sharedApplication().endBackgroundTask(self.backgroundTaskID)
         }
+          self.timer = NSTimer.scheduledTimerWithTimeInterval(5, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         
     }
     
@@ -90,11 +89,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     //MARK: Custom methods
     func timerDidFire(sender: NSTimer) {
-        var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
         if let str = CoreDID.getSelectedDID(moc) {
             let fromStr = CoreMessage.getLastMsgByDID(moc, did: str.did)?.date.strippedDateFromString()
             Message.getMessagesFromAPI(true, moc: moc, from: fromStr) { (responseObject, error) -> () in
-            }
+            }                        
         }
     }
     

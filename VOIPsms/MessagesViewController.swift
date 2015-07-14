@@ -18,6 +18,7 @@ import QuartzCore
 struct ContactStruct {
     var contactName = String()
     var contactId = String()
+    var phoneLabel = String()
     var lastMsgDate = String()
     var lastMsg = String()
     var lastMsgType = NSNumber()
@@ -175,7 +176,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 performSegueWithIdentifier("showLoginSegue", sender: self)
             }
             
-            CoreUser.authenticate(moc, email: currentUser!.email, password: pwd!, completionHandler: { (success) -> Void in
+            CoreUser.authenticate(moc, email: currentUser!.email, password: pwd!, completionHandler: { (success, error) -> Void in
                 if success == false || currentUser?.remember == false {
                     self.performSegueWithIdentifier("showLoginSegue", sender: self)
                 }

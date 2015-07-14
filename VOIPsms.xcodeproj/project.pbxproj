@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2A1648251ADCBB7E00E8DF91 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1648241ADCBB7E00E8DF91 /* MainTabBarController.swift */; };
+		2A2878BD1B504BE600C9C1A4 /* TextFieldExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2878BC1B504BE600C9C1A4 /* TextFieldExtension.swift */; };
 		2A287D381AF724380078F0F7 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A287D371AF724380078F0F7 /* AddressBook.framework */; };
 		2A3ACCB11AEAF0630005193B /* UIDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */; };
 		2A3DC8751B311B1500C50BBA /* xViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3DC8741B311B1500C50BBA /* xViewController.swift */; };
@@ -66,6 +67,7 @@
 /* Begin PBXFileReference section */
 		255C57A492F6184F53AFAD80 /* libPods-VOIPsmsTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VOIPsmsTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A1648241ADCBB7E00E8DF91 /* MainTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
+		2A2878BC1B504BE600C9C1A4 /* TextFieldExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldExtension.swift; sourceTree = "<group>"; };
 		2A287D361AF723F20078F0F7 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		2A287D371AF724380078F0F7 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIDeviceExtension.swift; sourceTree = "<group>"; };
@@ -289,6 +291,7 @@
 				2ADBA1CA1AFED4460048972E /* StringExtension.swift */,
 				2AE76D351AE2C26500A6E84D /* ArrayExtension.swift */,
 				2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */,
+				2A2878BC1B504BE600C9C1A4 /* TextFieldExtension.swift */,
 			);
 			name = extensions;
 			sourceTree = "<group>";
@@ -358,6 +361,11 @@
 					2A98D4281ADB665C003D3512 = {
 						CreatedOnToolsVersion = 6.3;
 						DevelopmentTeam = 22EHG7NS36;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 					2A98D4401ADB665D003D3512 = {
 						CreatedOnToolsVersion = 6.3;
@@ -485,6 +493,7 @@
 				2A640C701B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m in Sources */,
 				2A98D4571ADB6891003D3512 /* CoreUser.swift in Sources */,
 				2A640C6E1B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.m in Sources */,
+				2A2878BD1B504BE600C9C1A4 /* TextFieldExtension.swift in Sources */,
 				2A98D4551ADB66EE003D3512 /* SwiftyJSON.swift in Sources */,
 				2ABFAEDD1AE09FD700EFABBD /* CoreMessage.swift in Sources */,
 				2AA6CAF41B1B9A1D006C7D39 /* ContactActionViewController.swift in Sources */,

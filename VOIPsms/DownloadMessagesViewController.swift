@@ -43,16 +43,53 @@ class DownloadMessagesViewController: UIViewController {
                 if let currentUser = CoreUser.currentUser(self.moc) {
                     Message.getMessagesFromAPI(false, moc: moc, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
                         error) -> () in
-                        println("done")
-                        currentUser.initialLogon = 0
-                        currentUser.messagesLoaded = 1
-                        CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
-                        self.activityIndicator.stopAnimating()
-                        self.performSegueWithIdentifier("segueToMessages", sender: self)
+                    
+                        if error == nil {
+                            
+                            if let contacts = CoreContact.getAllContacts(self.moc) {
+                                for c in contacts {
+                                    if let lastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: nil) {
+                                        var formatter1: NSDateFormatter = NSDateFormatter()
+                                        formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                                        let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
+                                        c.lastModified = parsedDate
+                                        CoreContact.updateContactInMOC(self.moc)
+                                    }
+                                }
+                            }
+                            
+                            println("done")
+                            currentUser.initialLogon = 0
+                            currentUser.messagesLoaded = 1
+                            CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
+                            self.activityIndicator.stopAnimating()
+                            self.performSegueWithIdentifier("segueToMessages", sender: self)
+                        } else {
+                            println(error)
+                            self.showErrorController()
+                            //here have the try again button or UIViewController
+                        }
                     })
                 }
             }
         }
+    }
+    
+    func showErrorController() {
+        var alertController = UIAlertController(title: "Network Error", message: "We are having trouble reaching the voip.ms servers, click Ok to try again or No to cancel to try again later", preferredStyle: .Alert)
+        
+        var okAction = UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default) {
+            UIAlertAction in
+            println("pressed")
+            self.getMessages()
+        }
+        var cancelAction = UIAlertAction(title: "No, cancel", style: UIAlertActionStyle.Cancel) {
+            UIAlertAction in
+            println("cancelled")
+        }
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        self.presentViewController(alertController, animated: true, completion: nil)
     }
     
     func updateMessageCounter(sender: NSTimer) {

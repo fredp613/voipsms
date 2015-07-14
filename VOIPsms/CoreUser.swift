@@ -86,7 +86,7 @@ class CoreUser: NSManagedObject {
     }
         
     
-    class func authenticate(moc: NSManagedObjectContext, email: String, password: String, completionHandler: ((Bool) -> Void)!) -> Void {
+    class func authenticate(moc: NSManagedObjectContext, email: String, password: String, completionHandler: ((Bool, error: NSError?) -> Void)!) -> Void {
                 
         var url = APIUrls.getUrl + "api_username=" + email + "&api_password=" + password + "&method=getDIDsInfo"
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: url, params: nil, completionHandler: { (data, error) -> () in
@@ -100,14 +100,14 @@ class CoreUser: NSManagedObject {
                         currentUser?.remember = true
                         moc.save(nil)
                     }
-                    return completionHandler(true)
+                    return completionHandler(true, error: nil)
                 } else {
-                    return completionHandler(false)
+                    return completionHandler(false, error: nil)
                 }
                 
             } else {
                 println(error)
-                return completionHandler(false)
+                return completionHandler(false, error: error)
             }
         })
         

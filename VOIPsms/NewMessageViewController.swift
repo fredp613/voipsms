@@ -110,7 +110,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         self.textMessage.text = ""
         CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msg, did: self.did, flag: message_status.PENDING.rawValue, completionHandler: { (responseObject, error) -> () in
             if (CoreContact.currentContact(self.moc, contactId: contact) != nil) {
-                CoreContact.updateInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr,fullName: nil, addressBookLastModified: nil)
+                CoreContact.updateInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr,fullName: nil, phoneLabel: nil, addressBookLastModified: nil)
             } else {
                 println("creating contact")
                 CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
@@ -198,6 +198,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             self.contacts = [ContactStruct]()
             self.tableView.reloadData()
         }
+//        println(self.contacts.map({$0.phoneLabel}))
     }
  
     
@@ -222,16 +223,26 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
         var contact = self.contacts[indexPath.row]
-         
+
         Contact().getContactsDict { (contacts) -> () in
             
             let contStr = contact.contactId as String
             if contacts[contact.contactId] != nil {
                 let cText = contacts[contact.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-                cell.textLabel?.text = cText! + " " + contact.contactId
+                cell.textLabel?.text = cText!
             } else {
-                cell.textLabel?.text = contact.contactId //.northAmericanPhoneNumberFormat()
+                if contact.contactName != "" {
+                    cell.textLabel?.text = contact.contactName
+                } else {
+                    cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+                }
             }
+            if contact.phoneLabel != "" {
+                cell.detailTextLabel?.text = contact.phoneLabel + ": " +  contact.contactId.northAmericanPhoneNumberFormat()
+            } else {
+                cell.detailTextLabel?.text = ""
+            }
+            
         }
         
         return cell
@@ -241,7 +252,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         //update text field to show contact
         self.selectedContact = self.contacts[indexPath.row].contactId
         let cell = self.tableView.cellForRowAtIndexPath(indexPath)
-        self.searchBar.text = cell?.textLabel?.text
+        self.searchBar.text = "\(cell!.textLabel!.text!) \(self.contacts[indexPath.row].phoneLabel)"
         
         self.contacts = [ContactStruct]()
         self.tableView.reloadData()
@@ -327,13 +338,11 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-        if segue.identifier == "showDetailSegue" {
-            var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
-            detailSegue.contactId = selectedContact
-            detailSegue.did = did
-        }
+//        if segue.identifier == "showDetailSegue" {
+//            var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
+//            detailSegue.contactId = selectedContact
+//            detailSegue.did = did
+//        }
     }
 
 

@@ -65,7 +65,7 @@ class NewContactViewController: UIViewController, UITextFieldDelegate, ContactAc
             }
             if Contact().createContact(contactId, firstName: self.textFirstName.text, lastName: self.textLastName.text) {
                 var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-                CoreContact.updateInManagedObjectContext(moc, contactId: contactId, lastModified: nil, fullName: fullName, addressBookLastModified: NSDate())
+                CoreContact.updateInManagedObjectContext(moc, contactId: contactId, lastModified: nil, fullName: fullName, phoneLabel: nil, addressBookLastModified: NSDate())
             }
             self.dismissContactActionVC()
             self.dismissViewControllerAnimated(true, completion: { () -> Void in

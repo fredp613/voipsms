@@ -13,6 +13,7 @@ import CoreData
 class AddressBookContactStruct {
     var contactFullName : String = String()
     var recordId : String = String()
+    var phoneLabel : String = String()
     init() {
 
     }
@@ -91,7 +92,7 @@ class Contact {
         let propertyType: NSNumber = kABMultiStringPropertyType
         return Unmanaged.fromOpaque(ABMultiValueCreateMutable(propertyType.unsignedIntValue).toOpaque()).takeUnretainedValue() as NSObject as ABMultiValueRef
     }
-    func getContactsDict(completionHandler: ([String: String]) -> ()){
+    func getContactsDict(completionHandler: ([String : String]) -> ()){
         var contactsDict = [String: String]()
         self.addressBook.loadContacts(
             { (contacts: [AnyObject]!, error: NSError!) in
@@ -105,7 +106,6 @@ class Contact {
                                 options: nil, range: NSMakeRange(0, pStr.length))
                             let mappedResults = map(results) { pStr.substringWithRange($0.range)}
                             let strRepresentationResults = "".join(mappedResults)
-                            
                             contactsDict.updateValue("\(c.firstName) \(c.lastName)", forKey:strRepresentationResults)
                         }
                     }
@@ -121,10 +121,15 @@ class Contact {
         var adbk : ABAddressBook? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()
         
         let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as NSArray as [ABRecord]
+//        let phones: ABMultiValueRef = ABRecordCopyValue(people, kABPersonPhoneProperty) as! ABMultiValueRef
         for person in people {
             
             if let fullName = ABRecordCopyCompositeName(person)?.takeRetainedValue() as? NSString {
                 if let keyword = keyword {
+                    
+
+                    
+                    
                     if fullName.lowercaseString.rangeOfString(keyword.lowercaseString) != nil {
                         var abContact = AddressBookContactStruct()
                         abContact.contactFullName = fullName as String
@@ -155,7 +160,8 @@ class Contact {
                     let contacts = responseObject
                     let filteredArray = contacts.filter() {$0.recordId == cc.contactId}
                     if let fullName = filteredArray.map({$0.contactFullName}).last {
-                        CoreContact.updateInManagedObjectContext(moc, contactId: cc.contactId, lastModified: nil, fullName: fullName, addressBookLastModified: NSDate())
+                        let phoneLabel = filteredArray.map({$0.phoneLabel}).last!
+                        CoreContact.updateInManagedObjectContext(moc, contactId: cc.contactId, lastModified: nil, fullName: fullName, phoneLabel: phoneLabel, addressBookLastModified: NSDate())
                     }
 
                 }
@@ -183,14 +189,26 @@ class Contact {
                     var contact = AddressBookContactStruct()
                     contact.contactFullName = fullName as String
                     let phoneUnmanaged = ABMultiValueCopyValueAtIndex(phones, numberIndex)
+                    let phoneLabelUnmanaged = ABMultiValueCopyLabelAtIndex(phones, numberIndex)
                     let phoneNumber : NSString = phoneUnmanaged.takeRetainedValue() as! NSString
+                    let phoneLabel : NSString = phoneLabelUnmanaged.takeRetainedValue() as NSString
                     let regex = NSRegularExpression(pattern: "[0-9]",
+                        options: nil, error: nil)!
+                    let regexLabel = NSRegularExpression(pattern: "[a-zA-Z0-9]",
                         options: nil, error: nil)!
                     let results = regex.matchesInString(phoneNumber as String,
                         options: nil, range: NSMakeRange(0, phoneNumber.length))
+                    let resultsLabel = regexLabel.matchesInString(phoneLabel as String,
+                        options: nil, range: NSMakeRange(0, phoneLabel.length))
+                    
                     let mappedResults = map(results) { phoneNumber.substringWithRange($0.range)}
                     let strRepresentationResults = "".join(mappedResults)
+                    
+                    let mappedResultsLabel = map(resultsLabel) { phoneLabel.substringWithRange($0.range)}
+                    let strRepresentationResultsLabel = "".join(mappedResultsLabel)
+                    
                     var finalPhoneNumber = strRepresentationResults as NSString
+                    var finalPhoneLabel = strRepresentationResultsLabel as NSString
                     
                     var range = NSRange()
                     if finalPhoneNumber.length > 10 {
@@ -199,7 +217,9 @@ class Contact {
                         range = NSRange(location: 0, length: finalPhoneNumber.length)
                     }
                     var ff = finalPhoneNumber.substringWithRange(range)
+                    
                     contact.recordId = ff
+                    contact.phoneLabel = String(finalPhoneLabel)
                     self.contactsArr.append(contact)
                 }
 //                println(self.contactsArr.map({$0.contactFullName}))

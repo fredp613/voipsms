@@ -5,6 +5,7 @@
         <attribute name="contactId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="fullName" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="lastModified" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="phoneLabel" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="messages" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CoreMessage" inverseName="contact" inverseEntity="CoreMessage" syncable="YES"/>
     </entity>
     <entity name="CoreDeleteMessage" representedClassName="VOIPsms.CoreDeleteMessage" syncable="YES">
@@ -19,10 +20,10 @@
     <entity name="CoreMessage" representedClassName="VOIPsms.CoreMessage" syncable="YES">
         <attribute name="contactId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="coreId" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
-        <attribute name="date" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="date" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="did" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="flag" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <attribute name="message" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="type" optional="YES" attributeType="Boolean" syncable="YES"/>
         <relationship name="contact" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CoreContact" inverseName="messages" inverseEntity="CoreContact" syncable="YES"/>
@@ -38,7 +39,7 @@
         <attribute name="token" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="CoreContact" positionX="-63" positionY="27" width="128" height="120"/>
+        <element name="CoreContact" positionX="-63" positionY="27" width="128" height="135"/>
         <element name="CoreDeleteMessage" positionX="214" positionY="54" width="128" height="60"/>
         <element name="CoreDID" positionX="160" positionY="165" width="128" height="105"/>
         <element name="CoreMessage" positionX="115" positionY="-189" width="128" height="180"/>

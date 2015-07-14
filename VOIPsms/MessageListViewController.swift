@@ -11,6 +11,7 @@ import CoreData
 
 @objc protocol MessageListViewDelegate {
     optional func triggerSegue(contact: String)
+     optional func updateMessagesTableView()
 }
 
 class MessageListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, UISearchBarDelegate, UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource, MessageListViewDelegate {
@@ -89,17 +90,14 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
         }
         
-//        let addMessageButton = UIBarButtonItem(title: "New", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToNewMessage:")
-//        self.navigationItem.rightBarButtonItem = addMessageButton
-        
         self.btnNewMessage.layer.cornerRadius = self.btnNewMessage.frame.size.height / 2
         self.view.bringSubviewToFront(self.btnNewMessage)
-//        checkAllPermissions()
-        self.tableView.reloadData()
+//        self.tableView.reloadData()
         
     }
 
     override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(true)
         self.pokeFetchedResultsController()
         titleBtn = UIButton(frame: CGRectMake(navigationController!.navigationBar.center.x, navigationController!.navigationBar.center.y, 100, 40))
         if let selectedDID = CoreDID.getSelectedDID(managedObjectContext) {
@@ -114,12 +112,14 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             let currentUser = CoreUser.currentUser(managedObjectContext)
             let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
             
-            CoreUser.authenticate(managedObjectContext, email: currentUser!.email, password: pwd!, completionHandler: { (success) -> Void in
+            CoreUser.authenticate(managedObjectContext, email: currentUser!.email, password: pwd!, completionHandler: { (success, error) -> Void in
                 if success == false || currentUser?.remember == false {
                     self.performSegueWithIdentifier("showLoginSegue", sender: self)
                 } else {
                     if currentUser!.messagesLoaded.boolValue == false || currentUser!.messagesLoaded == 0 {
                         self.performSegueWithIdentifier("showDownloadMessagesSegue", sender: self)
+                    } else {
+                        self.startTimer()
                     }
                 }
             })
@@ -128,7 +128,8 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             performSegueWithIdentifier("showLoginSegue", sender: self)
         }
 
-        startTimer()
+
+        
     }
     
     override func viewDidDisappear(animated: Bool) {
@@ -172,32 +173,28 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     func timerDidFire(sender: NSTimer) {
-        if let str = CoreDID.getSelectedDID(managedObjectContext) {
-            if let cm = messageFetchedResultsController.fetchedObjects {
-                if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
-                    var ogCount = cm.count
-                    if currentUser.initialLogon.boolValue == false {
-                        var from = ""
-                            if let lastMessage = cm.first as? CoreMessage {
+        
+        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+//        dispatch_async(backgroundQueue, { () -> Void in
+            if let str = CoreDID.getSelectedDID(self.managedObjectContext) {
+                if let cm = CoreMessage.getMessagesByDID(self.managedObjectContext, did: self.did).first {
+                    if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
+                        let lastMessage = cm
+                            var from = ""
                                 from = lastMessage.date
-                                Message.getMessagesFromAPI(false, moc: managedObjectContext, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
-                                    var error: NSError? = nil
-                                    if (self.fetchedResultsController.performFetch(&error)==false) {
-                                        println("An error has occurred: \(error?.localizedDescription)")
-                                    }
-                                    if currentUser.initialLoad.boolValue == true {
+                                Message.getMessagesFromAPI(false, moc: self.managedObjectContext, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
+                                    self.pokeFetchedResultsController()
+                                    if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
                                         currentUser.initialLoad = 0
+                                        currentUser.initialLogon = 0
                                         CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
                                     }
-                                    self.tableView.reloadData()
-
+                                        self.pokeFetchedResultsController()
                                 })
-                            }
                     }
+                    
                 }
-                
-            }
-            
         }
 
     }
@@ -228,18 +225,17 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             case .Delete:
                 self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
             case .Update:
-                self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+                self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
             default:
-                self.tableView.reloadData()
+                self.pokeFetchedResultsController()
             }
         }
     }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.endUpdates()
+        self.pokeFetchedResultsController()
     }
-    
-
     
     //MARK: table view delegates
     
@@ -263,20 +259,37 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         return 0
     }
     
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        println("selected row")
+//                    self.pokeFetchedResultsController()
+//        timer.invalidate()
+//        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+//        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+//        dispatch_async(backgroundQueue, { () -> Void in
+//            let contact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
+//            if let lastMessage = CoreContact.getLastIncomingMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
+//                println(lastMessage.type)
+//                if lastMessage.type == 1 || lastMessage.type.boolValue == true {
+//                    if lastMessage.flag == message_status.DELIVERED.rawValue {
+//                        lastMessage.flag = message_status.READ.rawValue
+//                        CoreMessage.updateInManagedObjectContext(self.managedObjectContext, coreMessage: lastMessage)
+//                    }
+//                }
+//            }
+//        })
+        
+    }
+    
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
         let contact = fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
         
-        var message : CoreMessage!
-            
-        let predicate = NSPredicate(format: "did == %@", self.did)
-        let contactPredicate = NSPredicate(format: "contactId == %@", contact.contactId)
-        let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [predicate, contactPredicate])
-        messageFetchedResultsController.fetchRequest.predicate = compoundPredicate
-        messageFetchedResultsController.performFetch(nil)
-        var messages = messageFetchedResultsController.fetchedObjects
-        if let message = messages?.first as? CoreMessage {
-            cell.detailTextLabel?.text = message.message
+        let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
+        
+//        if let lastMessage = contact.messages.sortedArrayUsingDescriptors([sortDescriptor]).first! as? CoreMessage {
+        if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
+            let message = lastMessage as CoreMessage
+            cell.detailTextLabel?.text = "\(message.message) - \(contact.lastModified) - \(message.flag)"
             let font:UIFont? = UIFont(name: "Arial", size: 13.0)
             let dateStr = NSAttributedString(string: message.date.dateFormattedString(), attributes:
                 [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
@@ -289,14 +302,60 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             if cell.contentView.viewWithTag(3) != nil {
                 cell.contentView.viewWithTag(3)?.removeFromSuperview()
             }
+            if message.type.boolValue == true {
+                if message.flag != message_status.READ.rawValue {
+                    var textCol = UIColor.blueColor()
+                    cell.textLabel?.textColor = textCol
+                    cell.detailTextLabel?.textColor = textCol
+                    dateLbl.textColor = textCol
+                } else {
+                    var textCol = UIColor.blackColor()
+                    cell.textLabel?.textColor = textCol
+                    cell.detailTextLabel?.textColor = textCol
+                }
+            }
             cell.contentView.addSubview(dateLbl)
         }
+        
+        
+
+        
+        
+//        var messages = messageFetchedResultsController.fetchedObjects
+//        if let message = messages?.first as? CoreMessage {
+//            cell.detailTextLabel?.text = message.message
+//            let font:UIFont? = UIFont(name: "Arial", size: 13.0)
+//            let dateStr = NSAttributedString(string: message.date.dateFormattedString(), attributes:
+//                [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
+//                    NSFontAttributeName: font!])
+//            let dateFrame = CGRectMake(cell.frame.origin.x, cell.detailTextLabel!.frame.origin.x, cell.frame.width - 30, cell.textLabel!.frame.height)
+//            let dateLbl = UILabel(frame: dateFrame)
+//            dateLbl.attributedText = dateStr
+//            dateLbl.textAlignment = NSTextAlignment.Right
+//            dateLbl.tag = 3
+//            if cell.contentView.viewWithTag(3) != nil {
+//                cell.contentView.viewWithTag(3)?.removeFromSuperview()
+//            }
+//            if message.type.boolValue == true {
+//                if message.flag != message_status.READ.rawValue {
+//                    var textCol = UIColor.blueColor()
+//                    cell.textLabel?.textColor = textCol
+//                    cell.detailTextLabel?.textColor = textCol
+//                    dateLbl.textColor = textCol
+//                }
+//            }
+//            
+//            cell.contentView.addSubview(dateLbl)
+//            
+//        }
         
         if contact.fullName != nil {
             cell.textLabel?.text = contact.fullName
         } else {
-            cell.textLabel?.text = "\(contact.contactId)"  //.northAmericanPhoneNumberFormat()
+            cell.textLabel?.text = "\(contact.contactId.northAmericanPhoneNumberFormat())"  //.northAmericanPhoneNumberFormat()
         }
+        
+        
 
        
         return cell
@@ -316,15 +375,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             var messages = messageFetchedResultsController.fetchedObjects?.filter({$0.contactId == contact.contactId}) as! [CoreMessage]
             
             CoreMessage.deleteAllMessagesFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
-                
                 self.pokeFetchedResultsController()
-//                if messages.count > 0 {
-//                    let messagesToDelete = messages.filter({$0.id != ""})
-//                    Message.deleteMessagesFromAPI(messagesToDelete.map({$0.id}), completionHandler: { (responseObject, error) -> () in
-//                        //println
-//                    })
-//                }
-                
             })
             
         }
@@ -360,15 +411,14 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 messageFetchedResultsController.performFetch(nil)
 
                 var contactIDs = [String]()
-                if let contactMessages = messageFetchedResultsController.fetchedObjects {
-                    contactIDs += contactMessages.map({$0.contactId})
-                    let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
-                    fetchedResultsController.fetchRequest.predicate = contactPredicate
-                    fetchedResultsController.performFetch(nil)
-                    self.tableView.reloadData()
-                }
-
+                contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: self.did).map({$0.contactId})
+                let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
+                fetchedResultsController.fetchRequest.predicate = contactPredicate
+                fetchedResultsController.performFetch(nil)
+                self.tableView.reloadData()
             }
+            
+           
             
         }
         maskView.removeFromSuperview()
@@ -494,17 +544,59 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         self.pokeFetchedResultsController()
         self.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
     }
+    
+    func updateMessagesTableView() {
+        println("delegate caled")
+//        if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
+        self.pokeFetchedResultsController()
+//        self.tableView.reloadData()
+        
+//        if let lastMessage = CoreMessage.getMessages(self.managedObjectContext, ascending: false).first {
+        if let lastMessage = messageFetchedResultsController.fetchedObjects?.first! as? CoreMessage {
+            println(lastMessage.message)
+            if let currentContact = CoreContact.currentContact(self.managedObjectContext, contactId: lastMessage.contactId) {
+                var formatter1: NSDateFormatter = NSDateFormatter()
+                formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
+                currentContact.lastModified = parsedDate
+                CoreContact.updateContactInMOC(self.managedObjectContext)
+                self.pokeFetchedResultsController()
+//                self.tableView.reloadData()
+            }
+        }
+
+
+    }
         
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+//        self.pokeFetchedResultsController()
 
+//        timer.invalidate()
         if (segue.identifier == "showMessageDetailSegue") {
             self.searchBar.resignFirstResponder()
             var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
             if let indexPath = self.tableView.indexPathForSelectedRow() {
-                detailSegue.contactId = self.fetchedResultsController.objectAtIndexPath(indexPath).contactId as String
+                var contact: CoreContact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
+                detailSegue.contactId = contact.contactId as String
+                if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
+                    var formatter1: NSDateFormatter = NSDateFormatter()
+                    formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                    let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
+                    contact.lastModified = parsedDate
+                    CoreContact.updateContactInMOC(self.managedObjectContext)
+                    if lastMessage.type.boolValue == true {
+                        lastMessage.flag = message_status.READ.rawValue
+                        CoreMessage.updateInManagedObjectContext(self.managedObjectContext, coreMessage: lastMessage)
+                    } else if (lastMessage.id != "") {
+                        lastMessage.flag = message_status.DELIVERED.rawValue
+                       CoreMessage.updateInManagedObjectContext(self.managedObjectContext, coreMessage: lastMessage)
+                    }
+                }
+        
+                
             } else {
                 detailSegue.contactId = self.contactForSegue
             }
@@ -513,6 +605,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 self.did = selectedDID.did
             }
             detailSegue.did = self.did
+            detailSegue.delegate = self
+            
+
         }
         
         if segue.identifier == "segueToNewMessage" {
@@ -520,7 +615,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             newMsgVC?.did = self.did
             newMsgVC?.delegate = self
         }
-        timer.invalidate()
+
     }
     
     

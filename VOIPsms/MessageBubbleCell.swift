@@ -53,7 +53,7 @@ class MessageBubbleCell: UITableViewCell {
         let dateStr = NSAttributedString(string: "\n\(humanDate)", attributes:
             [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
                 NSFontAttributeName: font!])
-        let messageStr = NSAttributedString(string: message.message)
+        let messageStr = NSAttributedString(string: message.message + " - " + message.flag)
         mutableStr.appendAttributedString(messageStr)
         if message.date != "" {
             mutableStr.appendAttributedString(dateStr)

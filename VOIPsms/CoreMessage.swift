@@ -49,7 +49,7 @@ class CoreMessage: NSManagedObject {
         }
         
         if let c = CoreContact.currentContact(managedObjectContext, contactId: contact) {
-            if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date, fullName: nil, addressBookLastModified: nil) {
+            if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date, fullName: nil, phoneLabel: nil, addressBookLastModified: nil) {
                 coreMessage.contact = c
             }
         } else {
@@ -71,6 +71,12 @@ class CoreMessage: NSManagedObject {
     
     class func updateInManagedObjectContext(moc: NSManagedObjectContext, coreMessage: CoreMessage) {
         if moc.save(nil) {
+//            var cc = coreMessage.contact
+//            var formatter1: NSDateFormatter = NSDateFormatter()
+//            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+//            let parsedDate: NSDate = formatter1.dateFromString(coreMessage.date)!
+//            cc.lastModified = parsedDate
+//            CoreContact.updateContactInMOC(moc)
         }
     }
     
@@ -179,7 +185,7 @@ class CoreMessage: NSManagedObject {
             var formatter: NSDateFormatter = NSDateFormatter()
             formatter.dateFormat = "dd-MM-yyyy"
             let stringDate: String = formatter.stringFromDate(NSDate())
-            CoreContact.updateInManagedObjectContext(moc, contactId: cm.contactId, lastModified: stringDate,fullName: nil, addressBookLastModified: nil)
+            CoreContact.updateInManagedObjectContext(moc, contactId: cm.contactId, lastModified: stringDate,fullName: nil, phoneLabel: nil, addressBookLastModified: nil)
             return cm
         }
         return nil
@@ -220,6 +226,7 @@ class CoreMessage: NSManagedObject {
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         let predicate = NSPredicate(format: "id == %@", Id)
         fetchRequest.predicate = predicate
+        fetchRequest.fetchLimit = 1
         var error : NSError? = nil
         if let fetchResults = moc.executeFetchRequest(fetchRequest, error: &error) as? [CoreMessage] {
             if fetchResults.count > 0 {
@@ -237,6 +244,8 @@ class CoreMessage: NSManagedObject {
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         let entity = NSEntityDescription.entityForName("CoreMessage", inManagedObjectContext: moc)
         fetchRequest.entity = entity
+        let sortDescriptor = NSSortDescriptor(key: "id", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
         let predicate = NSPredicate(format: "did == %@", did)
         fetchRequest.predicate = predicate
         

@@ -10,16 +10,22 @@ import Foundation
 
 extension String {
     
- 
     func northAmericanPhoneNumberFormat() -> String {
        
         let strToFormat = self as NSString
-        let areaCode = strToFormat.substringWithRange(NSRange(location: 0, length: 3))
-        let firstPart = strToFormat.substringWithRange(NSRange(location: 3, length: 3))
-        let lastPart = strToFormat.substringWithRange(NSRange(location: 6, length: 4))
-        let formattedPhoneNumber = areaCode + "-" + firstPart + "-" + lastPart
+        let regex = NSRegularExpression(pattern: "[0-9]", options: nil, error: nil)
+        if (regex?.matchesInString(self, options: nil, range: NSMakeRange(0, strToFormat.length)) != nil) {
+            if strToFormat.length > 9 {
+                let areaCode = strToFormat.substringWithRange(NSRange(location: 0, length: 3))
+                let firstPart = strToFormat.substringWithRange(NSRange(location: 3, length: 3))
+                let lastPart = strToFormat.substringWithRange(NSRange(location: 6, length: 4))
+                let formattedPhoneNumber = areaCode + "-" + firstPart + "-" + lastPart
+                
+                return formattedPhoneNumber
+            }
+        }
+        return self
         
-        return formattedPhoneNumber
     }
     
     func strippedDateFromString() -> String {
