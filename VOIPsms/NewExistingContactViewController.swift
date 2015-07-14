@@ -80,7 +80,12 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
             UIAlertAction in
             println("pressed")
             let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-            CoreContact.updateInManagedObjectContext(moc, contactId: self.contactId, lastModified: nil, fullName: self.contacts[indexPath.row].contactFullName, phoneLabel: nil, addressBookLastModified: NSDate())
+            if let currentContact = CoreContact.currentContact(moc, contactId: self.contactId) {
+                currentContact.fullName = self.contacts[indexPath.row].contactFullName
+                println("saving to contact")
+                moc.save(nil)
+            }
+//            CoreContact.updateInManagedObjectContext(moc, contactId: self.contactId, lastModified: nil, fullName: self.contacts[indexPath.row].contactFullName, phoneLabel: nil, addressBookLastModified: NSDate())
 
             self.dismissContactActionVC()
             self.dismissViewControllerAnimated(true, completion: { () -> Void in

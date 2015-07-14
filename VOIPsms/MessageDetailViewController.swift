@@ -292,7 +292,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: lastMessage)
             }
         }
-//        self.delegate?.updateMessagesTableView!()
+        self.delegate?.updateMessagesTableView!()
     }
     
     
@@ -663,12 +663,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             dispatch_async(backgroundQueue, { () -> Void in
                 Message.sendMessageAPI(self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
                     
-                    if error != nil {
-                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            cm.flag = message_status.UNDELIVERED.rawValue
-                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-                        })
-                    } else {
+//                    if error != nil {
+//                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                            cm.flag = message_status.UNDELIVERED.rawValue
+//                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+//                        })
+//                    } else {
                         if responseObject["status"].stringValue == "success" {
                             cm.id = responseObject["sms"].stringValue
                             cm.flag = message_status.DELIVERED.rawValue
@@ -686,7 +686,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                                 CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
                             })
                         }
-                    }
+//                    }
                 })
             })
         } else {
@@ -808,14 +808,16 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     func deleteMessages(sender: UIButton) {
         for (key, value) in self.messagesToDelete {
             CoreMessage.deleteMessage(self.moc, coreMessage: value)
+            
             var deleteViewButton = self.view.viewWithTag(key)
             deleteViewButton!.backgroundColor = nil
         }
         self.messagesToDelete.removeAll(keepCapacity: false)
         deleteMenuActivated = false
        
-        self.messageFetchedResultsController.performFetch(nil)
+        messageFetchedResultsController.performFetch(nil)
         self.tableView.reloadData()
+        self.delegate?.updateMessagesTableView!()
     }
     
     func cancelDeleteAction(sender: UIButton) {

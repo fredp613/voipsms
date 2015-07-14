@@ -38,7 +38,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             self.did = did.did
             var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
             let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
-            contactsFetchRequest.predicate = contactPredicate
+            let contactPredicateDeleted = NSPredicate(format: "deletedContact == 0")
+            let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [contactPredicate, contactPredicateDeleted])
+            contactsFetchRequest.predicate = compoundPredicate
         }
         
         let frc = NSFetchedResultsController(
@@ -92,6 +94,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         self.btnNewMessage.layer.cornerRadius = self.btnNewMessage.frame.size.height / 2
         self.view.bringSubviewToFront(self.btnNewMessage)
+        self.pokeFetchedResultsController()
 //        self.tableView.reloadData()
         
     }
@@ -184,13 +187,12 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                             var from = ""
                                 from = lastMessage.date
                                 Message.getMessagesFromAPI(false, moc: self.managedObjectContext, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
-                                    self.pokeFetchedResultsController()
                                     if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
                                         currentUser.initialLoad = 0
                                         currentUser.initialLogon = 0
                                         CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
                                     }
-                                        self.pokeFetchedResultsController()
+                                self.pokeFetchedResultsController()
                                 })
                     }
                     
@@ -366,19 +368,37 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     
-    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(tableView: UITableView, willBeginEditingRowAtIndexPath indexPath: NSIndexPath) {
         self.timer.invalidate()
+    }
+    
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         
         if editingStyle == UITableViewCellEditingStyle.Delete {
             
+            var contactId = String()
             var contact = fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
-            var messages = messageFetchedResultsController.fetchedObjects?.filter({$0.contactId == contact.contactId}) as! [CoreMessage]
+            contact.deletedContact = 1
+            self.managedObjectContext.save(nil)
+            self.pokeFetchedResultsController()
+            self.tableView.reloadData()
             
-            CoreMessage.deleteAllMessagesFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
-                self.pokeFetchedResultsController()
+            let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+            dispatch_async(backgroundQueue, { () -> Void in
+                var messages = self.messageFetchedResultsController.fetchedObjects?.filter({$0.contactId == contactId}) as! [CoreMessage]
+                CoreMessage.deleteAllMessagesFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
+//                    self.pokeFetchedResultsController()
+                })
+
             })
             
+//            CoreMessage.deleteAllMessagesFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
+//                self.pokeFetchedResultsController()
+//            })
+            
         }
+        self.startTimer()
     }
 
     
@@ -397,8 +417,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         return formattedDID
     }
     
+    
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        
+//        self.tableView.reloadData()
         if let dids = CoreDID.getDIDs(self.managedObjectContext) {
             self.did = dids[row].did
             CoreDID.toggleSelected(self.managedObjectContext, did: dids[row].did)
@@ -406,25 +427,28 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             titleBtn.setTitle(self.did.northAmericanPhoneNumberFormat(), forState: UIControlState.Normal)
             if let newDID = CoreDID.getSelectedDID(self.managedObjectContext) {
                 self.did = newDID.did
-                let predicate = NSPredicate(format: "did == %@", self.did)
-                messageFetchedResultsController.fetchRequest.predicate = predicate
-                messageFetchedResultsController.performFetch(nil)
 
-                var contactIDs = [String]()
-                contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: self.did).map({$0.contactId})
-                let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
-                fetchedResultsController.fetchRequest.predicate = contactPredicate
-                fetchedResultsController.performFetch(nil)
-                self.tableView.reloadData()
+                self.pokeFetchedResultsController()
+                if self.fetchedResultsController.fetchedObjects?.count > 0 {
+                    for c in self.fetchedResultsController.fetchedObjects as! [CoreContact] {
+                        if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: c.contactId, did: self.did) {
+                            var formatter1: NSDateFormatter = NSDateFormatter()
+                            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                            let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
+                            c.lastModified = parsedDate
+                            CoreContact.updateContactInMOC(self.managedObjectContext)
+                        }
+                    }
+                }
+               
             }
-            
-           
-            
         }
         maskView.removeFromSuperview()
         didView.removeFromSuperview()
+        self.tableView.reloadData()
         startTimer()
     }
+  
     
     //MARK: Search Bar Delegate Methods
     
@@ -530,7 +554,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             self.did = did.did
             var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
             let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
-            fetchedResultsController.fetchRequest.predicate = contactPredicate
+            let contactPredicateDeleted = NSPredicate(format: "deletedContact == 0")
+            let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [contactPredicate, contactPredicateDeleted])
+            fetchedResultsController.fetchRequest.predicate = compoundPredicate
         }
         fetchedResultsController.performFetch(nil)
         self.tableView.reloadData()
@@ -547,25 +573,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func updateMessagesTableView() {
         println("delegate caled")
-//        if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
         self.pokeFetchedResultsController()
-//        self.tableView.reloadData()
+        self.tableView.reloadData()
         
-//        if let lastMessage = CoreMessage.getMessages(self.managedObjectContext, ascending: false).first {
-        if let lastMessage = messageFetchedResultsController.fetchedObjects?.first! as? CoreMessage {
-            println(lastMessage.message)
-            if let currentContact = CoreContact.currentContact(self.managedObjectContext, contactId: lastMessage.contactId) {
-                var formatter1: NSDateFormatter = NSDateFormatter()
-                formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
-                currentContact.lastModified = parsedDate
-                CoreContact.updateContactInMOC(self.managedObjectContext)
-                self.pokeFetchedResultsController()
-//                self.tableView.reloadData()
-            }
-        }
-
-
     }
         
     // MARK: - Navigation

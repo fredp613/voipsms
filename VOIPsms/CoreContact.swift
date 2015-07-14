@@ -17,6 +17,7 @@ class CoreContact: NSManagedObject {
     @NSManaged var addressBookSyncLastModified: NSDate!
     @NSManaged var fullName: String!
     @NSManaged var phoneLabel: String!
+    @NSManaged var deletedContact: NSNumber!
     var ccs = [CoreContact]()
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?) -> CoreContact? {
@@ -364,14 +365,27 @@ class CoreContact: NSManagedObject {
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         fetchRequest.returnsObjectsAsFaults = false
         let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
-        
-        if let did = did {
-            var secondPredicate = NSPredicate(format: "did == %@", did)
-            let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
-            fetchRequest.predicate = predicate
+//        var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
+//        let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
+        if let deletedMessages = CoreDeleteMessage.getAllDeletedMessages(managedObjectContext) {
+            if let did = did {
+                var secondPredicate = NSPredicate(format: "did == %@", did)
+                var deletePredicate = NSPredicate(format: "!(id IN %@)", deletedMessages.map({$0.id}))
+                let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate, deletePredicate])
+                fetchRequest.predicate = predicate
+            } else {
+                fetchRequest.predicate = firstPredicate
+            }
         } else {
-            fetchRequest.predicate = firstPredicate
+            if let did = did {
+                var secondPredicate = NSPredicate(format: "did == %@", did)
+                let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
+                fetchRequest.predicate = predicate
+            } else {
+                fetchRequest.predicate = firstPredicate
+            }
         }
+       
         
         let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]

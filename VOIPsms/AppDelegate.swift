@@ -18,7 +18,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var timer : NSTimer = NSTimer()
     var backgroundTaskID : UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier()
 
-
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         if Contact().checkAccess() {
             Contact().syncAddressBook1()
@@ -30,6 +29,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: nil))
+        
+        Contact().getContactsDict({ (contacts) -> () in
+//            if contacts[self.contactId] != nil {
+//                let cText = contacts[self.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+//                self.navigationController?.navigationBar.topItem?.title = cText
+//                
+//            } else {
+//                self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
+//            }
+        })
         
         timer.invalidate()
         

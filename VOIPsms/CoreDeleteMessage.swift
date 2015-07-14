@@ -16,7 +16,7 @@ class CoreDeleteMessage: NSManagedObject {
     
     class func createInManagedObjectContext(moc: NSManagedObjectContext, id: String) -> Bool {
         
-        let coreDeleteMessage : CoreMessage = NSEntityDescription.insertNewObjectForEntityForName("CoreMessage", inManagedObjectContext: moc) as! CoreMessage
+        let coreDeleteMessage : CoreDeleteMessage = NSEntityDescription.insertNewObjectForEntityForName("CoreDeleteMessage", inManagedObjectContext: moc) as! CoreDeleteMessage
         coreDeleteMessage.id = id
         
         let err = NSError()
@@ -44,7 +44,19 @@ class CoreDeleteMessage: NSManagedObject {
         }
         return false
     }
-    
+    class func getAllDeletedMessages(moc: NSManagedObjectContext) -> [CoreDeleteMessage]? {
+        let fetchRequest = NSFetchRequest(entityName: "CoreDeleteMessage")
+        let entity = NSEntityDescription.entityForName("CoreDeleteMessage", inManagedObjectContext: moc)
+        fetchRequest.entity = entity
+        fetchRequest.returnsObjectsAsFaults = false
+        var coreMessages = [CoreDeleteMessage]()
+        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDeleteMessage]
+        if fetchResults?.count > 0 {
+            coreMessages = fetchResults!
+            return coreMessages
+        }
+        return nil
+    }
 //    CoreMessage.isDeletedMessageById(moc, id: id) == false **/
     class func isDeletedMessage(moc: NSManagedObjectContext, id: String) -> Bool {        
         let fetchRequest = NSFetchRequest(entityName: "CoreDeleteMessage")
