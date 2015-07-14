@@ -662,22 +662,30 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         if Reachability.isConnectedToNetwork() {
             dispatch_async(backgroundQueue, { () -> Void in
                 Message.sendMessageAPI(self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
-                    if responseObject["status"].stringValue == "success" {
-                        cm.id = responseObject["sms"].stringValue
-                        cm.flag = message_status.DELIVERED.rawValue
-                        var formatter1: NSDateFormatter = NSDateFormatter()
-                        formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                        let parsedDate: String = formatter1.stringFromDate(NSDate())
-                        cm.date = parsedDate
-                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-                        })
-
-                    } else {
+                    
+                    if error != nil {
                         dispatch_async(dispatch_get_main_queue(), { () -> Void in
                             cm.flag = message_status.UNDELIVERED.rawValue
                             CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
                         })
+                    } else {
+                        if responseObject["status"].stringValue == "success" {
+                            cm.id = responseObject["sms"].stringValue
+                            cm.flag = message_status.DELIVERED.rawValue
+                            var formatter1: NSDateFormatter = NSDateFormatter()
+                            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                            let parsedDate: String = formatter1.stringFromDate(NSDate())
+                            cm.date = parsedDate
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+                            })
+                            
+                        } else {
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                cm.flag = message_status.UNDELIVERED.rawValue
+                                CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+                            })
+                        }
                     }
                 })
             })
