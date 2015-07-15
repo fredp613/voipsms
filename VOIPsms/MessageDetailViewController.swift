@@ -194,15 +194,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                     self.tableView.reloadData()
                 }
             }
-            
-            
         }
-        
         startTimer()
         self.tableView.reloadData()
     }
-    
-    
+        
     func segueToContactDetails(sender: UIBarButtonItem) {
         Contact().getContactsDict { (contacts) -> () in
             if contacts[self.contactId] != nil {

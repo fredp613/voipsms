@@ -376,18 +376,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             let qualityOfServiceClass = QOS_CLASS_BACKGROUND
             let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
             dispatch_async(backgroundQueue, { () -> Void in
-
-                
-//                var messages = self.messageFetchedResultsController.fetchedObjects?.filter({$0.contactId == contactId}) as! [CoreMessage]
-//                CoreMessage.deleteAllMessagesFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
-//                })
-                
+                let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+                CoreMessage.deleteAllMessagesFromContact(moc, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
+                })
             })
-            
-            //            CoreMessage.deleteAllMessagesFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
-            //                self.pokeFetchedResultsController()
-            //            })
-            
         }
         self.startTimer()
     }
