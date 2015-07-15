@@ -10,6 +10,7 @@
 		2A1648251ADCBB7E00E8DF91 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1648241ADCBB7E00E8DF91 /* MainTabBarController.swift */; };
 		2A2878BD1B504BE600C9C1A4 /* TextFieldExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2878BC1B504BE600C9C1A4 /* TextFieldExtension.swift */; };
 		2A287D381AF724380078F0F7 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A287D371AF724380078F0F7 /* AddressBook.framework */; };
+		2A2F256B1B55D7FB00949569 /* TableViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2F256A1B55D7FB00949569 /* TableViewController1.swift */; };
 		2A3ACCB11AEAF0630005193B /* UIDeviceExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */; };
 		2A3DC8751B311B1500C50BBA /* xViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3DC8741B311B1500C50BBA /* xViewController.swift */; };
 		2A3E8B621B1D42B10063A4B3 /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A3E8B611B1D42B10063A4B3 /* AddressBookUI.framework */; };
@@ -70,6 +71,7 @@
 		2A2878BC1B504BE600C9C1A4 /* TextFieldExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldExtension.swift; sourceTree = "<group>"; };
 		2A287D361AF723F20078F0F7 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		2A287D371AF724380078F0F7 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
+		2A2F256A1B55D7FB00949569 /* TableViewController1.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController1.swift; sourceTree = "<group>"; };
 		2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIDeviceExtension.swift; sourceTree = "<group>"; };
 		2A3DC8741B311B1500C50BBA /* xViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = xViewController.swift; sourceTree = "<group>"; };
 		2A3E8B611B1D42B10063A4B3 /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
@@ -196,6 +198,7 @@
 		2A98D42B1ADB665C003D3512 /* VOIPsms */ = {
 			isa = PBXGroup;
 			children = (
+				2A2F256A1B55D7FB00949569 /* TableViewController1.swift */,
 				2AE359491B3F048E00F9EF57 /* DownloadMessagesViewController.swift */,
 				2AFCFFBA1B33752700A11469 /* MessageListViewController.swift */,
 				2A3DC8741B311B1500C50BBA /* xViewController.swift */,
@@ -511,6 +514,7 @@
 				2A98D4321ADB665C003D3512 /* VOIPsms.xcdatamodeld in Sources */,
 				2AE76D331AE2B91D00A6E84D /* MessageDetailViewController.swift in Sources */,
 				2ABFAED91AE08DBC00EFABBD /* MessagesViewController.swift in Sources */,
+				2A2F256B1B55D7FB00949569 /* TableViewController1.swift in Sources */,
 				2AE0DE5E1AE72946008EC08E /* MessageBubbleCell.swift in Sources */,
 				2AB4AC2F1B2F3ED700358899 /* DateExtension.swift in Sources */,
 				2ADBA1CB1AFED4460048972E /* StringExtension.swift in Sources */,

@@ -252,7 +252,7 @@
                                 <rect key="frame" x="0.0" y="45" width="600" height="555"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="none" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Cell" textLabel="mgP-9f-0ga" detailTextLabel="U5h-Yb-sHQ" rowHeight="83" style="IBUITableViewCellStyleSubtitle" id="leX-Lu-SL5">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="gray" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Cell" textLabel="mgP-9f-0ga" detailTextLabel="U5h-Yb-sHQ" rowHeight="83" style="IBUITableViewCellStyleSubtitle" id="leX-Lu-SL5">
                                         <rect key="frame" x="0.0" y="0.0" width="451" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="leX-Lu-SL5" id="tk3-xa-zJ2">
@@ -1043,7 +1043,7 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="Hki-ZF-hAF"/>
-        <segue reference="meH-hc-SMK"/>
+        <segue reference="yKZ-gd-B0X"/>
         <segue reference="NWg-hd-3Oh"/>
     </inferredMetricsTieBreakers>
 </document>

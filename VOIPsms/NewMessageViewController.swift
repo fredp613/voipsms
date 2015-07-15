@@ -22,7 +22,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     let addressBook = APAddressBook()
     var model = ModelSize()
     var contacts : [ContactStruct] = [ContactStruct]()
-    var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+    var moc : NSManagedObjectContext! //= CoreDataStack().managedObjectContext!
     var did : String = String()
     var selectedContact = String()
     var delegate: MessageListViewDelegate?
@@ -93,8 +93,6 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     
     @IBAction func sendMessageWasPressed(sender: AnyObject) {
         
-//        self.textMessage.resignFirstResponder()
-        
         var contact = ""
         if selectedContact != "" {
             contact = selectedContact
@@ -109,35 +107,22 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         var dateStr = formatter.stringFromDate(date)
         self.textMessage.text = ""
         CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msg, did: self.did, flag: message_status.PENDING.rawValue, completionHandler: { (responseObject, error) -> () in
-            if (CoreContact.currentContact(self.moc, contactId: contact) != nil) {
-                CoreContact.updateInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr,fullName: nil, phoneLabel: nil, addressBookLastModified: nil)
+            if let currentContact = CoreContact.currentContact(self.moc, contactId: contact) {
+                var formatter1: NSDateFormatter = NSDateFormatter()
+                formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                let parsedDate: NSDate = formatter1.dateFromString(dateStr)!
+                currentContact.lastModified = parsedDate
+                currentContact.deletedContact = 0
+                CoreContact.updateContactInMOC(self.moc)
+//                CoreContact.updateInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr,fullName: nil, phoneLabel: nil, addressBookLastModified: nil)
             } else {
                 println("creating contact")
                 CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
             }
-            self.delegate?.triggerSegue!(contact)
+            self.delegate?.triggerSegue!(contact, moc: self.moc)
             self.dismissViewControllerAnimated(false, completion: { () -> Void in
             })
-//            let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-//            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-//            dispatch_async(backgroundQueue, { () -> Void in
-//                if let cm = responseObject {
-//                    Message.sendMessageAPI(contact, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
-//                        if responseObject["status"].stringValue == "success" {
-//                           cm.id = responseObject["sms"].stringValue
-//                           cm.flag = message_status.DELIVERED.rawValue
-//                           CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-//                            //                        CoreMessage.deleteStaleMsgInManagedObjectContext(self.moc, coreId: cm!.coreId)
-//                            
-//                        }
-//                    })
-//                }
-//            })
-            
-            
-            //                    let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-            //                    let controllerToPush: AnyObject! = storyBoard.instantiateViewControllerWithIdentifier("messageDetailView")
-            //                    self.navigationController?.setViewControllers([controllerToPush], animated: true)
+
         })
     }
     

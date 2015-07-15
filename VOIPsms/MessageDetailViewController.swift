@@ -54,7 +54,7 @@ struct IOSModel {
         default:
             self.model = ModelSize.IPHONE_6
         }
-
+        
     }
     
     init(model: ModelSize) {
@@ -76,8 +76,8 @@ struct IOSModel {
 }
 
 class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScrollViewDelegate, UITextViewDelegate, NSFetchedResultsControllerDelegate, MessageListViewDelegate {
-
-//    @IBOutlet weak var textMessage: UITextField!
+    
+    //    @IBOutlet weak var textMessage: UITextField!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var sendButton: UIButton!
     @IBOutlet weak var scrollView: UIScrollView!
@@ -85,8 +85,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     @IBOutlet weak var bottomConstraint: NSLayoutConstraint!
     @IBOutlet weak var textMessage: UITextView!
-
-    var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+    
+    var moc : NSManagedObjectContext! //CoreDataStack().managedObjectContext!
     var messages : [CoreMessage]!
     var contactId = String()
     var cellHeights = [CGFloat]()
@@ -109,8 +109,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     var scrollDirection = ScrollDirection()
     var tableFullyLoaded = false
     var retrying : Bool = false
-
-//    var coreDid = CoreDID()
+    
+    //    var coreDid = CoreDID()
     var delegate:MessageListViewDelegate? = nil
     
     lazy var messageFetchedResultsController: NSFetchedResultsController = {
@@ -121,8 +121,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let contactPredicate = NSPredicate(format: "contactId == %@", self.contactId)
         let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [msgDIDPredicate, contactPredicate])
         messagesFetchRequest.predicate = compoundPredicate
-//        messagesFetchRequest.fetchBatchSize = 20
-
+        //        messagesFetchRequest.fetchBatchSize = 20
+        
         
         let frc = NSFetchedResultsController(
             fetchRequest: messagesFetchRequest,
@@ -134,7 +134,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         return frc
         }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tableView.delegate = self
@@ -142,7 +142,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         if let selectedDID = CoreDID.getSelectedDID(moc) {
             self.did = selectedDID.did
         }
-
+        
         if textMessage.text == "" {
             sendButton.enabled = false
         }
@@ -160,8 +160,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         scrollView.bounces = false
         scrollView.bringSubviewToFront(tableView)
         
+        var error : NSError? = nil
+        if (messageFetchedResultsController.performFetch(&error)==false) {
+            println("An error has occurred: \(error?.localizedDescription)")
+        }
         
-        startTimer()
+
         compressedTableViewHeight = self.tableView.frame.size.height
         
         dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
@@ -179,6 +183,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         if let lastMessage = messageFetchedResultsController.fetchedObjects?.last! as? CoreMessage {
             if lastMessage.flag == message_status.PENDING.rawValue {
+                println("last message here")
                 self.processMessage(lastMessage)
             }
             if lastMessage.flag == message_status.DELIVERED.rawValue {
@@ -189,14 +194,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                     self.tableView.reloadData()
                 }
             }
-
-
+            
+            
         }
         
-        var error : NSError? = nil
-        if (messageFetchedResultsController.performFetch(&error)==false) {
-            println("An error has occurred: \(error?.localizedDescription)")
-        }
+        startTimer()
         self.tableView.reloadData()
     }
     
@@ -220,33 +222,33 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 let lastMsgDate = lastMsg.date
                 Message.getIncomingMessagesFromAPI(self.moc, did: did, contact: contactId, from: lastMsgDate.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
                     if responseObject.count > 0 {
-                    for (key: String, t: JSON) in responseObject["sms"] {
-                        if let cm = CoreMessage.getMessageById(self.moc, Id: t["id"].stringValue) {
-                        } else {
-                            var error: NSError? = nil
-                            if (self.messageFetchedResultsController.performFetch(&error)==false) {
-                                println("An error has occurred: \(error?.localizedDescription)")
+                        for (key: String, t: JSON) in responseObject["sms"] {
+                            if let cm = CoreMessage.getMessageById(self.moc, Id: t["id"].stringValue) {
+                            } else {
+                                var error: NSError? = nil
+                                if (self.messageFetchedResultsController.performFetch(&error)==false) {
+                                    println("An error has occurred: \(error?.localizedDescription)")
+                                }
                             }
                         }
                     }
-                  }
                 })
             }
         }
-//        self.tableViewScrollToBottomAnimated(false)
-//        self.tableViewScrollToBottomAnimated(false)
-
+        //        self.tableViewScrollToBottomAnimated(false)
+        //        self.tableViewScrollToBottomAnimated(false)
+        
     }
     
     func startTimer() {
         if Reachability.isConnectedToNetwork() {
             timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
         } //else {
-//            let alert = UIAlertView(title: "Network Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
-//            alert.show()
-//        }
+        //            let alert = UIAlertView(title: "Network Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
+        //            alert.show()
+        //        }
         
-
+        
     }
     
     func stopTimer() {
@@ -255,7 +257,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-//        self.tableView.reloadData()
+        //        self.tableView.reloadData()
         self.tableViewScrollToBottomAnimated(false)
         self.tableViewScrollToBottomAnimated(false)
     }
@@ -263,11 +265,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
         
-//        var error : NSError? = nil
-//        if (messageFetchedResultsController.performFetch(&error)==false) {
-//            println("An error has occurred: \(error?.localizedDescription)")
-//        }
-//        self.tableView.reloadData()
+        //        var error : NSError? = nil
+        //        if (messageFetchedResultsController.performFetch(&error)==false) {
+        //            println("An error has occurred: \(error?.localizedDescription)")
+        //        }
+        //        self.tableView.reloadData()
         
         Contact().getContactsDict({ (contacts) -> () in
             if contacts[self.contactId] != nil {
@@ -280,7 +282,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         })
         self.tableViewScrollToBottomAnimated(false)
         self.tableViewScrollToBottomAnimated(false)
-
+        
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -312,11 +314,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         if self.lastContentOffset < scrollView.contentOffset.y {
             scrollDirection = ScrollDirection.ScrollDirectionDown
             println("no")
-
+            
             self.textMessage.resignFirstResponder()
-
+            
         }
-
+        
         self.lastContentOffset = scrollView.contentOffset.y
         let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
         scrollView.contentInset = contentInsets;
@@ -349,7 +351,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.endUpdates()
-
+        
         dispatch_async(dispatch_get_main_queue(), { () -> Void in
             self.messageFetchedResultsController.performFetch(nil)
             self.tableViewScrollToBottomAnimated(true)
@@ -357,13 +359,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         })
     }
     
-
+    
     
     //MARK: -tableView delegates
     
     
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-
+        
         
         var indexPaths = tableView.indexPathsForVisibleRows()
         
@@ -378,7 +380,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             }
         }
         
-    
+        
     }
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -389,13 +391,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         return 0
     }
     
-
+    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let sections = messageFetchedResultsController.sections {
             let currentSection = sections[section] as! NSFetchedResultsSectionInfo
             return currentSection.numberOfObjects
         }
-                        
+        
         return 0
     }
     
@@ -428,20 +430,20 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func tableView(tableView: UITableView, didEndDisplayingCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-       
+        
         if indexPath == self.selectedIndexPath {
             if self.messageFetchedResultsController.fetchedObjects?.count > 0 {
                 NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: Selector("updateView"), userInfo: nil, repeats: false)
             }
         }
-
+        
     }
     
     func updateView() {
         if deleteMenuActivated {
             var delView = self.view.viewWithTag(selectedIndexPath.row + 100)!
             delView.backgroundColor = UIColor.lightGrayColor()
-//            self.messagesToDelete.removeAll(keepCapacity: false)
+            //            self.messagesToDelete.removeAll(keepCapacity: false)
             self.messagesToDelete.updateValue(self.messageFetchedResultsController.objectAtIndexPath(selectedIndexPath) as! CoreMessage, forKey: selectedIndexPath.row + 100)
             
         } else {
@@ -450,23 +452,23 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                     let vi = v as! UIView
                     if vi.tag == 31 || vi.tag == 30 {
                         vi.removeFromSuperview()
-                    }                    
+                    }
                 }
                 self.dynamicBarButton.title = "Details"
                 self.dynamicBarButton.action = "segueToContactDetails:"
             })
         }
-      tableViewScrollToBottomAnimated(true)
-      tableViewScrollToBottomAnimated(true)
+        tableViewScrollToBottomAnimated(true)
+        tableViewScrollToBottomAnimated(true)
         
-      
+        
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
         let cellIdentifier = NSStringFromClass(MessageBubbleCell)
         var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as! MessageBubbleCell!
-
+        
         cell = MessageBubbleCell(style: .Default, reuseIdentifier: cellIdentifier)
         cell.userInteractionEnabled = true;
         // Add gesture recognizers #CopyMessage
@@ -510,7 +512,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 
             }
         }
-       
+        
         return cell
         
     }
@@ -532,11 +534,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     //MARK: MessageViewDelegate methods
     
-//    func refreshRequestedData(tableData: [Trash], tableDataAssets: [TrashAssets]) {
-//        delegate?.refreshRequestedData!(tableData, tableDataAssets: tableDataAssets)
-//    }
+    //    func refreshRequestedData(tableData: [Trash], tableDataAssets: [TrashAssets]) {
+    //        delegate?.refreshRequestedData!(tableData, tableDataAssets: tableDataAssets)
+    //    }
     
-   
+    
     //MARK: - textView delegates
     
     func textViewDidChange(textView: UITextView) {
@@ -557,17 +559,17 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         }
     }
     //MARK: - Keyboard delegates
-
+    
     func keyboardWillHide(sender: NSNotification) {
         let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
         scrollView.contentInset = contentInsets;
         scrollView.scrollIndicatorInsets = contentInsets;
-//        if self.tableViewHeightConstraint.constant < compressedTableViewHeight {
-//            self.tableViewHeightConstraint.constant = compressedTableViewHeight
-//        }
-
+        //        if self.tableViewHeightConstraint.constant < compressedTableViewHeight {
+        //            self.tableViewHeightConstraint.constant = compressedTableViewHeight
+        //        }
+        
     }
-
+    
     func adjustForKeyboard(notification: NSNotification) {
         let userInfo = notification.userInfo!
         
@@ -581,28 +583,28 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             if notification.name == UIKeyboardWillChangeFrameNotification {
                 
                 if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
-//                    if allCellHeight < keyboardScreenEndFrame.height  {
-//                        tableViewHeightConstraint.constant = compressedTableViewHeight - (keyboardViewEndFrame.height - 80)
-//                        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
-//                        scrollView.contentInset = contentInsets;
-//                        scrollView.scrollIndicatorInsets = contentInsets;
-//                    } else {
-                        scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height + 10, right: 0)
-                        scrollView.scrollIndicatorInsets = scrollView.contentInset
-//                    }
+                    //                    if allCellHeight < keyboardScreenEndFrame.height  {
+                    //                        tableViewHeightConstraint.constant = compressedTableViewHeight - (keyboardViewEndFrame.height - 80)
+                    //                        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+                    //                        scrollView.contentInset = contentInsets;
+                    //                        scrollView.scrollIndicatorInsets = contentInsets;
+                    //                    } else {
+                    scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height + 10, right: 0)
+                    scrollView.scrollIndicatorInsets = scrollView.contentInset
+                    //                    }
                 }
             }
-           
+            
         }
-
+        
         tableViewScrollToBottomAnimated(true)
-     
+        
     }
     
     func tableViewScrollToBottomAnimated(animated: Bool) {
         let numberOfRows = tableView.numberOfRowsInSection(0)
         if numberOfRows > 0 {
-//        let indexPath = NSIndexPath(forRow: self.tableData.endIndex - 1, inSection: 0)
+            //        let indexPath = NSIndexPath(forRow: self.tableData.endIndex - 1, inSection: 0)
             if let lastMessage = messageFetchedResultsController.fetchedObjects?.last as? CoreMessage {
                 let indexPath = messageFetchedResultsController.indexPathForObject(lastMessage)
                 tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Top,
@@ -619,15 +621,15 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         var msgForCoreData = self.textMessage.text
         self.textMessage.text = ""
-    
+        
         let date = NSDate()
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)
-//        self.tableViewScrollToBottomAnimated(true)
+        //        self.tableViewScrollToBottomAnimated(true)
         
-//        NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
-    
+        //        NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
+        
         CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: "", type: false, date: dateStr, message: msgForCoreData, did: self.did, flag: message_status.PENDING.rawValue) { (responseObject, error) -> () in
             if error == nil {
                 if let cm = responseObject {
@@ -639,9 +641,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         }
     }
     
-//    func timerDidFire(sender: NSTimer) {
-//        self.tableViewScrollToBottomAnimated(true)
-//    }
+    //    func timerDidFire(sender: NSTimer) {
+    //        self.tableViewScrollToBottomAnimated(true)
+    //    }
     
     func processMessage(cm: CoreMessage) {
         if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
@@ -662,31 +664,24 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         if Reachability.isConnectedToNetwork() {
             dispatch_async(backgroundQueue, { () -> Void in
                 Message.sendMessageAPI(self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
-                    
-//                    if error != nil {
-//                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-//                            cm.flag = message_status.UNDELIVERED.rawValue
-//                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-//                        })
-//                    } else {
-                        if responseObject["status"].stringValue == "success" {
-                            cm.id = responseObject["sms"].stringValue
-                            cm.flag = message_status.DELIVERED.rawValue
-                            var formatter1: NSDateFormatter = NSDateFormatter()
-                            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                            let parsedDate: String = formatter1.stringFromDate(NSDate())
-                            cm.date = parsedDate
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-                            })
-                            
-                        } else {
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                cm.flag = message_status.UNDELIVERED.rawValue
-                                CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-                            })
-                        }
-//                    }
+
+                    if responseObject["status"].stringValue == "success" {
+                        cm.id = responseObject["sms"].stringValue
+                        cm.flag = message_status.DELIVERED.rawValue
+                        var formatter1: NSDateFormatter = NSDateFormatter()
+                        formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                        let parsedDate: String = formatter1.stringFromDate(NSDate())
+                        cm.date = parsedDate
+                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+                        })
+                        
+                    } else {
+                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            cm.flag = message_status.UNDELIVERED.rawValue
+                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+                        })
+                    }
                 })
             })
         } else {
@@ -707,7 +702,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             
             
         }
-       
+        
     }
     
     func configureAccessoryView(cell: UITableViewCell, message: CoreMessage) {
@@ -729,13 +724,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 btnRetry.clipsToBounds = true
                 cell.accessoryView = btnRetry
             }
-        }                
+        }
     }
     
     func retryWasPressed(sender: UIButton) {
         println("hi")
-//        let cm : CoreMessage = self.messageFetchedResultsController.objectAtIndexPath(self.selectedIndexPath) as! CoreMessage
-//        processMessage(cm)
+        //        let cm : CoreMessage = self.messageFetchedResultsController.objectAtIndexPath(self.selectedIndexPath) as! CoreMessage
+        //        processMessage(cm)
     }
     
     func isLastMessage(message: CoreMessage) -> Bool {
@@ -794,7 +789,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         dynamicBarButton.action = "cancelDeleteAction:"
         self.tableView.reloadData()
     }
-
+    
     
     func deleteMenuButtonSelected(sender: UIButton) {
         let btn = sender
@@ -814,7 +809,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         }
         self.messagesToDelete.removeAll(keepCapacity: false)
         deleteMenuActivated = false
-       
+        
         messageFetchedResultsController.performFetch(nil)
         self.tableView.reloadData()
         self.delegate?.updateMessagesTableView!()
@@ -833,19 +828,19 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         }
         
     }
-
-
+    
+    
     
     // MARK: - Navigation
-
+    
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-
+        
         if (segue.identifier == "showContactDetailSegue") {
             var actionSegue : ContactActionViewController = segue.destinationViewController as! ContactActionViewController
             actionSegue.contactId = self.contactId
             timer.invalidate()
         }
     }
-
+    
 }

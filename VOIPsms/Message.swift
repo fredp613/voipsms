@@ -207,7 +207,8 @@ class Message {
                     flagValue = message_status.READ.rawValue
                 }
                 let did = t["did"].stringValue
-                if CoreMessage.isExistingMessageById(moc, id: id) == false {
+                if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
+
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
                         
 //                        Message.sendPushNotification(contact, message: message)

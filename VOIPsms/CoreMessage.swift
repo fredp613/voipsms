@@ -107,9 +107,7 @@ class CoreMessage: NSManagedObject {
         let coreMessages = CoreContact.getMsgsByContact(moc, contactId: contactId, did: did)
         
         for cm in coreMessages {
-            CoreDeleteMessage.createInManagedObjectContext(moc, id: cm.id)
-            moc.deleteObject(cm)
-            moc.save(nil)
+            CoreMessage.deleteMessage(moc, coreMessage: cm)
         }
         
         return completionHandler(responseObject: true, error: nil)
@@ -258,15 +256,21 @@ class CoreMessage: NSManagedObject {
         return coreMessages
     }
     
-    class func getMessagesByDST(moc: NSManagedObjectContext, dst: String, did: String) -> [CoreMessage]? {
+    class func getMessagesByDST(moc: NSManagedObjectContext, dst: String, did: String?) -> [CoreMessage]? {
         
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         let entity = NSEntityDescription.entityForName("CoreMessage", inManagedObjectContext: moc)
         fetchRequest.entity = entity
-        let firstPredicate = NSPredicate(format: "contactId CONTAINS[cd] %@", dst)
-        let secondPredicate = NSPredicate(format: "did == %@", did)
-        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
-        fetchRequest.predicate = predicate
+        if let did = did {
+            let firstPredicate = NSPredicate(format: "contactId CONTAINS[cd] %@", dst)
+            let secondPredicate = NSPredicate(format: "did == %@", did)
+            let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
+            fetchRequest.predicate = predicate
+        } else {
+            let predicate = NSPredicate(format: "contactId CONTAINS[cd] %@", dst)
+            fetchRequest.predicate = predicate
+        }
+        
         
         fetchRequest.returnsObjectsAsFaults = false
         var coreMessages = [CoreMessage]()
