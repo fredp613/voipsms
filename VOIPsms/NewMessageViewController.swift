@@ -57,7 +57,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         scrollView.bringSubviewToFront(textMessage)
         scrollView.bringSubviewToFront(sendButton)
 
-        if self.textMessage.text == "" {
+        if self.textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
             self.sendButton.enabled = false
         }
         
@@ -99,7 +99,13 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         } else {
             contact = self.searchBar.text
         }
-        var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+        var trimmedMessage = self.textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        var msg : String = trimmedMessage.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+        
+//        NSString *string = @" this text has spaces before and after ";
+//        NSString *trimmedString = [string stringByTrimmingCharactersInSet:
+//        [NSCharacterSet whitespaceCharacterSet]];
+        
         
         let date = NSDate()
         let formatter = NSDateFormatter()
@@ -114,7 +120,6 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
                 currentContact.lastModified = parsedDate
                 currentContact.deletedContact = 0
                 CoreContact.updateContactInMOC(self.moc)
-//                CoreContact.updateInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr,fullName: nil, phoneLabel: nil, addressBookLastModified: nil)
             } else {
                 println("creating contact")
                 CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
@@ -130,6 +135,11 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     func textViewDidChange(textView: UITextView) {
         let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
         scrollView.contentInset = contentInsets;
+        if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
+            sendButton.enabled = false
+        } else {
+            sendButton.enabled = true
+        }
     }
     
     func keyboardWillShow() {

@@ -16,6 +16,7 @@ class NewContactViewController: UIViewController, UITextFieldDelegate, ContactAc
     @IBOutlet weak var doneButton: UIButton!
     @IBOutlet weak var textMobile: UITextField!
     var delegate: ContactActionViewControllerDelegate? = nil
+    var moc : NSManagedObjectContext!
     
     var contactId : String = String()
     
@@ -64,8 +65,7 @@ class NewContactViewController: UIViewController, UITextFieldDelegate, ContactAc
                 fullName = self.textFirstName.text
             }
             if Contact().createContact(contactId, firstName: self.textFirstName.text, lastName: self.textLastName.text) {
-                var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-                CoreContact.updateInManagedObjectContext(moc, contactId: contactId, lastModified: nil, fullName: fullName, phoneLabel: nil, addressBookLastModified: NSDate())
+                CoreContact.updateInManagedObjectContext(self.moc, contactId: contactId, lastModified: nil, fullName: fullName, phoneLabel: nil, addressBookLastModified: NSDate())
             }
             self.dismissContactActionVC()
             self.dismissViewControllerAnimated(true, completion: { () -> Void in

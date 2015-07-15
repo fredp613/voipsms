@@ -16,6 +16,7 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     var contacts : [AddressBookContactStruct] = [AddressBookContactStruct]()
     var contactId : String = String()
     var delegate: ContactActionViewControllerDelegate? = nil
+    var moc : NSManagedObjectContext!
 
     
     override func viewDidLoad() {
@@ -79,11 +80,11 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
         var okAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default) {
             UIAlertAction in
             println("pressed")
-            let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-            if let currentContact = CoreContact.currentContact(moc, contactId: self.contactId) {
+//            let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+            if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
                 currentContact.fullName = self.contacts[indexPath.row].contactFullName
                 println("saving to contact")
-                moc.save(nil)
+                self.moc.save(nil)
             }
 //            CoreContact.updateInManagedObjectContext(moc, contactId: self.contactId, lastModified: nil, fullName: self.contacts[indexPath.row].contactFullName, phoneLabel: nil, addressBookLastModified: NSDate())
 

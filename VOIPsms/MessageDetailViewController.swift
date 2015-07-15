@@ -142,8 +142,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         if let selectedDID = CoreDID.getSelectedDID(moc) {
             self.did = selectedDID.did
         }
-        
-        if textMessage.text == "" {
+
+        if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
             sendButton.enabled = false
         }
         self.textMessage.delegate = self
@@ -538,7 +538,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     //MARK: - textView delegates
     
     func textViewDidChange(textView: UITextView) {
-        if textMessage.text == "" {
+        if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
             sendButton.enabled = false
         } else {
             sendButton.enabled = true
@@ -832,11 +832,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         
+        
         if (segue.identifier == "showContactDetailSegue") {
             var actionSegue : ContactActionViewController = segue.destinationViewController as! ContactActionViewController
             actionSegue.contactId = self.contactId
-            timer.invalidate()
+            actionSegue.moc = self.moc
         }
+        timer.invalidate()
     }
     
 }

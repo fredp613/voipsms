@@ -82,7 +82,7 @@ class Message {
                 let typeStr = t["type"].stringValue
                 var type : Bool
                 let date = t["date"].stringValue
-                let message = t["message"].stringValue
+                let message = t["message"].stringValue.stringByReplacingOccurrencesOfString("?", withString: " ", options: NSStringCompareOptions.LiteralSearch, range: nil)
                 var flagValue = String()
                 if typeStr == "0" {
                     type = false
@@ -104,7 +104,6 @@ class Message {
                 if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
                         println("message created")
-
 
                         if let contactOfMessage = CoreContact.currentContact(moc, contactId: contact) {
                             var formatter1: NSDateFormatter = NSDateFormatter()

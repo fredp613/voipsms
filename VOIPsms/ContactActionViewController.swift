@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 
 protocol ContactActionViewControllerDelegate {
@@ -17,6 +18,7 @@ class ContactActionViewController: UIViewController, ContactActionViewController
 
     var contactId : String = String()
     var dismissFlag : Bool = false
+    var moc : NSManagedObjectContext!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,12 +55,14 @@ class ContactActionViewController: UIViewController, ContactActionViewController
             var newContactSegue : NewContactViewController = segue.destinationViewController as! NewContactViewController
             newContactSegue.delegate = self
             newContactSegue.contactId = self.contactId
+            newContactSegue.moc = self.moc
         }
         
         if (segue.identifier == "existingContactSegue") {
             var newExistingContactSegue : NewExistingContactViewController = segue.destinationViewController as! NewExistingContactViewController
             newExistingContactSegue.delegate = self
             newExistingContactSegue.contactId = self.contactId
+            newExistingContactSegue.moc = self.moc
         }
     }
 

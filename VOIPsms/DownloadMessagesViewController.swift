@@ -45,7 +45,7 @@ class DownloadMessagesViewController: UIViewController {
                         error) -> () in
                     
                         if error == nil {
-                            
+                           
                             if let contacts = CoreContact.getAllContacts(self.moc) {
                                 for c in contacts {
                                     if let lastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: nil) {
@@ -56,6 +56,9 @@ class DownloadMessagesViewController: UIViewController {
                                         CoreContact.updateContactInMOC(self.moc)
                                     }
                                 }
+                            }
+                            if Contact().checkAccess() {
+                                Contact().syncAddressBook1()
                             }
                             
                             println("done")

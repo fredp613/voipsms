@@ -279,7 +279,8 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         //        if let lastMessage = contact.messages.sortedArrayUsingDescriptors([sortDescriptor]).first! as? CoreMessage {
         if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
             let message = lastMessage as CoreMessage
-            cell.detailTextLabel?.text = "\(message.message) - \(contact.lastModified) - \(message.flag)"
+            let text2 = message.message //.stringByReplacingOccurrencesOfString("?", withString: "'", options: NSStringCompareOptions.LiteralSearch, range: nil)
+            cell.detailTextLabel?.text = "\(text2) - \(message.flag)"
             let font:UIFont? = UIFont(name: "Arial", size: 13.0)
             let dateStr = NSAttributedString(string: message.date.dateFormattedString(), attributes:
                 [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
