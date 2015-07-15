@@ -111,9 +111,13 @@ class Message {
                             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                             let parsedDate: NSDate = formatter1.dateFromString(date)!
                             contactOfMessage.lastModified = parsedDate
-                            CoreContact.updateContactInMOC(moc)
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                CoreContact.updateContactInMOC(moc)
+                            })
                         } else {
-                            CoreContact.createInManagedObjectContext(moc, contactId: contact, lastModified: date)
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                CoreContact.createInManagedObjectContext(moc, contactId: contact, lastModified: date)
+                            })
                         }
 
                         dispatch_async(dispatch_get_main_queue(), { () -> Void in

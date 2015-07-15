@@ -192,7 +192,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                             currentUser.initialLogon = 0
                             CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
                         }
-                        self.pokeFetchedResultsController()
+//                        self.pokeFetchedResultsController()
                     })
                 }
                 
