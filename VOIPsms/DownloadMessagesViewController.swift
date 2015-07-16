@@ -10,50 +10,82 @@ import UIKit
 import CoreData
 
 
-class DownloadMessagesViewController: UIViewController {
-
-    @IBOutlet weak var lblCountHeader: UILabel!
-    @IBOutlet weak var lblCount: UILabel!
+class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsControllerDelegate **/ {
+    
+    
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-    var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+
     var timer : NSTimer = NSTimer()
+    var notificationCenter = NSNotificationCenter.defaultCenter()
+    var totalCount : Int = Int()
+    var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+    
+
+    @IBOutlet weak var testBtn: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.lblCountHeader.hidden = true
         self.activityIndicator.startAnimating()
-//        getMessages()
-
+        self.notificationCenter.addObserver(self, selector: "contextDidSave:", name: NSManagedObjectContextWillSaveNotification, object: nil)
     }
-    
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        getMessages()
+        self.totalCount = 0
+
+        var qualityOfServiceClass = Int(QOS_CLASS_DEFAULT.value)
+        var backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        dispatch_async(backgroundQueue, { () -> Void in
+             self.getMessages()
+        })
+        
+    }      
+    
+    func contextDidSave(notification: NSNotification) {
+        totalCount = totalCount + 1
+        println(totalCount)
+        self.testBtn.setTitle(String(totalCount), forState: UIControlState.Normal)
+//        if notification.name == NSManagedObjectContextWillSaveNotification {
+//            println("yes")
+//            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                println("main thread")
+//                var c = CoreMessage.getMessages(self.moc, ascending: false).count
+//                println(self.lblCount.text! + " - " + String(c))
+//            })
+        
+//        }
+        
+        
     }
 
+    @IBAction func testBtnAction(sender: AnyObject) {
+        println("button pressed")
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
     //MARK: Custom Methods
-    func getMessages() {
-        if let dids = CoreDID.getDIDs(moc) {
+    func getMessages() {        
+        
+        var backgroundMOC : NSManagedObjectContext = CoreDataStack().managedObjectContextPrivate!
+        if let dids = CoreDID.getDIDs(backgroundMOC) {
             if let str = dids.filter({$0.currentlySelected.boolValue == true}).first {
-                if let currentUser = CoreUser.currentUser(self.moc) {
-                    Message.getMessagesFromAPI(false, moc: moc, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
+                if let currentUser = CoreUser.currentUser(backgroundMOC) {
+                    Message.getMessagesFromAPI(false, moc: backgroundMOC, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
                         error) -> () in
                     
                         if error == nil {
                            
-                            if let contacts = CoreContact.getAllContacts(self.moc) {
+                            if let contacts = CoreContact.getAllContacts(backgroundMOC) {
                                 for c in contacts {
-                                    if let lastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: nil) {
+                                    if let lastMessage = CoreContact.getLastMessageFromContact(backgroundMOC, contactId: c.contactId, did: nil) {
                                         var formatter1: NSDateFormatter = NSDateFormatter()
                                         formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                                         let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
                                         c.lastModified = parsedDate
-                                        CoreContact.updateContactInMOC(self.moc)
+                                        CoreContact.updateContactInMOC(backgroundMOC)
                                     }
                                 }
                             }
@@ -64,13 +96,19 @@ class DownloadMessagesViewController: UIViewController {
                             println("done")
                             currentUser.initialLogon = 0
                             currentUser.messagesLoaded = 1
-                            CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
-                            self.activityIndicator.stopAnimating()
-                            self.performSegueWithIdentifier("segueToMessages", sender: self)
+                            CoreUser.updateInManagedObjectContext(backgroundMOC, coreUser: currentUser)
+                           
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                self.activityIndicator.stopAnimating()
+                                self.notificationCenter.removeObserver(self)
+                                self.performSegueWithIdentifier("segueToMessages", sender: self)
+                            })
+                            
                         } else {
                             println(error)
-                            self.showErrorController()
-                            //here have the try again button or UIViewController
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                self.showErrorController()
+                            })
                         }
                     })
                 }
@@ -94,18 +132,7 @@ class DownloadMessagesViewController: UIViewController {
         alertController.addAction(cancelAction)
         self.presentViewController(alertController, animated: true, completion: nil)
     }
-    
-    func updateMessageCounter(sender: NSTimer) {
-//        println("message starting")
-//        let moc1 = CoreDataStack().managedObjectContext!
-//        println(CoreMessage.getMessages(moc1, ascending: false).count)
 
-
-//        if messageCount > 0 {
-//            lblCountHeader.hidden = false
-//            lblCount.text = String(messageCount)
-//        }
-    }
 
 
     

@@ -266,7 +266,6 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         println("selected row")
         self.timer.invalidate()
-        
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -602,6 +601,8 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             detailSegue.did = self.did
             detailSegue.moc = self.managedObjectContext
             detailSegue.delegate = self
+            self.searchBar.text = ""
+            self.searchBar.resignFirstResponder()
             
         }
         

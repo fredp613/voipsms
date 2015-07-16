@@ -59,12 +59,22 @@ class CoreDataStack {
         return managedObjectContext
         }()
     
+    lazy var managedObjectContextPrivate: NSManagedObjectContext? = {
+ 
+        let coordinator = self.persistentStoreCoordinator
+        if coordinator == nil {
+            return nil
+        }
+        var backgroundObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+        backgroundObjectContext.persistentStoreCoordinator = coordinator
+        return backgroundObjectContext
+        }()
     // MARK: - Core Data Saving support
     
-    func saveContext () {
+    func saveContext (context: NSManagedObjectContext) {
         if let moc = self.managedObjectContext {
             var error: NSError? = nil
-            if moc.hasChanges && !moc.save(&error) {
+            if context.hasChanges && !context.save(&error) {
                 // Replace this implementation with code to handle the error appropriately.
                 // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 NSLog("Unresolved error \(error), \(error!.userInfo)")
@@ -72,4 +82,73 @@ class CoreDataStack {
             }
         }
     }
+    
+    func saveContext() {
+        self.saveContext(self.managedObjectContextPrivate!)
+    }
+    
+    func contextDidSaveContext(notification: NSNotification) {
+        
+        let sender = notification.object as! NSManagedObjectContext
+        if sender === self.managedObjectContext {
+            println("saved to main context in this thread")
+            self.managedObjectContextPrivate!.performBlock({ () -> Void in
+                self.managedObjectContextPrivate!.mergeChangesFromContextDidSaveNotification(notification)
+            })
+        } else if sender === self.managedObjectContextPrivate {
+            println("saved backgorund context in this thread")
+            self.managedObjectContext!.performBlock({ () -> Void in
+                self.managedObjectContext!.mergeChangesFromContextDidSaveNotification(notification)
+            })
+        } else {
+            println("saved to context in other thread")
+            self.managedObjectContextPrivate!.performBlock({ () -> Void in
+                self.managedObjectContextPrivate?.mergeChangesFromContextDidSaveNotification(notification)
+            })
+            self.managedObjectContext!.performBlock({ () -> Void in
+                self.managedObjectContext!.mergeChangesFromContextDidSaveNotification(notification)
+            })
+        }
+        
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }

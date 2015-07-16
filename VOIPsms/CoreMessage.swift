@@ -49,40 +49,43 @@ class CoreMessage: NSManagedObject {
         }
         
         if let c = CoreContact.currentContact(managedObjectContext, contactId: contact) {
-            if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date, fullName: nil, phoneLabel: nil, addressBookLastModified: nil) {
-                coreMessage.contact = c
-            }
+//            if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date, fullName: nil, phoneLabel: nil, addressBookLastModified: nil) {
+//                coreMessage.contact = c
+//            }
+            var formatter1: NSDateFormatter = NSDateFormatter()
+            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+            let parsedDate: NSDate = formatter1.dateFromString(date)!
+            c.lastModified = parsedDate
+            CoreContact.updateContactInMOC(managedObjectContext)
+            
         } else {
             if let c = CoreContact.createInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date) {
                 coreMessage.contact = c
             }
         }
         let err = NSError()
-        if managedObjectContext.save(nil) {
-//            if let cc = CoreContact.getLastMessageFromContact(managedObjectContext, contactId: contact, did: did) {
-//                if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: cc.date) {
-//                }
-//            }
+                
+        CoreDataStack().saveContext(managedObjectContext)
+//        if managedObjectContext.save(nil) {            
             return completionHandler(responseObject: coreMessage, error: nil)
-        } else {
-            return completionHandler(responseObject: nil, error: err)
-        }
+//        } else {
+//            return completionHandler(responseObject: nil, error: err)
+//        }
     }
     
     class func updateInManagedObjectContext(moc: NSManagedObjectContext, coreMessage: CoreMessage) {
-        if moc.save(nil) {
-//            var cc = coreMessage.contact
-//            var formatter1: NSDateFormatter = NSDateFormatter()
-//            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-//            let parsedDate: NSDate = formatter1.dateFromString(coreMessage.date)!
-//            cc.lastModified = parsedDate
-//            CoreContact.updateContactInMOC(moc)
-        }
+        CoreDataStack().saveContext(moc)
+        
+//        if moc.save(nil) {
+//        }
     }
     
     class func deleteMessage(moc: NSManagedObjectContext, coreMessage: CoreMessage) {
         if coreMessage.id != "" {
+//            println(coreMessage.id)
             CoreDeleteMessage.createInManagedObjectContext(moc, id: coreMessage.id)
+//            Message.deleteMessagesFromAPI([coreMessage.id], completionHandler: { (responseObject, error) -> () in
+//            })
         }
         var contact = coreMessage.contactId
         var did = coreMessage.did
@@ -98,6 +101,8 @@ class CoreMessage: NSManagedObject {
             currentContact?.lastModified = parsedDate
             CoreContact.updateContactInMOC(moc)
         }
+        
+        
       
         
     }

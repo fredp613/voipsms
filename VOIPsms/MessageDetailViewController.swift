@@ -168,7 +168,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
 
         compressedTableViewHeight = self.tableView.frame.size.height
         
-        dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
+        if CoreContact.currentContact(self.moc, contactId: self.contactId)?.fullName == nil {
+            dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
+        }
+        
+
+        
         
         self.navigationItem.rightBarButtonItem = dynamicBarButton
         
@@ -348,11 +353,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.endUpdates()
         
-        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            self.messageFetchedResultsController.performFetch(nil)
+//        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//            self.messageFetchedResultsController.performFetch(nil)
             self.tableViewScrollToBottomAnimated(true)
             self.tableViewScrollToBottomAnimated(true)
-        })
+//        })
     }
     
     
@@ -426,7 +431,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func tableView(tableView: UITableView, didEndDisplayingCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        
         if indexPath == self.selectedIndexPath {
             if self.messageFetchedResultsController.fetchedObjects?.count > 0 {
                 NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: Selector("updateView"), userInfo: nil, repeats: false)
@@ -437,10 +441,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func updateView() {
         if deleteMenuActivated {
-            var delView = self.view.viewWithTag(selectedIndexPath.row + 100)!
-            delView.backgroundColor = UIColor.lightGrayColor()
-            //            self.messagesToDelete.removeAll(keepCapacity: false)
-            self.messagesToDelete.updateValue(self.messageFetchedResultsController.objectAtIndexPath(selectedIndexPath) as! CoreMessage, forKey: selectedIndexPath.row + 100)
+            if let delView = self.view.viewWithTag(selectedIndexPath.row + 100) {
+                delView.backgroundColor = UIColor.lightGrayColor()
+                //            self.messagesToDelete.removeAll(keepCapacity: false)
+                self.messagesToDelete.updateValue(self.messageFetchedResultsController.objectAtIndexPath(selectedIndexPath) as! CoreMessage, forKey: selectedIndexPath.row + 100)
+            }
+           
             
         } else {
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -467,12 +473,16 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         cell = MessageBubbleCell(style: .Default, reuseIdentifier: cellIdentifier)
         cell.userInteractionEnabled = true;
-        // Add gesture recognizers #CopyMessage
-        let action: Selector = "messageShowMenuAction:"
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: action)
-        tapGestureRecognizer.numberOfTapsRequired = 2
-        cell.bubbleImageView.addGestureRecognizer(tapGestureRecognizer)
-        cell.bubbleImageView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: action))
+        
+        if cell != nil {
+            // Add gesture recognizers #CopyMessage
+            let action: Selector = "messageShowMenuAction:"
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: action)
+            tapGestureRecognizer.numberOfTapsRequired = 2
+            cell.bubbleImageView.addGestureRecognizer(tapGestureRecognizer)
+            cell.bubbleImageView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: action))
+        }
+        
         if let message = messageFetchedResultsController.objectAtIndexPath(indexPath) as? CoreMessage {
             cell.configureWithMessage(message)
             var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
@@ -622,24 +632,16 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)
-        //        self.tableViewScrollToBottomAnimated(true)
-        
-        //        NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: "timerDidFire:", userInfo: nil, repeats: false)
         
         CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: "", type: false, date: dateStr, message: msgForCoreData, did: self.did, flag: message_status.PENDING.rawValue) { (responseObject, error) -> () in
             if error == nil {
                 if let cm = responseObject {
-                    self.messageFetchedResultsController.performFetch(nil)
                     self.processMessage(cm)
                 }
-                
             }
         }
     }
-    
-    //    func timerDidFire(sender: NSTimer) {
-    //        self.tableViewScrollToBottomAnimated(true)
-    //    }
+
     
     func processMessage(cm: CoreMessage) {
         if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
@@ -658,7 +660,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let qualityOfServiceClass = QOS_CLASS_BACKGROUND
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
         if Reachability.isConnectedToNetwork() {
-            dispatch_async(backgroundQueue, { () -> Void in
+//            dispatch_async(backgroundQueue, { () -> Void in
                 Message.sendMessageAPI(self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
 
                     if responseObject["status"].stringValue == "success" {
@@ -668,18 +670,18 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                         formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                         let parsedDate: String = formatter1.stringFromDate(NSDate())
                         cm.date = parsedDate
-                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
                             CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-                        })
+//                        })
                         
                     } else {
-                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
                             cm.flag = message_status.UNDELIVERED.rawValue
                             CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-                        })
+//                        })
                     }
                 })
-            })
+//            })
         } else {
             if !retrying {
                 cm.flag = message_status.UNDELIVERED.rawValue
@@ -746,27 +748,45 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func messageShowMenuAction(gestureRecognizer: UITapGestureRecognizer) {
-        let bubbleImageView = gestureRecognizer.view!
-        bubbleImageView.becomeFirstResponder()
-        let twoTaps = (gestureRecognizer.numberOfTapsRequired == 2)
-        let doubleTap = (twoTaps && gestureRecognizer.state == .Ended)
-        let longPress = (!twoTaps && gestureRecognizer.state == .Began)
-        if doubleTap || longPress {
-            let pressedIndexPath = tableView.indexPathForRowAtPoint(gestureRecognizer.locationInView(tableView))!
-            tableView.selectRowAtIndexPath(pressedIndexPath, animated: false, scrollPosition: .None)
-            let menuController = UIMenuController.sharedMenuController()
-            menuController.setTargetRect(bubbleImageView.frame, inView: bubbleImageView.superview!)
-            menuController.menuItems = nil
-            menuController.menuItems = [UIMenuItem(title: "Copy", action: "messageCopyTextAction:"), UIMenuItem(title: "More...", action: "activateDeleteAction:")]
-            menuController.setMenuVisible(true, animated: true)
-            self.selectedIndexPath = pressedIndexPath
+        
+        if let lm = CoreContact.getLastMessageFromContact(self.moc, contactId: self.contactId, did: self.did) {
+           
+            let bubbleImageView = gestureRecognizer.view!
+            bubbleImageView.becomeFirstResponder()
+            let twoTaps = (gestureRecognizer.numberOfTapsRequired == 2)
+            let doubleTap = (twoTaps && gestureRecognizer.state == .Ended)
+            let longPress = (!twoTaps && gestureRecognizer.state == .Began)
+            if doubleTap || longPress {
+                let pressedIndexPath = tableView.indexPathForRowAtPoint(gestureRecognizer.locationInView(tableView))!
+                tableView.selectRowAtIndexPath(pressedIndexPath, animated: false, scrollPosition: .None)
+                let menuController = UIMenuController.sharedMenuController()
+                menuController.setTargetRect(bubbleImageView.frame, inView: bubbleImageView.superview!)
+                menuController.menuItems = nil
+                let copyMenuItem = UIMenuItem(title: "Copy", action: "messageCopyTextAction:")
+                if lm.flag != message_status.PENDING.rawValue {
+                    menuController.menuItems = [copyMenuItem, UIMenuItem(title: "More...", action: "activateDeleteAction:")]
+                } else {
+                    menuController.menuItems = [copyMenuItem]
+                }
+                
+                
+                if lm.flag != message_status.PENDING.rawValue {
+                    
+                }
+                
+                menuController.setMenuVisible(true, animated: true)
+                self.selectedIndexPath = pressedIndexPath
+            }
         }
+        
+        
     }
     // 2. Copy text to pasteboard
     func messageCopyTextAction(menuController: UIMenuController) {
-        let selectedIndexPath = tableView.indexPathForSelectedRow()
-        let selectedMessage = messageFetchedResultsController.objectAtIndexPath(selectedIndexPath!) as! CoreMessage
-        UIPasteboard.generalPasteboard().string = selectedMessage.message
+        if let selectedIndexPath = tableView.indexPathForSelectedRow() {
+            let selectedMessage = messageFetchedResultsController.objectAtIndexPath(selectedIndexPath) as! CoreMessage
+            UIPasteboard.generalPasteboard().string = selectedMessage.message
+        }
     }
     // 3. Deselect row
     func menuControllerWillHide(notification: NSNotification) {

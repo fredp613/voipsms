@@ -58,13 +58,12 @@ class Message {
             if components.day > 91 {
                 fromStr = dateFormatter.stringFromDate(date2.dateByAddingTimeInterval(60*60*24*(-91)))
             }
-            
             if (currentUser.initialLogon.boolValue == true) || (currentUser.initialLoad.boolValue == true) {
                 params = [
                     "method" : "getSMS",
                     "from" : fromStr,
                     "to" : dateFormatter.stringFromDate(NSDate()) as String,
-                    "limit" : "500"
+                    "limit" : "200"
                 ]
             } else {
                 params = [
@@ -74,7 +73,9 @@ class Message {
             }
         }
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
+
         VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
+          
             let json = responseObject
             for (key: String, t: JSON) in json["sms"] {
                 let contact = t["contact"].stringValue
@@ -82,7 +83,7 @@ class Message {
                 let typeStr = t["type"].stringValue
                 var type : Bool
                 let date = t["date"].stringValue
-                let message = t["message"].stringValue.stringByReplacingOccurrencesOfString("?", withString: " ", options: NSStringCompareOptions.LiteralSearch, range: nil)
+                let message = t["message"].stringValue.stringByReplacingOccurrencesOfString("?", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
                 var flagValue = String()
                 if typeStr == "0" {
                     type = false
@@ -110,13 +111,13 @@ class Message {
                             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                             let parsedDate: NSDate = formatter1.dateFromString(date)!
                             contactOfMessage.lastModified = parsedDate
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 CoreContact.updateContactInMOC(moc)
-                            })
+//                            })
                         } else {
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 CoreContact.createInManagedObjectContext(moc, contactId: contact, lastModified: date)
-                            })
+//                            })
                         }
 
                         dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -132,6 +133,10 @@ class Message {
             return completionHandler(responseObject: json, error: nil)
         }
     }
+    
+
+    
+    
     class func sendPushNotification(contact: String, message: String) {
         let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
         var contactStr = contact
@@ -261,6 +266,7 @@ class Message {
                 "id":id
             ]
             VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
+                println(responseObject)
             }
         }
         return completionHandler(responseObject: true, error: nil)

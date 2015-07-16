@@ -52,8 +52,9 @@ class CoreUser: NSManagedObject {
     }
     
     class func updateInManagedObjectContext(moc: NSManagedObjectContext, coreUser: CoreUser) {
-        if moc.save(nil) {
-        }
+//        if moc.save(nil) {
+//        }
+        CoreDataStack().saveContext(moc)
     }
     
     class func currentUser(managedObjectContext: NSManagedObjectContext) -> CoreUser? {

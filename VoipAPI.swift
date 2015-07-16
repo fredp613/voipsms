@@ -35,12 +35,13 @@ class VoipAPI : NSObject, UIAlertViewDelegate {
                 request.HTTPBody = NSJSONSerialization.dataWithJSONObject(params, options: nil, error: &err)
             }
         }
+
+        
         
         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response, data, error) -> Void in
+            
             if let err = error {
-                
-//                let alert = UIAlertView(title: "Something went wrong please try again", message: "Connection error", delegate: self, cancelButtonTitle: "Ok")
-//                alert.show()
+
                 return
             }
             
@@ -48,9 +49,14 @@ class VoipAPI : NSObject, UIAlertViewDelegate {
                 
                 if let json: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers, error: nil) {
                     let parsedData = JSON(json!)
-                    return completionHandler(responseObject: parsedData, error: nil)
+                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                        return completionHandler(responseObject: parsedData, error: nil)
+                    })
+
                 } else {
-                    return completionHandler(responseObject: nil, error: error)
+                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                        return completionHandler(responseObject: nil, error: error)
+                    })
                 }
             }
             
@@ -73,11 +79,10 @@ class VoipAPI : NSObject, UIAlertViewDelegate {
             }
         }
         
-        
-        
+
         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response, data, error) -> Void in
             if let err = error {
-                
+
 //                let alert = UIAlertView(title: "Something went wrong please try again", message: "Connection error", delegate: self, cancelButtonTitle: "Ok")
 //                alert.show()
                 return

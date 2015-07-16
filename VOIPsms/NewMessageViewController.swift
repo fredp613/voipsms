@@ -97,33 +97,34 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         if selectedContact != "" {
             contact = selectedContact
         } else {
-            contact = self.searchBar.text
+            
+            var cleanedSearchBarText = NSString(string: self.searchBar.text)
+            if cleanedSearchBarText.length > 10 {
+                cleanedSearchBarText = cleanedSearchBarText.substringWithRange(NSMakeRange(1, 10))
+                println(cleanedSearchBarText)
+            }
+            contact = cleanedSearchBarText as String
+//            contact = self.searchBar.text
         }
         var trimmedMessage = self.textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
-        var msg : String = trimmedMessage.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
-        
-//        NSString *string = @" this text has spaces before and after ";
-//        NSString *trimmedString = [string stringByTrimmingCharactersInSet:
-//        [NSCharacterSet whitespaceCharacterSet]];
-        
-        
+        var msg : String = trimmedMessage.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!        
         let date = NSDate()
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)
         self.textMessage.text = ""
         CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msg, did: self.did, flag: message_status.PENDING.rawValue, completionHandler: { (responseObject, error) -> () in
-            if let currentContact = CoreContact.currentContact(self.moc, contactId: contact) {
-                var formatter1: NSDateFormatter = NSDateFormatter()
-                formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                let parsedDate: NSDate = formatter1.dateFromString(dateStr)!
-                currentContact.lastModified = parsedDate
-                currentContact.deletedContact = 0
-                CoreContact.updateContactInMOC(self.moc)
-            } else {
-                println("creating contact")
-                CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
-            }
+//            if let currentContact = CoreContact.currentContact(self.moc, contactId: contact) {
+//                var formatter1: NSDateFormatter = NSDateFormatter()
+//                formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+//                let parsedDate: NSDate = formatter1.dateFromString(dateStr)!
+//                currentContact.lastModified = parsedDate
+//                currentContact.deletedContact = 0
+//                CoreContact.updateContactInMOC(self.moc)
+//            } else {
+//                println("creating contact")
+//                CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
+//            }
             self.delegate?.triggerSegue!(contact, moc: self.moc)
             self.dismissViewControllerAnimated(false, completion: { () -> Void in
             })
@@ -132,14 +133,49 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     }
     
     //MARK: UITextView Delegate Methods
+    
+    func textViewDidBeginEditing(textView: UITextView) {
+        if validateContactText(searchBar.text) {
+            if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
+                sendButton.enabled = false
+            } else {
+                sendButton.enabled = true
+            }
+        } else {
+            self.sendButton.enabled = false
+        }
+    }
+    
     func textViewDidChange(textView: UITextView) {
         let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
         scrollView.contentInset = contentInsets;
-        if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
-            sendButton.enabled = false
+        
+        if validateContactText(searchBar.text) {
+            if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
+                sendButton.enabled = false
+            } else {
+                sendButton.enabled = true
+            }
         } else {
-            sendButton.enabled = true
+            self.sendButton.enabled = false
         }
+        
+       
+    }
+    
+    func validateContactText(input: String) -> Bool {
+        if self.selectedContact == "" {
+            let strToFormat = input as NSString
+            let regex = NSRegularExpression(pattern: "[0-9]", options: nil, error: nil)
+            if (regex?.matchesInString(input, options: nil, range: NSMakeRange(0, strToFormat.length)) != nil) {
+                if strToFormat.length >= 10 && strToFormat.length <= 11 {
+                   return true
+                }
+            }
+        } else {
+            return true
+        }
+        return false
     }
     
     func keyboardWillShow() {
@@ -177,9 +213,8 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     //MARK: SearchBar Delegate Methods
     
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
-
+        
         if searchText != "" {
-            self.sendButton.enabled = true
             CoreContact.getContacts(moc, did: did, dst: searchText, name: nil, message: nil, completionHandler: { (responseObject, error) -> () in
                 var coreContacts = responseObject as! [CoreContact]
                 CoreContact.findAllContactsByName(self.moc, searchTerm: searchText, existingContacts: coreContacts, completionHandler: { (contacts) -> () in
@@ -189,11 +224,19 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             })
             
         } else {
-            self.sendButton.enabled = false
             self.contacts = [ContactStruct]()
             self.tableView.reloadData()
         }
-//        println(self.contacts.map({$0.phoneLabel}))
+        
+        if validateContactText(searchBar.text) {
+            if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
+                sendButton.enabled = false
+            } else {
+                sendButton.enabled = true
+            }
+        } else {
+            self.sendButton.enabled = false
+        }
     }
  
     
@@ -251,6 +294,16 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         
         self.contacts = [ContactStruct]()
         self.tableView.reloadData()
+        
+        if validateContactText(searchBar.text) {
+            if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
+                sendButton.enabled = false
+            } else {
+                sendButton.enabled = true
+            }
+        } else {
+            self.sendButton.enabled = false
+        }
 
     }
     

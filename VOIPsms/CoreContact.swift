@@ -33,12 +33,14 @@ class CoreContact: NSManagedObject {
             contact.lastModified = NSDate()
         }
         let error : NSError? = nil
-        if managedObjectContext.save(nil) {
-            println("contact saved")
-            return contact
-        }
+//        if managedObjectContext.save(nil) {
+//            println("contact saved")
+//            return contact
+//        }
+        CoreDataStack().saveContext(managedObjectContext)
+        return contact
 
-        return nil
+//        return nil
     }
     
     class func updateInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?, fullName: String?, phoneLabel: String?, addressBookLastModified: NSDate?) -> Bool {
@@ -66,14 +68,16 @@ class CoreContact: NSManagedObject {
             if let sync = addressBookLastModified {
                 contact.addressBookSyncLastModified = sync
             }
-            managedObjectContext.save(nil)
+//            managedObjectContext.save(nil)
+            CoreDataStack().saveContext(managedObjectContext)
             return true
         }
         return false
     }
     
     class func updateContactInMOC(moc: NSManagedObjectContext) {
-        moc.save(nil)
+//        moc.save(nil)
+        CoreDataStack().saveContext(moc)
     }
     
     class func getAllContacts(managedObjectContext: NSManagedObjectContext) -> [CoreContact]? {
