@@ -11,30 +11,26 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="voiplogo" translatesAutoresizingMaskIntoConstraints="NO" id="gHD-Wg-SxW">
-                    <rect key="frame" x="183" y="187" width="115" height="43"/>
+                    <rect key="frame" x="190" y="187" width="101" height="30"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="43" id="EHi-Qt-Rin"/>
-                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="43" id="EKI-de-17D"/>
-                        <constraint firstAttribute="width" constant="115" id="FpH-Zr-Jxk"/>
-                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="115" id="XsF-yJ-GX4"/>
+                        <constraint firstAttribute="height" constant="30" id="T9Z-AA-snY"/>
+                        <constraint firstAttribute="width" constant="101" id="hqQ-kD-bbz"/>
                     </constraints>
                 </imageView>
-                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="voipsmsicon" translatesAutoresizingMaskIntoConstraints="NO" id="gU2-Yv-TGI">
-                    <rect key="frame" x="213" y="131" width="55" height="48"/>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chat-2x" translatesAutoresizingMaskIntoConstraints="NO" id="gU2-Yv-TGI">
+                    <rect key="frame" x="220" y="142" width="41" height="37"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="48" id="6ck-8a-KFb"/>
-                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="48" id="7H0-xo-ez0"/>
-                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="55" id="pAH-y9-cud"/>
-                        <constraint firstAttribute="width" constant="55" id="u3Q-ab-qkG"/>
+                        <constraint firstAttribute="width" constant="41" id="9wJ-Wc-7oA"/>
+                        <constraint firstAttribute="height" constant="37" id="K5T-7z-xx3"/>
                     </constraints>
                 </imageView>
             </subviews>
-            <color key="backgroundColor" red="0.4549019608" green="0.53333333329999999" blue="0.69411764710000001" alpha="1" colorSpace="calibratedRGB"/>
+            <color key="backgroundColor" red="0.45375987509999999" green="0.53392431220000003" blue="0.69332904669999995" alpha="1" colorSpace="calibratedRGB"/>
             <constraints>
-                <constraint firstItem="gHD-Wg-SxW" firstAttribute="top" secondItem="gU2-Yv-TGI" secondAttribute="bottom" constant="8" symbolic="YES" id="3zC-6V-bpb"/>
-                <constraint firstItem="gHD-Wg-SxW" firstAttribute="centerX" secondItem="gU2-Yv-TGI" secondAttribute="centerX" id="PMj-j8-PhB"/>
-                <constraint firstItem="gU2-Yv-TGI" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="131" id="kBA-YQ-be9"/>
-                <constraint firstItem="gHD-Wg-SxW" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="s4t-BI-Ua6"/>
+                <constraint firstItem="gU2-Yv-TGI" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="38s-Yv-X4a"/>
+                <constraint firstItem="gHD-Wg-SxW" firstAttribute="top" secondItem="gU2-Yv-TGI" secondAttribute="bottom" constant="8" symbolic="YES" id="7Pp-mt-jBA"/>
+                <constraint firstItem="gHD-Wg-SxW" firstAttribute="centerX" secondItem="gU2-Yv-TGI" secondAttribute="centerX" id="Y6g-kO-tfH"/>
+                <constraint firstItem="gU2-Yv-TGI" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="142" id="zOJ-ae-y2N"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
@@ -42,7 +38,7 @@
         </view>
     </objects>
     <resources>
+        <image name="chat-2x" width="16" height="16"/>
         <image name="voiplogo" width="169" height="37"/>
-        <image name="voipsmsicon" width="54" height="47"/>
     </resources>
 </document>

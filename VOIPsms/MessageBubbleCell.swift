@@ -3,25 +3,59 @@ import UIKit
 let incomingTag = 0, outgoingTag = 1
 let bubbleTag = 8
 
-class MessageBubbleCell: UITableViewCell {
+class CustomTextViewForCell : UITextView, UITextViewDelegate {
+    override init(frame: CGRect, textContainer: NSTextContainer?) {
+        super.init(frame: CGRectZero, textContainer: nil)
+        self.delegate = self
+    }
+
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func textView(textView: UITextView, shouldInteractWithURL URL: NSURL, inRange characterRange: NSRange) -> Bool {
+        println("hi")
+        return true
+    }
+    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+        println("asdf")
+        return false
+    }
+}
+
+
+class MessageBubbleCell: UITableViewCell, TTTAttributedLabelDelegate  {
     let bubbleImageView: UIImageView
-    let messageLabel: UILabel
+    let messageLabel: TTTAttributedLabel
     
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         bubbleImageView = UIImageView(image: bubbleImage.incoming, highlightedImage: bubbleImage.incomingHighlighed)
         bubbleImageView.tag = bubbleTag
         bubbleImageView.userInteractionEnabled = true // #CopyMesage
-        
-        messageLabel = UILabel(frame: CGRectZero)
+        messageLabel = TTTAttributedLabel(frame: CGRectZero)
+
 //        messageLabel.font = UIFont.systemFontOfSize(messageFontSize)
         messageLabel.numberOfLines = 0
-        messageLabel.userInteractionEnabled = false   // #CopyMessage
-        
+//        messageLabel.textContainer.lineBreakMode = NSLineBreakMode.ByWordWrapping
+//        messageLabel.scrollEnabled = false
+//        messageLabel.backgroundColor = UIColor.clearColor()
+//        messageLabel.dataDetectorTypes = UIDataDetectorTypes.Link | UIDataDetectorTypes.PhoneNumber | UIDataDetectorTypes.Address //| UIDataDetectorTypes.CalendarEvent
+//        messageLabel.editable = false
+//        messageLabel.selectable = true
+//        messageLabel.userInteractionEnabled = true
+//        messageLabel.contentInset = UIEdgeInsets(top: -8, left: 0, bottom: 0, right: 0)
+//        messageLabel.contentSize.width = 218
+
+
+        messageLabel.preferredMaxLayoutWidth = 218
+
         super.init(style: .Default, reuseIdentifier: reuseIdentifier)
         selectionStyle = .None
+        messageLabel.delegate = self
         
         contentView.addSubview(bubbleImageView)
         bubbleImageView.addSubview(messageLabel)
+        
         
         bubbleImageView.setTranslatesAutoresizingMaskIntoConstraints(false)
         messageLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
@@ -32,7 +66,7 @@ class MessageBubbleCell: UITableViewCell {
         
         bubbleImageView.addConstraint(NSLayoutConstraint(item: messageLabel, attribute: .CenterX, relatedBy: .Equal, toItem: bubbleImageView, attribute: .CenterX, multiplier: 1, constant: 3))
         bubbleImageView.addConstraint(NSLayoutConstraint(item: messageLabel, attribute: .CenterY, relatedBy: .Equal, toItem: bubbleImageView, attribute: .CenterY, multiplier: 1, constant: -0.5))
-        messageLabel.preferredMaxLayoutWidth = 218
+
         bubbleImageView.addConstraint(NSLayoutConstraint(item: messageLabel, attribute: .Height, relatedBy: .Equal, toItem: bubbleImageView, attribute: .Height, multiplier: 1, constant: -15))
     }
     
@@ -41,7 +75,8 @@ class MessageBubbleCell: UITableViewCell {
     }
     
     func configureWithMessage(message: CoreMessage) {
-        let font:UIFont? = UIFont(name: "Arial", size: 12.0)
+        let messageFont:UIFont? = UIFont(name: "Helvetica", size: 15.0)
+        let dateFont:UIFont? = UIFont(name: "Helvetica-Oblique", size: 12.0)
         var mutableStr = NSMutableAttributedString()
         var humanDate = String()
         if message.date != "" {
@@ -49,17 +84,61 @@ class MessageBubbleCell: UITableViewCell {
         } else {
             humanDate = message.date
         }
+        var textColor : UIColor!
+        if message.type.boolValue == true {
+            textColor = UIColor.blackColor()
+        } else {
+            textColor = UIColor.whiteColor()
+        }
         
         let dateStr = NSAttributedString(string: "\n\(humanDate)", attributes:
-            [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
-                NSFontAttributeName: font!])
-        let messageStr = NSAttributedString(string: message.message + " - " + message.flag)
+            [NSForegroundColorAttributeName: textColor,
+                NSFontAttributeName: dateFont!])
+        let messageStr = NSAttributedString(string: message.message, attributes:
+            [NSForegroundColorAttributeName: textColor,
+                NSFontAttributeName: messageFont!])
+        
         mutableStr.appendAttributedString(messageStr)
         if message.date != "" {
             mutableStr.appendAttributedString(dateStr)
         }
+        
 
-        messageLabel.attributedText = mutableStr  //"\(message.message) \r\n \(dateStr.string)"
+        messageLabel.enabledTextCheckingTypes = NSTextCheckingType.Link.rawValue | NSTextCheckingType.PhoneNumber.rawValue
+        if message.type.boolValue == false {
+            messageLabel.linkAttributes = [NSForegroundColorAttributeName : UIColor.whiteColor().CGColor, NSUnderlineStyleAttributeName : NSUnderlineStyle.StyleSingle.rawValue]
+        } else {
+            messageLabel.linkAttributes = [NSForegroundColorAttributeName : UIColor.darkTextColor().CGColor, NSUnderlineStyleAttributeName : NSUnderlineStyle.StyleSingle.rawValue]
+        }
+
+//        messageLabel.enabledTextCheckingTypes = NSTextCheckingType.PhoneNumber.rawValue
+
+//        messageLabel.attributedText = mutableStr
+        messageLabel.setText(mutableStr)
+//        messageLabel.text = message.message
+        
+        
+//        
+//        let types: NSTextCheckingType = NSTextCheckingType.Address | NSTextCheckingType.PhoneNumber | NSTextCheckingType.Link
+//        var error: NSError?
+//        let detector = NSDataDetector(types: types.rawValue, error: &error)
+//        detector?.enumerateMatchesInString(message.message, options: nil, range: NSMakeRange(0, (message.message as NSString).length), usingBlock: { (result, flags, _) -> Void in
+//            if result.resultType == NSTextCheckingType.Link {
+//                println(result.URL!)
+//                println(result.range)
+//                var textToEvaluate = NSString(string: "\(mutableStr)").substringWithRange(result.range)
+//                mutableStr.mutableString.replaceCharactersInRange(result.range, withString: "asdfsdf")
+//            }
+//
+//            if result.resultType == NSTextCheckingType.PhoneNumber {
+//                println(result.phoneNumber!)
+//            }
+//            
+////            if result.resultType == NSTextCheckingType.Address {
+////                println(result.addressComponents!)
+////            }
+//            
+//        })
         
             var layoutAttribute: NSLayoutAttribute
             var layoutConstant: CGFloat
@@ -68,16 +147,20 @@ class MessageBubbleCell: UITableViewCell {
 //                tag = incomingTag
                 bubbleImageView.image = bubbleImage.incoming
                 bubbleImageView.highlightedImage = bubbleImage.incomingHighlighed
-                messageLabel.textColor = UIColor.blackColor()
+//                messageLabel.textColor = UIColor.blackColor()
                 layoutAttribute = .Left
                 layoutConstant = 10
+                
             } else { // outgoing
 //                tag = outgoingTag
                 bubbleImageView.image = bubbleImage.outgoing
                 bubbleImageView.highlightedImage = bubbleImage.outgoingHighlighed
-                messageLabel.textColor = UIColor.whiteColor()
+//                messageLabel.textColor = UIColor.whiteColor()
                 layoutAttribute = .Right
                 layoutConstant = -10
+                
+//                let attributes : [NSObject: AnyObject] = [NSForegroundColorAttributeName:UIColor.whiteColor(), NSUnderlineStyleAttributeName: 1]
+//                messageLabel.linkTextAttributes = attributes
             }
             
             let layoutConstraint: NSLayoutConstraint = bubbleImageView.constraints()[1] as! NSLayoutConstraint // `messageLabel` CenterX
@@ -97,6 +180,17 @@ class MessageBubbleCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
         bubbleImageView.highlighted = selected
     }
+    
+    //MARK: TTTAttributedLabel delegate methods
+    func attributedLabel(label: TTTAttributedLabel!, didLongPressLinkWithURL url: NSURL!, atPoint point: CGPoint) {
+        println("did select link")
+        UIApplication.sharedApplication().openURL(url)
+    }
+    
+    func attributedLabel(label: TTTAttributedLabel!, didSelectLinkWithPhoneNumber phoneNumber: String!) {
+        println(phoneNumber)
+        UIApplication.sharedApplication().openURL(NSURL(string: phoneNumber)!)
+    }
 }
 
 let bubbleImage = bubbleImageMake()
@@ -112,8 +206,8 @@ func bubbleImageMake() -> (incoming: UIImage, incomingHighlighed: UIImage, outgo
     let incomingHighlighted = coloredImage(maskIncoming, 206/255.0, 206/255.0, 210/255.0, 1).resizableImageWithCapInsets(capInsetsIncoming)
     
 //    UIColor(red: 179/255, green: 176/255, blue: 77/255, alpha: 1)
-    let outgoing = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 177/255.0, 1).resizableImageWithCapInsets(capInsetsOutgoing)
-    let outgoingHighlighted = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 177/255.0, 0.7).resizableImageWithCapInsets(capInsetsOutgoing)
+    let outgoing = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 195/255.0, 1).resizableImageWithCapInsets(capInsetsOutgoing)
+    let outgoingHighlighted = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 195/255.0, 0.7).resizableImageWithCapInsets(capInsetsOutgoing)
     
 //    return (incoming, incomingHighlighted, outgoing, outgoingHighlighted)
     return (incoming, incoming, outgoing, outgoing)
@@ -131,3 +225,8 @@ func coloredImage(image: UIImage, red: CGFloat, green: CGFloat, blue: CGFloat, a
     UIGraphicsEndImageContext()
     return result
 }
+
+
+
+
+

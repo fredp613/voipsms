@@ -38,6 +38,7 @@
 		2AA6CAF21B1B9653006C7D39 /* NewContactViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA6CAF11B1B9653006C7D39 /* NewContactViewController.swift */; };
 		2AA6CAF41B1B9A1D006C7D39 /* ContactActionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA6CAF31B1B9A1D006C7D39 /* ContactActionViewController.swift */; };
 		2AA6CAF61B1BF277006C7D39 /* NewExistingContactViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA6CAF51B1BF277006C7D39 /* NewExistingContactViewController.swift */; };
+		2AB3B42E1B598E4B00096DC2 /* NSMutableStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB3B42D1B598E4B00096DC2 /* NSMutableStringExtension.swift */; };
 		2AB4AC2F1B2F3ED700358899 /* DateExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB4AC2E1B2F3ED700358899 /* DateExtension.swift */; };
 		2ABFAED91AE08DBC00EFABBD /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAED81AE08DBC00EFABBD /* MessagesViewController.swift */; };
 		2ABFAEDD1AE09FD700EFABBD /* CoreMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAEDC1AE09FD700EFABBD /* CoreMessage.swift */; };
@@ -107,6 +108,7 @@
 		2AA6CAF11B1B9653006C7D39 /* NewContactViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewContactViewController.swift; sourceTree = "<group>"; };
 		2AA6CAF31B1B9A1D006C7D39 /* ContactActionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactActionViewController.swift; sourceTree = "<group>"; };
 		2AA6CAF51B1BF277006C7D39 /* NewExistingContactViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewExistingContactViewController.swift; sourceTree = "<group>"; };
+		2AB3B42D1B598E4B00096DC2 /* NSMutableStringExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSMutableStringExtension.swift; sourceTree = "<group>"; };
 		2AB4AC2E1B2F3ED700358899 /* DateExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateExtension.swift; sourceTree = "<group>"; };
 		2ABFAED81AE08DBC00EFABBD /* MessagesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
 		2ABFAEDC1AE09FD700EFABBD /* CoreMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreMessage.swift; sourceTree = "<group>"; };
@@ -295,6 +297,7 @@
 				2AE76D351AE2C26500A6E84D /* ArrayExtension.swift */,
 				2A3ACCB01AEAF0630005193B /* UIDeviceExtension.swift */,
 				2A2878BC1B504BE600C9C1A4 /* TextFieldExtension.swift */,
+				2AB3B42D1B598E4B00096DC2 /* NSMutableStringExtension.swift */,
 			);
 			name = extensions;
 			sourceTree = "<group>";
@@ -494,6 +497,7 @@
 				2A98D42F1ADB665C003D3512 /* AppDelegate.swift in Sources */,
 				2AC251C51AF6F40700A47AD0 /* NewMessageViewController.swift in Sources */,
 				2A640C701B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m in Sources */,
+				2AB3B42E1B598E4B00096DC2 /* NSMutableStringExtension.swift in Sources */,
 				2A98D4571ADB6891003D3512 /* CoreUser.swift in Sources */,
 				2A640C6E1B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.m in Sources */,
 				2A2878BD1B504BE600C9C1A4 /* TextFieldExtension.swift in Sources */,
@@ -651,6 +655,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = VOIPsms/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -666,6 +671,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = VOIPsms/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";

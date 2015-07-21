@@ -3,9 +3,11 @@
 
 target 'VOIPsms' do
 	pod 'APAddressBook/Swift'
+    pod 'TTTAttributedLabel'
 end
 
 target 'VOIPsmsTests' do
 	pod 'APAddressBook/Swift'
+    pod 'TTTAttributedLabel'
 end
 

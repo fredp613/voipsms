@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2FC31BB051716892C4123640"
+               BlueprintIdentifier = "22B4B7EB551BFBB11A6B63A2"
                BuildableName = "libPods-VOIPsms.a"
                BlueprintName = "Pods-VOIPsms"
                ReferencedContainer = "container:Pods.xcodeproj">

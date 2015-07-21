@@ -18,10 +18,9 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     var timer : NSTimer = NSTimer()
     var notificationCenter = NSNotificationCenter.defaultCenter()
     var totalCount : Int = Int()
-    var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+
     
 
-    @IBOutlet weak var testBtn: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +30,6 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        self.totalCount = 0
 
         var qualityOfServiceClass = Int(QOS_CLASS_DEFAULT.value)
         var backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
@@ -41,10 +39,11 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
         
     }      
     
+//    @IBAction func testPressed(sender: AnyObject) {
+//        println("testing")
+//    }
     func contextDidSave(notification: NSNotification) {
-        totalCount = totalCount + 1
-        println(totalCount)
-        self.testBtn.setTitle(String(totalCount), forState: UIControlState.Normal)
+//        self.testBtn.setTitle(String(totalCount), forState: UIControlState.Normal)
 //        if notification.name == NSManagedObjectContextWillSaveNotification {
 //            println("yes")
 //            dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -58,17 +57,13 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
         
     }
 
-    @IBAction func testBtnAction(sender: AnyObject) {
-        println("button pressed")
-    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
     //MARK: Custom Methods
-    func getMessages() {        
-        
+    func getMessages() {                
         var backgroundMOC : NSManagedObjectContext = CoreDataStack().managedObjectContextPrivate!
         if let dids = CoreDID.getDIDs(backgroundMOC) {
             if let str = dids.filter({$0.currentlySelected.boolValue == true}).first {

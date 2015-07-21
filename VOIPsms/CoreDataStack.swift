@@ -11,6 +11,7 @@ import CoreData
 
 class CoreDataStack {
     // MARK: - Core Data stack
+  
     
     lazy var applicationDocumentsDirectory: NSURL = {
         // The directory the application uses to store the Core Data store file. This code uses a directory named "myclerical.Trasher" in the application's documents Application Support directory.

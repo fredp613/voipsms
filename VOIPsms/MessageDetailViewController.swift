@@ -75,7 +75,7 @@ struct IOSModel {
     
 }
 
-class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScrollViewDelegate, UITextViewDelegate, NSFetchedResultsControllerDelegate, MessageListViewDelegate {
+class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScrollViewDelegate, UITextViewDelegate, NSFetchedResultsControllerDelegate, UIGestureRecognizerDelegate, MessageListViewDelegate {
     
     //    @IBOutlet weak var textMessage: UITextField!
     @IBOutlet weak var tableView: UITableView!
@@ -151,6 +151,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         tableView.separatorStyle = .None
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
+//        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardDidHideNotification, object: nil)
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
         
@@ -203,6 +204,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         startTimer()
         self.tableView.reloadData()
     }
+    
+    
+    @IBAction func handleSwipe(sender: AnyObject) {
+        println("handle swipe down")
+        self.textMessage.resignFirstResponder()
+    }
+    
         
     func segueToContactDetails(sender: UIBarButtonItem) {
         Contact().getContactsDict { (contacts) -> () in
@@ -275,7 +283,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         Contact().getContactsDict({ (contacts) -> () in
             if contacts[self.contactId] != nil {
                 let cText = contacts[self.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-                self.navigationController?.navigationBar.topItem?.title = cText
+                self.navigationController?.navigationBar.topItem?.title = "\(cText!) (\(self.contactId.northAmericanPhoneNumberFormat()))"
                 
             } else {
                 self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
@@ -289,13 +297,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(true)
         self.timer.invalidate()
-        if let lastMessage = CoreContact.getLastIncomingMessageFromContact(self.moc, contactId: self.contactId, did: self.did) {
-            if lastMessage.type == 1 || lastMessage.type.boolValue == true {
-                lastMessage.flag = message_status.READ.rawValue
-                CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: lastMessage)
-            }
-        }
-        self.delegate?.updateMessagesTableView!()
+//        if let lastMessage = CoreContact.getLastIncomingMessageFromContact(self.moc, contactId: self.contactId, did: self.did) {
+//            if lastMessage.type == 1 || lastMessage.type.boolValue == true {
+//                lastMessage.flag = message_status.READ.rawValue
+//                CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: lastMessage)
+//            }
+//        }
+//        self.delegate?.updateMessagesTableView!()
     }
     
     
@@ -315,8 +323,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         if self.lastContentOffset < scrollView.contentOffset.y {
             scrollDirection = ScrollDirection.ScrollDirectionDown
             println("no")
-            
-            self.textMessage.resignFirstResponder()
+            if scrollView == self.scrollView {
+              self.textMessage.resignFirstResponder()
+            }
+//            self.textMessage.resignFirstResponder()
             
         }
         
@@ -374,14 +384,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         if test.row == indexPath.row {
             if !self.tableFullyLoaded {
                 if !deleteMenuActivated {
-                    self.tableViewScrollToBottomAnimated(false)
-                    self.tableViewScrollToBottomAnimated(false)
+                    println("asdfdsfasfdsdsfdsdf potential problem here")
+//                    self.tableViewScrollToBottomAnimated(false)
+//                    self.tableViewScrollToBottomAnimated(false)
                 }
                 self.tableFullyLoaded = true
             }
         }
-        
-        
     }
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -416,15 +425,18 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 }
             } else {
                 //retry button exists
-                if (self.view.viewWithTag(33) != nil) {
-                    var cell = self.tableView.cellForRowAtIndexPath(self.messageFetchedResultsController.indexPathForObject(message)!)
-                    var activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
-                    activityIndicator.tag = 10
-                    cell!.accessoryView = activityIndicator
-                    activityIndicator.startAnimating()
-                    self.retrying = true
-                    processMessage(message)
+                if message.flag == message_status.UNDELIVERED.rawValue {
+//                    if (self.view.viewWithTag(33000) != nil) {
+                        var cell = self.tableView.cellForRowAtIndexPath(self.messageFetchedResultsController.indexPathForObject(message)!)
+                        var activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+                        activityIndicator.tag = 10
+                        cell!.accessoryView = activityIndicator
+                        activityIndicator.startAnimating()
+                        self.retrying = true
+                        processMessage(message)
+//                    }
                 }
+                
             }
         }
         
@@ -460,8 +472,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 self.dynamicBarButton.action = "segueToContactDetails:"
             })
         }
-        tableViewScrollToBottomAnimated(true)
-        tableViewScrollToBottomAnimated(true)
+//        tableViewScrollToBottomAnimated(true)
+//        tableViewScrollToBottomAnimated(true)
         
         
     }
@@ -472,7 +484,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         var cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier) as! MessageBubbleCell!
         
         cell = MessageBubbleCell(style: .Default, reuseIdentifier: cellIdentifier)
-        cell.userInteractionEnabled = true;
+//        cell.userInteractionEnabled = true;
         
         if cell != nil {
             // Add gesture recognizers #CopyMessage
@@ -485,6 +497,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         if let message = messageFetchedResultsController.objectAtIndexPath(indexPath) as? CoreMessage {
             cell.configureWithMessage(message)
+
+
+            
             var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
             allCellHeight += (size.height + 10)
             self.configureAccessoryView(cell, message: message)
@@ -555,6 +570,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         }
     }
     
+
     
     //MARK: - textField delegates
     func textFieldChange(sender: UITextField) {
@@ -566,13 +582,32 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     //MARK: - Keyboard delegates
     
+    
     func keyboardWillHide(sender: NSNotification) {
-        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
-        scrollView.contentInset = contentInsets;
-        scrollView.scrollIndicatorInsets = contentInsets;
-        //        if self.tableViewHeightConstraint.constant < compressedTableViewHeight {
-        //            self.tableViewHeightConstraint.constant = compressedTableViewHeight
-        //        }
+//        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+//        scrollView.contentInset = contentInsets;
+//        scrollView.scrollIndicatorInsets = contentInsets;
+        
+       
+        switch model.rawValue {
+            case 480:
+                self.tableView.frame.size.height = compressedTableViewHeight - 115
+                self.tableViewHeightConstraint.constant = compressedTableViewHeight - 115
+            case 568:
+                self.tableView.frame.size.height = compressedTableViewHeight - 30
+                self.tableViewHeightConstraint.constant = compressedTableViewHeight - 30
+            case 667:
+                self.tableView.frame.size.height = compressedTableViewHeight + 70
+                self.tableViewHeightConstraint.constant = compressedTableViewHeight + 70
+            case 736:
+                self.tableView.frame.size.height = compressedTableViewHeight + 120
+                self.tableViewHeightConstraint.constant = compressedTableViewHeight + 120
+            default:
+                self.tableView.frame.size.height = compressedTableViewHeight + 60
+                self.tableViewHeightConstraint.constant = compressedTableViewHeight + 60
+        }
+        
+        
         
     }
     
@@ -587,17 +622,42 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         } else {
             
             if notification.name == UIKeyboardWillChangeFrameNotification {
-                
                 if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
-                    //                    if allCellHeight < keyboardScreenEndFrame.height  {
-                    //                        tableViewHeightConstraint.constant = compressedTableViewHeight - (keyboardViewEndFrame.height - 80)
-                    //                        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
-                    //                        scrollView.contentInset = contentInsets;
-                    //                        scrollView.scrollIndicatorInsets = contentInsets;
-                    //                    } else {
-                    scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height + 10, right: 0)
-                    scrollView.scrollIndicatorInsets = scrollView.contentInset
-                    //                    }
+//                    if allCellHeight < keyboardScreenEndFrame.height  {
+
+                    
+                    if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
+                        //                println(model.rawValue)
+                        //                case IPHONE_4 = 480
+                        //                case IPHONE_5 = 568
+                        //                case IPHONE_6 = 667
+                        //                case IPHONE_6P = 736
+                        var offsetHeight = CGFloat()
+                        switch model.rawValue {
+                        case 480:
+                            offsetHeight = keyboardScreenEndFrame.height + 115
+                        case 568:
+                            offsetHeight = keyboardScreenEndFrame.height + 30
+                        case 667:
+                            offsetHeight = keyboardScreenEndFrame.height - 70
+                        case 736:
+                            offsetHeight = keyboardScreenEndFrame.height - 120
+                        default:
+                            offsetHeight = keyboardScreenEndFrame.height - 60
+                        }
+                        
+                        if notification.name == UIKeyboardWillChangeFrameNotification {
+                            self.tableView.frame.size.height = compressedTableViewHeight - offsetHeight
+                                self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight
+                            let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+                            scrollView.contentInset = contentInsets;
+//                            self.tableViewScrollToBottomAnimated(true)
+                        }
+                    }
+//                    } else {
+//                        scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height + 10, right: 0)
+//                        scrollView.scrollIndicatorInsets = scrollView.contentInset
+//                    }
                 }
             }
             
@@ -717,12 +777,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 var btnFrame = CGRectMake(cell.frame.origin.x, cell.frame.origin.y, 24, 24)
                 var btnRetry = UIView(frame: btnFrame)
                 btnRetry.backgroundColor = UIColor.redColor()
-                btnRetry.tag = 33
+                btnRetry.tag = 33000
                 btnRetry.layer.cornerRadius = btnRetry.frame.size.width / 2
                 btnRetry.clipsToBounds = true
                 cell.accessoryView = btnRetry
             }
         }
+        
     }
     
     func retryWasPressed(sender: UIButton) {
@@ -804,8 +865,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         dynamicBarButton.title = "Cancel"
         dynamicBarButton.action = "cancelDeleteAction:"
         self.tableView.reloadData()
+        if let selectedIndexPath = tableView.indexPathForSelectedRow() {
+            tableView.deselectRowAtIndexPath(selectedIndexPath, animated: false)
+        }
     }
-    
     
     func deleteMenuButtonSelected(sender: UIButton) {
         let btn = sender
@@ -828,6 +891,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         messageFetchedResultsController.performFetch(nil)
         self.tableView.reloadData()
+        deleteMenuActivated = false
         self.delegate?.updateMessagesTableView!()
     }
     
@@ -844,8 +908,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         }
         
     }
-    
-    
     
     // MARK: - Navigation
     

@@ -1,6 +1,6 @@
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/APAddressBook"
-OTHER_CFLAGS = $(inherited) -isystem "${PODS_ROOT}/Headers/Public" -isystem "${PODS_ROOT}/Headers/Public/APAddressBook"
-OTHER_LDFLAGS = $(inherited) -ObjC -l"Pods-VOIPsms-APAddressBook" -framework "AddressBook"
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/APAddressBook" "${PODS_ROOT}/Headers/Public/TTTAttributedLabel"
+OTHER_CFLAGS = $(inherited) -isystem "${PODS_ROOT}/Headers/Public" -isystem "${PODS_ROOT}/Headers/Public/APAddressBook" -isystem "${PODS_ROOT}/Headers/Public/TTTAttributedLabel"
+OTHER_LDFLAGS = $(inherited) -ObjC -l"Pods-VOIPsms-APAddressBook" -l"Pods-VOIPsms-TTTAttributedLabel" -framework "AddressBook" -framework "CoreGraphics" -framework "CoreText" -framework "QuartzCore" -framework "UIKit"
 OTHER_LIBTOOLFLAGS = $(OTHER_LDFLAGS)
 PODS_ROOT = ${SRCROOT}/Pods

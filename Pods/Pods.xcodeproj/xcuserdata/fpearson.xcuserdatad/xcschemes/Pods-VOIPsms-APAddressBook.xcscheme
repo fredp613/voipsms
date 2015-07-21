@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "EEBDC760E020C60997EC5ACB"
+               BlueprintIdentifier = "BBB44C3EF2EF0A532B9A68A1"
                BuildableName = "libPods-VOIPsms-APAddressBook.a"
                BlueprintName = "Pods-VOIPsms-APAddressBook"
                ReferencedContainer = "container:Pods.xcodeproj">

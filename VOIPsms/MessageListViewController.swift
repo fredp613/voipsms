@@ -277,9 +277,14 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         //        if let lastMessage = contact.messages.sortedArrayUsingDescriptors([sortDescriptor]).first! as? CoreMessage {
         if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
-            let message = lastMessage as CoreMessage
-            let text2 = message.message //.stringByReplacingOccurrencesOfString("?", withString: "'", options: NSStringCompareOptions.LiteralSearch, range: nil)
-            cell.detailTextLabel?.text = "\(text2) - \(message.flag)"
+            var message = lastMessage as CoreMessage
+            var text2 = message.message //.stringByReplacingOccurrencesOfString("?", withString: "'", options: NSStringCompareOptions.LiteralSearch, range: nil)
+            if message.flag == message_status.PENDING.rawValue {
+                cell.detailTextLabel?.text = "\(text2) sending..."
+            } else {
+                cell.detailTextLabel?.text = "\(text2)"
+            }
+
             let font:UIFont? = UIFont(name: "Arial", size: 13.0)
             let dateStr = NSAttributedString(string: message.date.dateFormattedString(), attributes:
                 [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
@@ -292,7 +297,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             if cell.contentView.viewWithTag(3) != nil {
                 cell.contentView.viewWithTag(3)?.removeFromSuperview()
             }
-            if message.type.boolValue == true {
+            if message.type.boolValue == true || message.type == 1 {
                 if message.flag != message_status.READ.rawValue {
                     var textCol = UIColor.blueColor()
                     cell.textLabel?.textColor = textCol

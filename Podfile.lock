@@ -2,11 +2,14 @@ PODS:
   - APAddressBook/Core (0.1.5)
   - APAddressBook/Swift (0.1.5):
     - APAddressBook/Core
+  - TTTAttributedLabel (1.13.4)
 
 DEPENDENCIES:
   - APAddressBook/Swift
+  - TTTAttributedLabel
 
 SPEC CHECKSUMS:
   APAddressBook: c72fec93464d57f39966ce28c107c10253fa7d39
+  TTTAttributedLabel: 0a2ac7b2dd726d32a070dafb01446026b11e624f
 
 COCOAPODS: 0.37.0
