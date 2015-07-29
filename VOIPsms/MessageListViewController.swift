@@ -119,7 +119,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 if success == false || currentUser?.remember == false {
                     self.performSegueWithIdentifier("showLoginSegue", sender: self)
                 } else {
-                    if currentUser!.messagesLoaded.boolValue == false || currentUser!.messagesLoaded == 0 {
+                    if currentUser!.messagesLoaded.boolValue == false || currentUser!.messagesLoaded.boolValue == false {
                         self.performSegueWithIdentifier("showDownloadMessagesSegue", sender: self)
                     } else {
                         self.startTimer()
@@ -311,38 +311,6 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             }
             cell.contentView.addSubview(dateLbl)
         }
-        
-        
-        
-        
-        
-        //        var messages = messageFetchedResultsController.fetchedObjects
-        //        if let message = messages?.first as? CoreMessage {
-        //            cell.detailTextLabel?.text = message.message
-        //            let font:UIFont? = UIFont(name: "Arial", size: 13.0)
-        //            let dateStr = NSAttributedString(string: message.date.dateFormattedString(), attributes:
-        //                [NSForegroundColorAttributeName: UIColor.lightGrayColor(),
-        //                    NSFontAttributeName: font!])
-        //            let dateFrame = CGRectMake(cell.frame.origin.x, cell.detailTextLabel!.frame.origin.x, cell.frame.width - 30, cell.textLabel!.frame.height)
-        //            let dateLbl = UILabel(frame: dateFrame)
-        //            dateLbl.attributedText = dateStr
-        //            dateLbl.textAlignment = NSTextAlignment.Right
-        //            dateLbl.tag = 3
-        //            if cell.contentView.viewWithTag(3) != nil {
-        //                cell.contentView.viewWithTag(3)?.removeFromSuperview()
-        //            }
-        //            if message.type.boolValue == true {
-        //                if message.flag != message_status.READ.rawValue {
-        //                    var textCol = UIColor.blueColor()
-        //                    cell.textLabel?.textColor = textCol
-        //                    cell.detailTextLabel?.textColor = textCol
-        //                    dateLbl.textColor = textCol
-        //                }
-        //            }
-        //
-        //            cell.contentView.addSubview(dateLbl)
-        //
-        //        }
         
         if contact.fullName != nil {
             cell.textLabel?.text = contact.fullName

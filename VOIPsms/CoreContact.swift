@@ -229,39 +229,26 @@ class CoreContact: NSManagedObject {
             }
             contactResult.append(contact)
         }
-        
-        Contact().loadAddressBook { (responseObject, error) -> () in
-            var contacts = responseObject
-            for c in contacts {
-                if (c.contactFullName.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) || (c.recordId.rangeOfString(searchTerm.lowercaseString) != nil) {
-                    var contactStruct = ContactStruct()
-                    contactStruct.contactId = c.recordId
-                    contactStruct.contactName = c.contactFullName
-                    contactStruct.phoneLabel = c.phoneLabel
-                    if !contains(contactResult.map({$0.contactId}), c.recordId) {
-                        contactResult.append(contactStruct)
+        if Contact().checkAccess() {
+            Contact().loadAddressBook { (responseObject, error) -> () in
+                var contacts = responseObject
+                for c in contacts {
+                    if (c.contactFullName.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) || (c.recordId.rangeOfString(searchTerm.lowercaseString) != nil) {
+                        var contactStruct = ContactStruct()
+                        contactStruct.contactId = c.recordId
+                        contactStruct.contactName = c.contactFullName
+                        contactStruct.phoneLabel = c.phoneLabel
+                        if !contains(contactResult.map({$0.contactId}), c.recordId) {
+                            contactResult.append(contactStruct)
+                        }
                     }
                 }
+                return completionHandler(contactResult)
             }
+        } else {
             return completionHandler(contactResult)
         }
         
-//        Contact().getContactsDict({ (contacts) -> () in
-//            if contacts.count > 0 {
-//                for (key,value) in contacts {
-//                    let numberStr = String(key)
-//                    if (value.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) || (numberStr.rangeOfString(searchTerm.lowercaseString) != nil) {
-//                        var contactStruct = ContactStruct()
-//                        contactStruct.contactId = key
-//                        contactStruct.contactName = value
-//                        if !contains(contactResult.map({$0.contactId}), key) {
-//                            contactResult.append(contactStruct)
-//                        }
-//                    }
-//                }
-//                return completionHandler(contactResult)
-//            }
-//        })
     }
     
     

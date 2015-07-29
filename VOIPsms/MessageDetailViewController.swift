@@ -169,14 +169,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
 
         compressedTableViewHeight = self.tableView.frame.size.height
         
-        if CoreContact.currentContact(self.moc, contactId: self.contactId)?.fullName == nil {
-            dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
-        }
+        
         
 
         
         
-        self.navigationItem.rightBarButtonItem = dynamicBarButton
+
         
         if let currentUser = CoreUser.currentUser(self.moc) {
             if currentUser.initialLoad.boolValue == true {
@@ -244,8 +242,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 })
             }
         }
-        //        self.tableViewScrollToBottomAnimated(false)
-        //        self.tableViewScrollToBottomAnimated(false)
+
         
     }
     
@@ -274,21 +271,29 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
         
-        //        var error : NSError? = nil
-        //        if (messageFetchedResultsController.performFetch(&error)==false) {
-        //            println("An error has occurred: \(error?.localizedDescription)")
-        //        }
-        //        self.tableView.reloadData()
-        
-        Contact().getContactsDict({ (contacts) -> () in
-            if contacts[self.contactId] != nil {
-                let cText = contacts[self.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-                self.navigationController?.navigationBar.topItem?.title = "\(cText!) (\(self.contactId.northAmericanPhoneNumberFormat()))"
+        if Contact().checkAccess() {
+            Contact().getContactsDict({ (contacts) -> () in
+                if contacts[self.contactId] != nil {
+                    let cText = contacts[self.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+                    self.navigationController?.navigationBar.topItem?.title = "\(cText!) (\(self.contactId.northAmericanPhoneNumberFormat()))"
+                    
+                } else {
+                    self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
+                }
                 
-            } else {
-                self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
-            }
-        })
+                if CoreContact.currentContact(self.moc, contactId: self.contactId)?.fullName == nil {
+                    self.dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
+                    self.navigationItem.rightBarButtonItem = self.dynamicBarButton
+                }
+            })
+        } else {
+            self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //
+        }
+        
+
+        
+        
+       
         self.tableViewScrollToBottomAnimated(false)
         self.tableViewScrollToBottomAnimated(false)
         
@@ -362,7 +367,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.endUpdates()
-        
+
 //        dispatch_async(dispatch_get_main_queue(), { () -> Void in
 //            self.messageFetchedResultsController.performFetch(nil)
             self.tableViewScrollToBottomAnimated(true)

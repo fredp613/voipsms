@@ -107,8 +107,10 @@ class MessageBubbleCell: UITableViewCell, TTTAttributedLabelDelegate  {
         messageLabel.enabledTextCheckingTypes = NSTextCheckingType.Link.rawValue | NSTextCheckingType.PhoneNumber.rawValue
         if message.type.boolValue == false {
             messageLabel.linkAttributes = [NSForegroundColorAttributeName : UIColor.whiteColor().CGColor, NSUnderlineStyleAttributeName : NSUnderlineStyle.StyleSingle.rawValue]
+            messageLabel.activeLinkAttributes = [NSForegroundColorAttributeName: UIColor.lightGrayColor().CGColor, NSUnderlineStyleAttributeName : NSUnderlineStyle.StyleNone.rawValue]
         } else {
             messageLabel.linkAttributes = [NSForegroundColorAttributeName : UIColor.darkTextColor().CGColor, NSUnderlineStyleAttributeName : NSUnderlineStyle.StyleSingle.rawValue]
+            messageLabel.activeLinkAttributes = [NSForegroundColorAttributeName: UIColor.lightGrayColor().CGColor, NSUnderlineStyleAttributeName : NSUnderlineStyle.StyleNone.rawValue]
         }
 
 //        messageLabel.enabledTextCheckingTypes = NSTextCheckingType.PhoneNumber.rawValue
@@ -188,8 +190,8 @@ class MessageBubbleCell: UITableViewCell, TTTAttributedLabelDelegate  {
     }
     
     func attributedLabel(label: TTTAttributedLabel!, didSelectLinkWithPhoneNumber phoneNumber: String!) {
-        println(phoneNumber)
-        UIApplication.sharedApplication().openURL(NSURL(string: phoneNumber)!)
+        var actionablePN = "tel://" + phoneNumber
+        UIApplication.sharedApplication().openURL(NSURL(string: actionablePN)!)
     }
 }
 

@@ -261,36 +261,57 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
         var contact = self.contacts[indexPath.row]
-
-        Contact().getContactsDict { (contacts) -> () in
-            
-            let contStr = contact.contactId as String
-            if contacts[contact.contactId] != nil {
-                let cText = contacts[contact.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-                cell.textLabel?.text = cText!
-            } else {
-                if contact.contactName != "" {
-                    cell.textLabel?.text = contact.contactName
-                } else {
-                    cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
-                }
+        
+        if Contact().checkAccess() {
+            Contact().getContactsDict { (contacts) -> () in
+                
+                    let contStr = contact.contactId as String
+                    if contacts[contact.contactId] != nil {
+                        let cText = contacts[contact.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+                        cell.textLabel?.text = cText!
+                    } else {
+                        if contact.contactName != "" {
+                            cell.textLabel?.text = contact.contactName
+                        } else {
+                            cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+                        }
+                    }
+                    if contact.phoneLabel != "" {
+                        cell.detailTextLabel?.text = contact.phoneLabel + ": " +  contact.contactId.northAmericanPhoneNumberFormat()
+                    } else {
+                        cell.detailTextLabel?.text = ""
+                    }
+                
             }
+        } else {
+            
+            if contact.contactName != "" {
+                cell.textLabel?.text = contact.contactName
+            } else {
+                cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+            }
+            
             if contact.phoneLabel != "" {
                 cell.detailTextLabel?.text = contact.phoneLabel + ": " +  contact.contactId.northAmericanPhoneNumberFormat()
             } else {
                 cell.detailTextLabel?.text = ""
             }
             
+            
+            cell.textLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
+            cell.detailTextLabel?.text = ""
+
         }
-        
+    
         return cell
     }
-    
+
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         //update text field to show contact
         self.selectedContact = self.contacts[indexPath.row].contactId
         let cell = self.tableView.cellForRowAtIndexPath(indexPath)
-        self.searchBar.text = "\(cell!.textLabel!.text!) \(self.contacts[indexPath.row].phoneLabel)"
+        
+        self.searchBar.text = "\(cell!.textLabel!.text!) (\(self.contacts[indexPath.row].phoneLabel): \(self.contacts[indexPath.row].contactId))"
         
         self.contacts = [ContactStruct]()
         self.tableView.reloadData()

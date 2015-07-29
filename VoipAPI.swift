@@ -18,30 +18,44 @@ enum httpMethodEnum : String {
     case UPDATE = "UPDATE"
 }
 
-class VoipAPI : NSObject, UIAlertViewDelegate {
+class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLConnectionDataDelegate {
     
-    class func APIAuthenticatedRequest(httpMethod: httpMethodEnum, url: String, params: [String:String!]?, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
+    var connection : NSURLConnection!
+    var url: String!
+    var params : [String:String!]?
+    var httpMethod: String!
+    
+    
+    init(httpMethod: httpMethodEnum, url: String, params: [String:String!]!) {
+        super.init()
+        self.url = url
+        self.httpMethod = httpMethod.rawValue
+        self.params = params
+        //initialize a connection from request
+
+        
+    }
+    
+    func APIAuthenticatedRequest(completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         
         let urlSession = NSURLSession.sharedSession()
         var request = NSMutableURLRequest(URL: NSURL(string: url)!)
-        request.HTTPMethod = httpMethod.rawValue
+        request.HTTPMethod = self.httpMethod //httpMethod.rawValue
                 
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         
         var err: NSError?
-        if httpMethod.rawValue != "GET"  {
-            if let params = params {
+        if httpMethod != "GET" { //httpMethod.rawValue != "GET"  {
+            if let params = self.params {
                 request.HTTPBody = NSJSONSerialization.dataWithJSONObject(params, options: nil, error: &err)
             }
         }
-
         
-        
-        NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response, data, error) -> Void in
-            
+        NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.new()) { (response, data, error) -> Void in
+//            println(response)
             if let err = error {
-
+                
                 return
             }
             
@@ -62,6 +76,24 @@ class VoipAPI : NSObject, UIAlertViewDelegate {
             
         }
     }
+    
+    func connection(connection: NSURLConnection, didFailWithError error: NSError) {
+        println("did fail with error")
+        println(error)
+    }
+    
+    func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
+        println("did receive response")
+        println(response)
+    }
+    
+    func connection(connection: NSURLConnection, willSendRequest request: NSURLRequest, redirectResponse response: NSURLResponse?) -> NSURLRequest? {
+
+        println("did receive response")
+        return request
+    }
+    
+
     
     class func APIAuthenticatedRequestSync(httpMethod: httpMethodEnum, url: String, params: [String:String!]?, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         

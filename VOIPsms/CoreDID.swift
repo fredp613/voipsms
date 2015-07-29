@@ -133,8 +133,9 @@ class CoreDID: NSManagedObject {
         let params = [
             "method": "getDIDsInfo"
         ]
+  
         
-        VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
+        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
             
             let json = responseObject
 

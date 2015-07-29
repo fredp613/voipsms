@@ -63,7 +63,7 @@ class Message {
                     "method" : "getSMS",
                     "from" : fromStr,
                     "to" : dateFormatter.stringFromDate(NSDate()) as String,
-                    "limit" : "500"
+                    "limit" : "450"
                 ]
             } else {
                 params = [
@@ -73,9 +73,10 @@ class Message {
             }
         }
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
+        
 
-        VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
-          
+        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
+            println(error)
             let json = responseObject
             for (key: String, t: JSON) in json["sms"] {
                 let contact = t["contact"].stringValue
@@ -104,7 +105,10 @@ class Message {
                 
                 if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
-                        println("message created")
+                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            println("message created")
+                        })
+
 
                         if let contactOfMessage = CoreContact.currentContact(moc, contactId: contact) {
                             var formatter1: NSDateFormatter = NSDateFormatter()
@@ -120,12 +124,12 @@ class Message {
 //                            })
                         }
 
-                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            if (type && (UIApplication.sharedApplication().applicationState == UIApplicationState.Background)) {
-                                println("trying to send push")
-                                Message.sendPushNotification(contact, message: message)
-                            }
-                        })
+//                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                            if (type && (UIApplication.sharedApplication().applicationState == UIApplicationState.Background)) {
+//                                println("trying to send push")
+//                                Message.sendPushNotification(contact, message: message)
+//                            }
+//                        })
                        
                     })
                 }
@@ -194,8 +198,8 @@ class Message {
             
         }
 
-        
-        VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
+
+        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
             
             let json = responseObject
             for (key: String, t: JSON) in json["sms"] {
@@ -248,7 +252,7 @@ class Message {
                 "message": messageText
             ]
                         
-            VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
+        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
                 if error != nil {
                     return completionHandler(responseObject: responseObject, error: error)
                 } else {
@@ -265,7 +269,7 @@ class Message {
                 "method":"deleteSMS",
                 "id":id
             ]
-            VoipAPI.APIAuthenticatedRequest(httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil) { (responseObject, error) -> () in
+        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
                 println(responseObject)
             }
         }

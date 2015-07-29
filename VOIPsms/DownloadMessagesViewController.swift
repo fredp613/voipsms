@@ -33,15 +33,15 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
 
         var qualityOfServiceClass = Int(QOS_CLASS_DEFAULT.value)
         var backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-        dispatch_async(backgroundQueue, { () -> Void in
+//        dispatch_async(backgroundQueue, { () -> Void in
              self.getMessages()
-        })
+//        })
         
     }      
     
-//    @IBAction func testPressed(sender: AnyObject) {
-//        println("testing")
-//    }
+    @IBAction func testPressed(sender: AnyObject) {
+        println("testing")
+    }
     func contextDidSave(notification: NSNotification) {
 //        self.testBtn.setTitle(String(totalCount), forState: UIControlState.Normal)
 //        if notification.name == NSManagedObjectContextWillSaveNotification {
@@ -64,7 +64,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     
     //MARK: Custom Methods
     func getMessages() {                
-        var backgroundMOC : NSManagedObjectContext = CoreDataStack().managedObjectContextPrivate!
+        var backgroundMOC : NSManagedObjectContext = CoreDataStack().managedObjectContext!
         if let dids = CoreDID.getDIDs(backgroundMOC) {
             if let str = dids.filter({$0.currentlySelected.boolValue == true}).first {
                 if let currentUser = CoreUser.currentUser(backgroundMOC) {

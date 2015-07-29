@@ -61,9 +61,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-//        self.backgroundTaskID = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
-//            UIApplication.sharedApplication().endBackgroundTask(self.backgroundTaskID)
-//        }
+        self.backgroundTaskID = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
+            UIApplication.sharedApplication().endBackgroundTask(self.backgroundTaskID)
+        }
 //          self.timer = NSTimer.scheduledTimerWithTimeInterval(5, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         
     }
