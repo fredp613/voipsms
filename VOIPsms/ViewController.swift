@@ -103,7 +103,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     
     func getInitialMessages() {
         let fromStr = CoreDID.getSelectedDID(moc)!.registeredOn.strippedDateFromString()        
-        Message.getMessagesFromAPI(false, moc: self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
+        Message.getMessagesFromAPI(false, fromList: false, moc: self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
             if responseObject.count > 0 {
                 println("success")
             } else {

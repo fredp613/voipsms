@@ -68,7 +68,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
         if let dids = CoreDID.getDIDs(backgroundMOC) {
             if let str = dids.filter({$0.currentlySelected.boolValue == true}).first {
                 if let currentUser = CoreUser.currentUser(backgroundMOC) {
-                    Message.getMessagesFromAPI(false, moc: backgroundMOC, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
+                    Message.getMessagesFromAPI(false, fromList: false, moc: backgroundMOC, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
                         error) -> () in
                     
                         if error == nil {

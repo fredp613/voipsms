@@ -169,16 +169,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
 
         compressedTableViewHeight = self.tableView.frame.size.height
         
-        
-        
-
-        
-        
-
-        
         if let currentUser = CoreUser.currentUser(self.moc) {
-            if currentUser.initialLoad.boolValue == true {
-                currentUser.initialLoad = false
+            if currentUser.initialLoad.boolValue == true || currentUser.initialLoad == 1 {
+                currentUser.initialLoad = 0
                 CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
             }
         }
@@ -191,7 +184,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 self.processMessage(lastMessage)
             }
             if lastMessage.flag == message_status.DELIVERED.rawValue {
-                if lastMessage.type.boolValue == true || lastMessage.type.boolValue == true {
+                if lastMessage.type.boolValue == true || lastMessage.type == 1 {
                     lastMessage.flag = message_status.READ.rawValue
                     CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: lastMessage)
                     messageFetchedResultsController.performFetch(nil)

@@ -75,7 +75,6 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         return frc
         }()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         var error: NSError? = nil
@@ -95,7 +94,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         self.btnNewMessage.layer.cornerRadius = self.btnNewMessage.frame.size.height / 2
         self.view.bringSubviewToFront(self.btnNewMessage)
         self.pokeFetchedResultsController()
-        //        self.tableView.reloadData()
+//        NSString *identifier = [[UIDevice currentDevice].identifierForVendor UUIDString];
+        let identifier = UIDevice.currentDevice().identifierForVendor.UUIDString
+        println(identifier)
         
     }
     
@@ -186,7 +187,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                     let lastMessage = cm
                     var from = ""
                     from = lastMessage.date
-                    Message.getMessagesFromAPI(false, moc: self.managedObjectContext, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
+                    Message.getMessagesFromAPI(false, fromList: true, moc: self.managedObjectContext, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
                         if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
                             currentUser.initialLoad = 0
                             currentUser.initialLogon = 0
@@ -273,9 +274,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         let contact = fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
         
-        let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
+//        let sortDescriptor = NSSortDescriptor(key: "date", ascending: true)
         
-        //        if let lastMessage = contact.messages.sortedArrayUsingDescriptors([sortDescriptor]).first! as? CoreMessage {
+//        if var lastMessage = contact.messages.sortedArrayUsingDescriptors([sortDescriptor]).first! as? CoreMessage {
         if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
             var message = lastMessage as CoreMessage
             var text2 = message.message //.stringByReplacingOccurrencesOfString("?", withString: "'", options: NSStringCompareOptions.LiteralSearch, range: nil)
@@ -297,17 +298,22 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             if cell.contentView.viewWithTag(3) != nil {
                 cell.contentView.viewWithTag(3)?.removeFromSuperview()
             }
+            var textCol = UIColor()
             if message.type.boolValue == true || message.type == 1 {
                 if message.flag != message_status.READ.rawValue {
-                    var textCol = UIColor.blueColor()
-                    cell.textLabel?.textColor = textCol
-                    cell.detailTextLabel?.textColor = textCol
+                    textCol = UIColor.blueColor()
                     dateLbl.textColor = textCol
                 } else {
-                    var textCol = UIColor.blackColor()
-                    cell.textLabel?.textColor = textCol
-                    cell.detailTextLabel?.textColor = textCol
+                    textCol = UIColor.blackColor()
+                    dateLbl.textColor = UIColor.lightGrayColor()
                 }
+                
+                cell.textLabel?.textColor = textCol
+                cell.detailTextLabel?.textColor = textCol
+            } else {
+                //default light gray and text colors
+                cell.textLabel?.textColor = UIColor.blackColor()
+                cell.detailTextLabel?.textColor = UIColor.blackColor()
             }
             cell.contentView.addSubview(dateLbl)
         }

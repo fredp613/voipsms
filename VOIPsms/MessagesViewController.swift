@@ -270,7 +270,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     self.activityIndicator.startAnimating()
                 }
 //                println("wefs")
-                Message.getMessagesFromAPI(false, moc: self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
+                Message.getMessagesFromAPI(false, fromList: false, moc: self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
                     if responseObject.count > 0 {
 
                         CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message: self.searchBar.text, completionHandler: { (responseObject, error) -> () in

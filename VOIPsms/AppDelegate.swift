@@ -103,7 +103,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func timerDidFire(sender: NSTimer) {
         if let str = CoreDID.getSelectedDID(moc) {
             let fromStr = CoreMessage.getLastMsgByDID(moc, did: str.did)?.date.strippedDateFromString()
-            Message.getMessagesFromAPI(true, moc: moc, from: fromStr) { (responseObject, error) -> () in
+            Message.getMessagesFromAPI(true, fromList: false, moc: moc, from: fromStr) { (responseObject, error) -> () in
             }                        
         }
     }

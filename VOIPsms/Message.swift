@@ -30,7 +30,7 @@ class Message {
     }
 
     
-    class func getMessagesFromAPI(fromAppDelegate: Bool, moc: NSManagedObjectContext, from: String!, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
+    class func getMessagesFromAPI(fromAppDelegate: Bool,fromList: Bool, moc: NSManagedObjectContext, from: String!, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "YYYY-MM-dd"
@@ -91,19 +91,22 @@ class Message {
                     flagValue = message_status.DELIVERED.rawValue
                 } else {
                     type = true
-                    if let currentUser = CoreUser.currentUser(moc) {
-                        flagValue = message_status.DELIVERED.rawValue
-                        if currentUser.initialLogon == 1 || currentUser.initialLogon.boolValue == true {
-                            flagValue = message_status.READ.rawValue
-                        }
-                    } else {
-                        flagValue = message_status.PENDING.rawValue
-                    }
-                    
                 }
                 let did = t["did"].stringValue
                 
                 if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
+                    if let currentUser = CoreUser.currentUser(moc) {
+                        if type == true {
+                            if currentUser.initialLogon == 1 || currentUser.initialLogon.boolValue == true  {
+                                flagValue = message_status.READ.rawValue
+                            } else if fromList {
+                                flagValue = message_status.DELIVERED.rawValue
+                            } else {
+                                flagValue = message_status.READ.rawValue
+                            }
+                        }
+                    }
+                    
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
                         dispatch_async(dispatch_get_main_queue(), { () -> Void in
                             println("message created")
@@ -194,8 +197,6 @@ class Message {
                     "contact" : contact
                 ]
             }
-            
-            
         }
 
 
@@ -222,11 +223,8 @@ class Message {
                 if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
 
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
-                        
 //                        Message.sendPushNotification(contact, message: message)
-                        
                         //check if contact exists
-
                         if let contactOfMessage = CoreContact.currentContact(moc, contactId: contact) {
                             var formatter1: NSDateFormatter = NSDateFormatter()
                             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
