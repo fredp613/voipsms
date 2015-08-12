@@ -22,11 +22,11 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
     
     var connection : NSURLConnection!
     var url: String!
-    var params : [String:String!]?
+    var params : [String:AnyObject]?
     var httpMethod: String!
     
     
-    init(httpMethod: httpMethodEnum, url: String, params: [String:String!]!) {
+    init(httpMethod: httpMethodEnum, url: String, params: [String:AnyObject]!) {
         super.init()
         self.url = url
         self.httpMethod = httpMethod.rawValue

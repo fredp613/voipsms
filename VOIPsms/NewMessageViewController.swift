@@ -106,14 +106,15 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             contact = cleanedSearchBarText as String
 //            contact = self.searchBar.text
         }
-        var trimmedMessage = self.textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
-        var msg : String = trimmedMessage.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!        
+//        var trimmedMessage = self.textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+//        var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+        var msgForCoreData = self.textMessage.text
         let date = NSDate()
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)
         self.textMessage.text = ""
-        CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msg, did: self.did, flag: message_status.PENDING.rawValue, completionHandler: { (responseObject, error) -> () in
+        CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msgForCoreData, did: self.did, flag: message_status.PENDING.rawValue, completionHandler: { (responseObject, error) -> () in
 //            if let currentContact = CoreContact.currentContact(self.moc, contactId: contact) {
 //                var formatter1: NSDateFormatter = NSDateFormatter()
 //                formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"

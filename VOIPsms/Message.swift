@@ -43,8 +43,9 @@ class Message {
             fromStr = CoreDID.getSelectedDID(moc)!.registeredOn
         }
         var params = [String : String]()
-        
+
         if let currentUser = CoreUser.currentUser(moc) {
+
             
             var calendar: NSCalendar = NSCalendar.currentCalendar()
             let strDate = dateFormatter.stringFromDate(NSDate())
@@ -73,7 +74,7 @@ class Message {
             }
         }
         var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
-        
+
 
         VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
             println(error)

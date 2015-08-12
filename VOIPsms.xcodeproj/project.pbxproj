@@ -19,6 +19,7 @@
 		2A640C6E1B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A640C661B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.m */; };
 		2A640C6F1B266D40009A77D0 /* TPKeyboardAvoidingTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A640C671B266D40009A77D0 /* TPKeyboardAvoidingTableView.m */; };
 		2A640C701B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A640C681B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m */; };
+		2A6998B11B77CD5600009762 /* CoreDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6998B01B77CD5600009762 /* CoreDevice.swift */; };
 		2A7FA6331AEB4BDD00011C6C /* CoreDID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */; };
 		2A9298DB1B1A1AC300FC4676 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A9298DA1B1A1AC300FC4676 /* Reachability.swift */; };
 		2A98D42F1ADB665C003D3512 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A98D42E1ADB665C003D3512 /* AppDelegate.swift */; };
@@ -85,6 +86,7 @@
 		2A640C6A1B266D40009A77D0 /* TPKeyboardAvoidingCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingCollectionView.h; sourceTree = "<group>"; };
 		2A640C6B1B266D40009A77D0 /* TPKeyboardAvoidingScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingScrollView.h; sourceTree = "<group>"; };
 		2A640C6C1B266D40009A77D0 /* TPKeyboardAvoidingTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPKeyboardAvoidingTableView.h; sourceTree = "<group>"; };
+		2A6998B01B77CD5600009762 /* CoreDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDevice.swift; sourceTree = "<group>"; };
 		2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDID.swift; sourceTree = "<group>"; };
 		2A9298DA1B1A1AC300FC4676 /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		2A98D4291ADB665C003D3512 /* VOIPsms.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VOIPsms.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -272,6 +274,7 @@
 		2A98D4581ADB689E003D3512 /* CoreModels */ = {
 			isa = PBXGroup;
 			children = (
+				2A6998B01B77CD5600009762 /* CoreDevice.swift */,
 				2A5E35981B0047AA0099F69B /* CoreDeleteMessage.swift */,
 				2A7FA6321AEB4BDD00011C6C /* CoreDID.swift */,
 				2AE76D371AE2D79800A6E84D /* CoreContact.swift */,
@@ -490,6 +493,7 @@
 				2AE76D381AE2D79800A6E84D /* CoreContact.swift in Sources */,
 				2AE3594A1B3F048E00F9EF57 /* DownloadMessagesViewController.swift in Sources */,
 				2A98D4521ADB6690003D3512 /* VoipAPI.swift in Sources */,
+				2A6998B11B77CD5600009762 /* CoreDevice.swift in Sources */,
 				2A3ACCB11AEAF0630005193B /* UIDeviceExtension.swift in Sources */,
 				2A98D4341ADB665C003D3512 /* ViewController.swift in Sources */,
 				2A640C6D1B266D40009A77D0 /* UIScrollView+TPKeyboardAvoidingAdditions.m in Sources */,
@@ -661,7 +665,7 @@
 				INFOPLIST_FILE = VOIPsms/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "586c31ae-8f67-47c5-bb4e-5d9220fc640b";
 				SWIFT_OBJC_BRIDGING_HEADER = "VOIPsms/Bridging-Header.h";
 			};
 			name = Debug;
@@ -677,7 +681,7 @@
 				INFOPLIST_FILE = VOIPsms/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "586c31ae-8f67-47c5-bb4e-5d9220fc640b";
 				SWIFT_OBJC_BRIDGING_HEADER = "VOIPsms/Bridging-Header.h";
 			};
 			name = Release;

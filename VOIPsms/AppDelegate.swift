@@ -17,6 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
     var timer : NSTimer = NSTimer()
     var backgroundTaskID : UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier()
+    var did : String = String()
+    let defaults = NSUserDefaults.standardUserDefaults()
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
@@ -30,28 +32,89 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
         }
         
+        if let cds = CoreDevice.getTokens(self.moc) {
+            println(cds)
+        }
+        
+        
 //        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: nil))
+        
+        UIApplication.sharedApplication().registerForRemoteNotifications()
+        
+        let settings = UIUserNotificationSettings(forTypes: .Alert, categories: nil)
+        UIApplication.sharedApplication().registerUserNotificationSettings(settings)
         
         //ask for contact access
         Contact().getContactsDict({ (contacts) -> () in
-//            if contacts[self.contactId] != nil {
-//                let cText = contacts[self.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-//                self.navigationController?.navigationBar.topItem?.title = cText
-//                
-//            } else {
-//                self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
-//            }
         })
         
         timer.invalidate()
+        
+//        if (launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]) {
+//            [self application:application didReceiveRemoteNotification:launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]];
+//        }
+        
+
+        if let myDict = launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? NSDictionary {
+            println("from remote")
+            println(myDict)
+        } else {
+            println("not from remote")
+            // no notification
+        }
         
         return true
     }
     
     func application(application: UIApplication, didReceiveLocalNotification notification: UILocalNotification) {
-        println("received notification")
+
     }
 
+//    func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
+//        println("house")
+//        if (application.applicationState == UIApplicationState.Active) {
+//            println("done")
+//        } else {
+//        // app was just brought from background to foreground
+//            println("ross")
+//        }
+//        
+//    }
+    
+    func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject], fetchCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
+        
+//        NSString *job = [[userInfo valueForKey:@"aps"] valueForKey:@"job"];
+        
+
+        if (application.applicationState == UIApplicationState.Active) {
+            println("niggaahhh")
+        } else {
+            println("niggasshhh background")
+            if let notificationContact = userInfo["contact"] as? String {
+                println("contact is: " + notificationContact)
+                if let notificationDID = userInfo["did"] as? String {
+                    println("did is:" + notificationDID)
+                    if let selectedDID = CoreDID.getSelectedDID(self.moc) {
+                        println("selected DID is: " + selectedDID.did)
+                        if selectedDID.did != notificationDID {
+                            CoreDID.toggleSelected(self.moc, did: notificationDID)
+                        }
+                        if let currentUser = CoreUser.currentUser(self.moc) {
+                            currentUser.notificationLoad = 1
+                            currentUser.notificationDID = notificationDID
+                            currentUser.notificationContact = notificationContact
+                            CoreDataStack().saveContext(moc)
+                            println(currentUser)
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
+    
+
+    
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
@@ -76,11 +139,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        app.cancelAllLocalNotifications()
 
 //        }
+        
+
+       
+        
     }
     
 
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+//        [[UIApplication sharedApplication] cancelAllLocalNotifications];
+        //clear all notifications - refactor this - s/b only messages from open contact
+//        UIApplication.sharedApplication().cancelAllLocalNotifications()
+        
+//        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+//        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+//        dispatch_async(backgroundQueue, { () -> Void in
+//            if let str = CoreDID.getSelectedDID(self.moc) {
+//                if let cm = CoreMessage.getMessagesByDID(self.moc, did: self.did).first {
+//                    if let currentUser = CoreUser.currentUser(self.moc) {
+//                        let lastMessage = cm
+//                        var from = ""
+//                        from = lastMessage.date
+//                        Message.getMessagesFromAPI(false, fromList: true, moc: self.moc, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
+//                            if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
+//                                currentUser.initialLoad = 0
+//                                currentUser.initialLogon = 0
+//                                CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
+//                            }
+//                            //                        self.pokeFetchedResultsController()
+//                        })
+//                    }
+//                    
+//                }
+//            }
+//        })
         
     }
 
@@ -92,11 +185,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
-        println(deviceToken)
+        var characterSet: NSCharacterSet = NSCharacterSet( charactersInString: "<>" )
+        
+        var deviceTokenString: String = ( deviceToken.description as NSString )
+            .stringByTrimmingCharactersInSet( characterSet )
+            .stringByReplacingOccurrencesOfString( " ", withString: "" ) as String
+//        
+//        if let cd = CoreDevice.createInManagedObjectContext(self.moc, device: deviceTokenString) {
+//              println("Got token data! \(cd.deviceToken)")
+//        }
+        
+        if let coreDevice = CoreDevice.createOrUpdateInMOC(self.moc, token: deviceTokenString) {
+            println("got token data! \(coreDevice.deviceToken)")
+        }
+
     }
     
     func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
-        println("failed")
+        println("Couldn't register: \(error)")
     }
     
     //MARK: Custom methods

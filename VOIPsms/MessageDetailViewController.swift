@@ -174,6 +174,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 currentUser.initialLoad = 0
                 CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
             }
+            
+            if currentUser.notificationLoad == 1 || currentUser.notificationLoad.boolValue {
+                currentUser.notificationLoad = 0
+                CoreDataStack().saveContext(moc)
+            }
         }
         
         //refactor this - only call this when user navigates from new message

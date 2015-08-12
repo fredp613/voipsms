@@ -19,6 +19,9 @@ class CoreUser: NSManagedObject {
     @NSManaged var initialLogon: NSNumber
     @NSManaged var initialLoad: NSNumber
     @NSManaged var messagesLoaded: NSNumber
+    @NSManaged var notificationLoad: NSNumber
+    @NSManaged var notificationDID: String
+    @NSManaged var notificationContact: String
     @NSManaged var notificationsFlag: NSNumber
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, email: String, pwd: String) -> Bool {
@@ -93,10 +96,40 @@ class CoreUser: NSManagedObject {
         
          VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest { (data, error) -> () in
             if data != nil {
+                println(data)
+
                 if data["status"] == "success" {
+                    
                     if self.userExists(moc) == false {
                         CoreUser.createInManagedObjectContext(moc, email: email, pwd: password)
-                        CoreDID.createOrUpdateDID(moc)
+                        
+//                        CoreDID.createOrUpdateDID(moc)
+                        let json = data
+                        
+                        for (index, (key: String, t: JSON)) in enumerate(json["dids"]) {
+                            var type : String
+                            if index == 0 {
+                                type = didType.PRIMARY.rawValue
+                            } else {
+                                type = didType.SUB.rawValue
+                            }
+                            let did = t["did"].stringValue
+                            
+                            let registeredOn = t["order_date"].stringValue
+                            let sms_enabled = t["sms_enabled"].stringValue
+                            
+                            if sms_enabled == "1" {
+                                if !CoreDID.isExistingDID(moc, didnum: did) {
+                                    CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: type, didRegisteredOn: registeredOn)
+                                    
+                                    //here call your web service send the device id
+                                }
+                            } else {
+                                // error should be something like, please enable SMS
+                                return completionHandler(false, error:nil)
+                                //some error to user
+                            }
+                        }
                     } else {
                         let currentUser = CoreUser.currentUser(moc)
                         currentUser?.remember = true
@@ -114,6 +147,29 @@ class CoreUser: NSManagedObject {
         }
         
     }
+    
+//    let json = responseObject
+//    
+//    for (index, (key: String, t: JSON)) in enumerate(json["dids"]) {
+//    var type : String
+//    if index == 0 {
+//    type = didType.PRIMARY.rawValue
+//    } else {
+//    type = didType.SUB.rawValue
+//    }
+//    let did = t["did"].stringValue
+//    
+//    let registeredOn = t["order_date"].stringValue
+//    let sms_enabled = t["sms_enabled"].stringValue
+//    
+//    if sms_enabled == "1" {
+//    if !CoreDID.isExistingDID(moc, didnum: did) {
+//    CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: type, didRegisteredOn: registeredOn)
+//    }
+//    } else {
+//    //some error to user
+//    }
+//    }
 
 
 }

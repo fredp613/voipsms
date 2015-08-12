@@ -123,14 +123,22 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                     if currentUser!.messagesLoaded.boolValue == false || currentUser!.messagesLoaded.boolValue == false {
                         self.performSegueWithIdentifier("showDownloadMessagesSegue", sender: self)
                     } else {
+                        
                         self.startTimer()
                     }
                 }
             })
             
+//            UIApplication.sharedApplication().registerForRemoteNotifications()
+//            
+//            let settings = UIUserNotificationSettings(forTypes: .Alert, categories: nil)
+//            UIApplication.sharedApplication().registerUserNotificationSettings(settings)
+            
         } else {
             performSegueWithIdentifier("showLoginSegue", sender: self)
         }
+        
+      
         
         
         
@@ -177,6 +185,25 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     func timerDidFire(sender: NSTimer) {
+        
+        if let cu = CoreUser.currentUser(self.managedObjectContext) {
+            if cu.notificationLoad == 1 || cu.notificationLoad.boolValue {
+                if cu.notificationContact != "" {
+                    if let contact = CoreContact.currentContact(self.managedObjectContext, contactId: cu.notificationContact) {
+                        self.contactForSegue = cu.notificationContact
+                        if contact.deletedContact.boolValue {
+                            contact.deletedContact = 0
+                            CoreDataStack().saveContext(self.managedObjectContext)
+                        }
+                    } else {
+                        if let cc = CoreContact.createInManagedObjectContext(self.managedObjectContext, contactId: cu.notificationContact, lastModified: nil) {
+                            self.contactForSegue = cu.notificationContact
+                        }
+                    }
+                    self.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
+                }
+            }
+        }
         
         let qualityOfServiceClass = QOS_CLASS_BACKGROUND
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
