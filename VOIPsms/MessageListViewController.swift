@@ -188,7 +188,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func startTimer() {
         if Reachability.isConnectedToNetwork() {
-            timer = NSTimer.scheduledTimerWithTimeInterval(240, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+            timer = NSTimer.scheduledTimerWithTimeInterval(120, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         }
     }
     
@@ -199,10 +199,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 if cu.notificationContact != "" {
                     if let contact = CoreContact.currentContact(self.managedObjectContext, contactId: cu.notificationContact) {
                         self.contactForSegue = cu.notificationContact
-                        if contact.deletedContact.boolValue {
-                            contact.deletedContact = 0
-                            CoreDataStack().saveContext(self.managedObjectContext)
-                        }
+//                        if contact.deletedContact.boolValue {
+//                            contact.deletedContact = 0
+//                            CoreDataStack().saveContext(self.managedObjectContext)
+//                        }
                     } else {
                         if let cc = CoreContact.createInManagedObjectContext(self.managedObjectContext, contactId: cu.notificationContact, lastModified: nil) {
                             self.contactForSegue = cu.notificationContact
@@ -213,6 +213,8 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             }
         }
         println("time is fire")
+        self.pokeFetchedResultsController()
+        
         let qualityOfServiceClass = QOS_CLASS_BACKGROUND
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
         //        dispatch_async(backgroundQueue, { () -> Void in

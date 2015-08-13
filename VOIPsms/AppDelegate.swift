@@ -89,6 +89,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if (application.applicationState == UIApplicationState.Active) {
             println("niggaahhh")
             self.createOrUpdateMessage(userInfo, userActive: true)
+            
+            
         } else {
             self.createOrUpdateMessage(userInfo, userActive: false)
             println("niggasshhh background")
@@ -240,6 +242,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                     let parsedDate: NSDate = formatter1.dateFromString(date)!
                     contactOfMessage.lastModified = parsedDate
+                    if contactOfMessage.deletedContact.boolValue {
+                        println("hey there im deleted")
+                        contactOfMessage.deletedContact = 0
+                    }
                     CoreContact.updateContactInMOC(self.moc)
                 } else {
                     CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: date)
