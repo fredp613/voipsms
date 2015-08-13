@@ -220,33 +220,47 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func dataSourceRefreshTimerDidFire(sender: NSTimer) {
         
-        var error : NSError? = nil
-        if messageFetchedResultsController.fetchedObjects?.count > 0 {
-            var lastMessage = messageFetchedResultsController.fetchedObjects?.last! as! CoreMessage
-            if let lastMsg = CoreContact.getLastIncomingMessageFromContact(moc, contactId: contactId, did: did) {
-                let lastMsgDate = lastMsg.date
-                Message.getIncomingMessagesFromAPI(self.moc, did: did, contact: contactId, from: lastMsgDate.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
-                    if responseObject.count > 0 {
-                        for (key: String, t: JSON) in responseObject["sms"] {
-                            if let cm = CoreMessage.getMessageById(self.moc, Id: t["id"].stringValue) {
-                            } else {
-                                var error: NSError? = nil
-                                if (self.messageFetchedResultsController.performFetch(&error)==false) {
-                                    println("An error has occurred: \(error?.localizedDescription)")
-                                }
-                            }
-                        }
-                    }
-                })
-            }
-        }
-
+//        var error : NSError? = nil
+//        if messageFetchedResultsController.fetchedObjects?.count > 0 {
+//            var lastMessage = messageFetchedResultsController.fetchedObjects?.last! as! CoreMessage
+//            if let lastMsg = CoreContact.getLastIncomingMessageFromContact(moc, contactId: contactId, did: did) {
+//                let lastMsgDate = lastMsg.date
+//                Message.getIncomingMessagesFromAPI(self.moc, did: did, contact: contactId, from: lastMsgDate.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
+//                    if responseObject.count > 0 {
+//                        for (key: String, t: JSON) in responseObject["sms"] {
+//                            if let cm = CoreMessage.getMessageById(self.moc, Id: t["id"].stringValue) {
+//                            } else {
+//                                var error: NSError? = nil
+//                                if (self.messageFetchedResultsController.performFetch(&error)==false) {
+//                                    println("An error has occurred: \(error?.localizedDescription)")
+//                                }
+//                            }
+//                        }
+//                    }
+//                })
+//            }
+//        }
         
+        var error: NSError? = nil
+        self.messageFetchedResultsController.fetchRequest.predicate = nil
+        self.messageFetchedResultsController.fetchRequest.sortDescriptors = nil
+        let primarySortDescriptor = NSSortDescriptor(key: "date", ascending: true)
+
+        let msgDIDPredicate = NSPredicate(format: "did == %@", self.did)
+        let contactPredicate = NSPredicate(format: "contactId == %@", self.contactId)
+        let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [msgDIDPredicate, contactPredicate])
+        self.messageFetchedResultsController.fetchRequest.sortDescriptors = [primarySortDescriptor]
+        self.messageFetchedResultsController.fetchRequest.predicate = compoundPredicate
+        self.messageFetchedResultsController.performFetch(nil)
+//        self.tableView.reloadData()
+//        if (self.messageFetchedResultsController.performFetch(&error)==false) {
+//            println("An error has occurred: \(error?.localizedDescription)")
+//        }
     }
     
     func startTimer() {
         if Reachability.isConnectedToNetwork() {
-            timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
+            timer = NSTimer.scheduledTimerWithTimeInterval(240, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
         } //else {
         //            let alert = UIAlertView(title: "Network Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
         //            alert.show()

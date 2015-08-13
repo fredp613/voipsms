@@ -127,13 +127,6 @@ class Message {
                                 CoreContact.createInManagedObjectContext(moc, contactId: contact, lastModified: date)
 //                            })
                         }
-
-//                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-//                            if (type && (UIApplication.sharedApplication().applicationState == UIApplicationState.Background)) {
-//                                println("trying to send push")
-//                                Message.sendPushNotification(contact, message: message)
-//                            }
-//                        })
                        
                     })
                 }

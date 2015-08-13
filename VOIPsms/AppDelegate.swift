@@ -88,7 +88,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         if (application.applicationState == UIApplicationState.Active) {
             println("niggaahhh")
+            self.createOrUpdateMessage(userInfo, userActive: true)
         } else {
+            self.createOrUpdateMessage(userInfo, userActive: false)
             println("niggasshhh background")
             if let notificationContact = userInfo["contact"] as? String {
                 println("contact is: " + notificationContact)
@@ -110,6 +112,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
+        
+        //save message
+        
+        
         
     }
     
@@ -212,6 +218,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Message.getMessagesFromAPI(true, fromList: false, moc: moc, from: fromStr) { (responseObject, error) -> () in
             }                        
         }
+    }
+    
+    func createOrUpdateMessage(userInfo: [NSObject : AnyObject], userActive: Bool) {
+        println(userInfo)
+        let contact = userInfo["contact"] as! String
+        let id = userInfo["id"] as! String
+        let type = 1
+        let did = userInfo["did"] as! String
+        let date = userInfo["date"] as! String
+        let message = userInfo["message"] as! String
+        var flagValue = message_status.DELIVERED.rawValue
+        if userActive {
+            flagValue = message_status.READ.rawValue
+        }
+        
+        if !CoreMessage.isExistingMessageById(self.moc, id: id) && !CoreDeleteMessage.isDeletedMessage(self.moc, id: id) {
+            CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: id, type: true, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
+                if let contactOfMessage = CoreContact.currentContact(self.moc, contactId: contact) {
+                    var formatter1: NSDateFormatter = NSDateFormatter()
+                    formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                    let parsedDate: NSDate = formatter1.dateFromString(date)!
+                    contactOfMessage.lastModified = parsedDate
+                    CoreContact.updateContactInMOC(self.moc)
+                } else {
+                    CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: date)
+                }
+            })
+        }
+        
     }
     
 //    func notificationsAreOk() -> Bool {

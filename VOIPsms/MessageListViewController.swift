@@ -24,13 +24,21 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     var did : String = String()
     var titleBtn: UIButton = UIButton()
     var timer : NSTimer = NSTimer()
-    var managedObjectContext : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+//    var managedObjectContext : NSManagedObjectContext!
     var searchKeyword: String = String()
     var didView : UIPickerView = UIPickerView()
     var contactForSegue : String = String()
     
-    lazy var fetchedResultsController: NSFetchedResultsController = {
+    lazy var managedObjectContext : NSManagedObjectContext = {
+        // Error at the next line "Use of undeclared type 'NSSAppDelegate'"
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         
+        let managedObjectContext = appDelegate.moc
+        return managedObjectContext
+    }()
+    
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreContact")
         let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
@@ -180,12 +188,12 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func startTimer() {
         if Reachability.isConnectedToNetwork() {
-            timer = NSTimer.scheduledTimerWithTimeInterval(2, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+            timer = NSTimer.scheduledTimerWithTimeInterval(240, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         }
     }
     
     func timerDidFire(sender: NSTimer) {
-        
+
         if let cu = CoreUser.currentUser(self.managedObjectContext) {
             if cu.notificationLoad == 1 || cu.notificationLoad.boolValue {
                 if cu.notificationContact != "" {
@@ -204,7 +212,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 }
             }
         }
-        
+        println("time is fire")
         let qualityOfServiceClass = QOS_CLASS_BACKGROUND
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
         //        dispatch_async(backgroundQueue, { () -> Void in
@@ -575,6 +583,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         //        self.pokeFetchedResultsController()
         
         timer.invalidate()
+//        startTimer()
         if (segue.identifier == "showMessageDetailSegue") {
             self.searchBar.resignFirstResponder()
             var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
