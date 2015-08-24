@@ -66,11 +66,6 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
                     if let currentUser = CoreUser.currentUser(self.moc) {
                         if currentUser.initialLogon.boolValue == true {
                             self.performSegueWithIdentifier("segueDownloadMessages", sender: self)                                                      
-                            if let device = CoreDevice.getToken(self.moc) {
-                                var tk = device.deviceToken
-                                self.sendDeviceDetailsToAPI(tk, user: currentUser)
-                            }
-
                         } else {
                             self.dismissViewControllerAnimated(true, completion: nil)
                         }
@@ -129,33 +124,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     }
     
     
-    func sendDeviceDetailsToAPI(deviceId: String, user: CoreUser) {
-        
-        
-        
-        if let did = CoreDID.getSelectedDID(self.moc) {
-            if let api_password = KeyChainHelper.retrieveForKey(user.email) {
-                let params = [
-                    "user":[
-                        "email": "fredp613@gmail.com",
-                        "pwd": api_password,
-                        "did":did.did,
-                        "device": deviceId
-                    ]
-                ]
-                var url = "http://localhost:3000/users"
-//                params should go in body of request
-
-                VoipAPI(httpMethod: httpMethodEnum.POST, url: url, params: params).APIAuthenticatedRequest({ (responseObject, error) -> () in
-                    println(responseObject)
-                })
-            }
-        }
-//        email: {type: String, required: true},
-//        password: { type: String, required: true },
-//        did: {type: String, required: true},
-//        device_token: { type: String, required: true },
-    }
+   
     
     //MARK: TextField Delegates
 

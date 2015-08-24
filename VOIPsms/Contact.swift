@@ -55,7 +55,6 @@ class Contact {
         var newContact:ABRecordRef! = ABPersonCreate().takeRetainedValue()
         var success:Bool = false
 
-
         success = ABRecordSetValue(newContact, kABPersonFirstNameProperty, firstName, &error)
         success = ABRecordSetValue(newContact, kABPersonLastNameProperty, lastName, &error)
         let propertyType: NSNumber = kABMultiStringPropertyType
@@ -114,33 +113,24 @@ class Contact {
         })
     }
     func getAllContacts(keyword: String?) -> [AddressBookContactStruct] {
-
-        
-        
 //        var tstStr = [NSString]()
         var adbk : ABAddressBook? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()
-        
         let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as NSArray as [ABRecord]
 //        let phones: ABMultiValueRef = ABRecordCopyValue(people, kABPersonPhoneProperty) as! ABMultiValueRef
         for person in people {
-            
             if let fullName = ABRecordCopyCompositeName(person)?.takeRetainedValue() as? NSString {
                 if let keyword = keyword {
-                    
-
-                    
-                    
                     if fullName.lowercaseString.rangeOfString(keyword.lowercaseString) != nil {
                         var abContact = AddressBookContactStruct()
                         abContact.contactFullName = fullName as String
                         abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
                         self.contactsArr.append(abContact)
-                    } else {
+                    } /**else {
                         var abContact = AddressBookContactStruct()
                         abContact.contactFullName = fullName as String
                         abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
                         self.contactsArr.append(abContact)
-                    }
+                    }**/
                 } else {
                     var abContact = AddressBookContactStruct()
                     abContact.contactFullName = fullName as String
@@ -246,7 +236,6 @@ class Contact {
                             let mappedResults = map(results) { pStr.substringWithRange($0.range)}
                             let strRepresentationResults = "".join(mappedResults)
                             contactsDict.updateValue("\(c.firstName) \(c.lastName)", forKey: strRepresentationResults)
-
                         }
                     }
                     for (key, value) in contactsDict {

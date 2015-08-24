@@ -15,7 +15,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-    var timer : NSTimer = NSTimer()
     var backgroundTaskID : UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier()
     var did : String = String()
     let defaults = NSUserDefaults.standardUserDefaults()
@@ -33,9 +32,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         if let cds = CoreDevice.getTokens(self.moc) {
-            println(cds)
+            println("tokens are")
+            for c in cds {
+                println(c.deviceToken)
+            }
         }
-        
         
 //        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: nil))
         
@@ -48,7 +49,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Contact().getContactsDict({ (contacts) -> () in
         })
         
-        timer.invalidate()
         
 //        if (launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]) {
 //            [self application:application didReceiveRemoteNotification:launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]];
@@ -62,6 +62,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             println("not from remote")
             // no notification
         }
+        
+        refreshMessages()
         
         return true
     }
@@ -84,16 +86,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject], fetchCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
         
 //        NSString *job = [[userInfo valueForKey:@"aps"] valueForKey:@"job"];
-        
 
         if (application.applicationState == UIApplicationState.Active) {
-            println("niggaahhh")
             self.createOrUpdateMessage(userInfo, userActive: true)
-            
-            
         } else {
             self.createOrUpdateMessage(userInfo, userActive: false)
-            println("niggasshhh background")
             if let notificationContact = userInfo["contact"] as? String {
                 println("contact is: " + notificationContact)
                 if let notificationDID = userInfo["did"] as? String {
@@ -102,22 +99,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         println("selected DID is: " + selectedDID.did)
                         if selectedDID.did != notificationDID {
                             CoreDID.toggleSelected(self.moc, did: notificationDID)
+                            if let currentUser = CoreUser.currentUser(self.moc) {
+                                currentUser.notificationLoad = 1
+                                currentUser.notificationDID = notificationDID
+                                currentUser.notificationContact = notificationContact
+                                CoreDataStack().saveContext(moc)
+                            }
                         }
-                        if let currentUser = CoreUser.currentUser(self.moc) {
-                            currentUser.notificationLoad = 1
-                            currentUser.notificationDID = notificationDID
-                            currentUser.notificationContact = notificationContact
-                            CoreDataStack().saveContext(moc)
-                            println(currentUser)
-                        }
+                       
                     }
                 }
             }
         }
-        
-        //save message
-        
-        
         
     }
     
@@ -202,6 +195,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        if let cd = CoreDevice.createInManagedObjectContext(self.moc, device: deviceTokenString) {
 //              println("Got token data! \(cd.deviceToken)")
 //        }
+        println(deviceToken)
         
         if let coreDevice = CoreDevice.createOrUpdateInMOC(self.moc, token: deviceTokenString) {
             println("got token data! \(coreDevice.deviceToken)")
@@ -214,7 +208,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     //MARK: Custom methods
-    func timerDidFire(sender: NSTimer) {
+    func refreshMessages() {
         if let str = CoreDID.getSelectedDID(moc) {
             let fromStr = CoreMessage.getLastMsgByDID(moc, did: str.did)?.date.strippedDateFromString()
             Message.getMessagesFromAPI(true, fromList: false, moc: moc, from: fromStr) { (responseObject, error) -> () in
@@ -224,12 +218,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func createOrUpdateMessage(userInfo: [NSObject : AnyObject], userActive: Bool) {
         println(userInfo)
-        let contact = userInfo["contact"] as! String
-        let id = userInfo["id"] as! String
-        let type = 1
         let did = userInfo["did"] as! String
-        let date = userInfo["date"] as! String
+        let id = userInfo["id"] as! String
         let message = userInfo["message"] as! String
+        let contact = userInfo["contact"] as! String
+        let date = userInfo["date"] as! String
+
+        
         var flagValue = message_status.DELIVERED.rawValue
         if userActive {
             flagValue = message_status.READ.rawValue
@@ -243,7 +238,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     let parsedDate: NSDate = formatter1.dateFromString(date)!
                     contactOfMessage.lastModified = parsedDate
                     if contactOfMessage.deletedContact.boolValue {
-                        println("hey there im deleted")
                         contactOfMessage.deletedContact = 0
                     }
                     CoreContact.updateContactInMOC(self.moc)
@@ -254,21 +248,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
     }
-    
-//    func notificationsAreOk() -> Bool {
-//        let wishedTypes = UIUserNotificationType.Badge |
-//            UIUserNotificationType.Alert |
-//            UIUserNotificationType.Sound;
-//        let application = UIApplication.sharedApplication()
-//        let settings = application.currentUserNotificationSettings()
-//        if settings == nil {
-//            return false
-//        }
-//        if settings.types != wishedTypes {
-//            return false
-//        }
-//        return true
-//    }
+ 
+
 
     
 

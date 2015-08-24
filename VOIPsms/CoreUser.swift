@@ -21,7 +21,7 @@ class CoreUser: NSManagedObject {
     @NSManaged var messagesLoaded: NSNumber
     @NSManaged var notificationLoad: NSNumber
     @NSManaged var notificationDID: String
-    @NSManaged var notificationContact: String
+    @NSManaged var notificationContact: String?
     @NSManaged var notificationsFlag: NSNumber
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, email: String, pwd: String) -> Bool {
@@ -61,7 +61,7 @@ class CoreUser: NSManagedObject {
     }
     
     class func currentUser(managedObjectContext: NSManagedObjectContext) -> CoreUser? {
-        //        let moc = CoreDataStack().managedObjectContext!
+//        let moc = CoreDataStack().managedObjectContext!
         let fetchRequest = NSFetchRequest(entityName: "CoreUser")
         var coreUser = [CoreUser]()
         var error : NSError? = nil

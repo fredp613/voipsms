@@ -33,6 +33,24 @@ extension String {
         return strToFormat.substringWithRange(NSRange(location: 0, length: 10)) as String
     }
     
+    func removeSpaces() -> String {
+        var str = self.stringByReplacingOccurrencesOfString(" ", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+        var str1 = str.stringByReplacingOccurrencesOfString("-", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+        var final = str1.stringByReplacingOccurrencesOfString(":", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+        return final
+    }
+    
+    func truncatedString() -> String {
+        if count(self) > 15 {
+            //truncate
+            var firstPart = self.substringToIndex(advance(self.startIndex, 23))
+            var truncateIndicator = "..."
+            return firstPart + truncateIndicator
+        }
+        return self
+    
+    }
+    
     func dateFormattedString() -> String {
         let tempDateFormatter = NSDateFormatter()
         tempDateFormatter.dateFormat = "YYYY-MM-dd HH:mm:ss"

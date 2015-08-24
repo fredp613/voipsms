@@ -109,6 +109,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
 //        var trimmedMessage = self.textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
 //        var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         var msgForCoreData = self.textMessage.text
+        //this is where the bug is, get the server date
         let date = NSDate()
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"

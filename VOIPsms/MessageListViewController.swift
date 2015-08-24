@@ -24,21 +24,22 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     var did : String = String()
     var titleBtn: UIButton = UIButton()
     var timer : NSTimer = NSTimer()
-//    var managedObjectContext : NSManagedObjectContext!
+//    var managedObjectContext : NSManagedObjectContext = CoreDataStack().managedObjectContext!
     var searchKeyword: String = String()
     var didView : UIPickerView = UIPickerView()
     var contactForSegue : String = String()
     
-    lazy var managedObjectContext : NSManagedObjectContext = {
-        // Error at the next line "Use of undeclared type 'NSSAppDelegate'"
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        
-        let managedObjectContext = appDelegate.moc
-        return managedObjectContext
-    }()
+//    lazy var managedObjectContext : NSManagedObjectContext = {
+//        // Error at the next line "Use of undeclared type 'NSSAppDelegate'"
+//        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+//        
+//        let managedObjectContext = appDelegate.moc
+//        return managedObjectContext
+//    }()
+    let managedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).moc
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
-        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
+//        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreContact")
         let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
@@ -64,7 +65,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     lazy var messageFetchedResultsController: NSFetchedResultsController = {
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreMessage")
-        let primarySortDescriptor = NSSortDescriptor(key: "date", ascending: false)
+        let primarySortDescriptor = NSSortDescriptor(key: "dateForSort", ascending: false)
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
         
         if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
@@ -120,6 +121,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             self.navigationController?.navigationBar.topItem?.titleView = titleBtn
         }
         
+        
+    }
+    
+    override func viewWillAppear(animated: Bool) {
         if CoreUser.userExists(managedObjectContext) {
             let currentUser = CoreUser.currentUser(managedObjectContext)
             let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
@@ -131,25 +136,20 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                     if currentUser!.messagesLoaded.boolValue == false || currentUser!.messagesLoaded.boolValue == false {
                         self.performSegueWithIdentifier("showDownloadMessagesSegue", sender: self)
                     } else {
-                        
                         self.startTimer()
                     }
                 }
             })
             
-//            UIApplication.sharedApplication().registerForRemoteNotifications()
-//            
-//            let settings = UIUserNotificationSettings(forTypes: .Alert, categories: nil)
-//            UIApplication.sharedApplication().registerUserNotificationSettings(settings)
+            //            UIApplication.sharedApplication().registerForRemoteNotifications()
+            //
+            //            let settings = UIUserNotificationSettings(forTypes: .Alert, categories: nil)
+            //            UIApplication.sharedApplication().registerUserNotificationSettings(settings)
             
         } else {
             performSegueWithIdentifier("showLoginSegue", sender: self)
         }
-        
-      
-        
-        
-        
+
     }
     
     override func viewDidDisappear(animated: Bool) {
@@ -187,8 +187,16 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     func startTimer() {
+        var time = NSTimeInterval()
         if Reachability.isConnectedToNetwork() {
-            timer = NSTimer.scheduledTimerWithTimeInterval(120, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
+            if UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
+                time = 120
+                println("registered")
+            } else {
+                time = 5
+                println("no registered")
+            }
+            timer = NSTimer.scheduledTimerWithTimeInterval(time, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         }
     }
     
@@ -196,47 +204,47 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
 
         if let cu = CoreUser.currentUser(self.managedObjectContext) {
             if cu.notificationLoad == 1 || cu.notificationLoad.boolValue {
-                if cu.notificationContact != "" {
-                    if let contact = CoreContact.currentContact(self.managedObjectContext, contactId: cu.notificationContact) {
-                        self.contactForSegue = cu.notificationContact
+                if let nc = cu.notificationContact  {
+                    if let contact = CoreContact.currentContact(self.managedObjectContext, contactId: nc) {
+                        self.contactForSegue = nc
 //                        if contact.deletedContact.boolValue {
 //                            contact.deletedContact = 0
 //                            CoreDataStack().saveContext(self.managedObjectContext)
 //                        }
                     } else {
-                        if let cc = CoreContact.createInManagedObjectContext(self.managedObjectContext, contactId: cu.notificationContact, lastModified: nil) {
-                            self.contactForSegue = cu.notificationContact
+                        if let cc = CoreContact.createInManagedObjectContext(self.managedObjectContext, contactId: nc, lastModified: nil) {
+                            self.contactForSegue = nc
                         }
                     }
                     self.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
                 }
             }
         }
-        println("time is fire")
-        self.pokeFetchedResultsController()
-        
         let qualityOfServiceClass = QOS_CLASS_BACKGROUND
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-        //        dispatch_async(backgroundQueue, { () -> Void in
-        if let str = CoreDID.getSelectedDID(self.managedObjectContext) {
-            if let cm = CoreMessage.getMessagesByDID(self.managedObjectContext, did: self.did).first {
-                if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
-                    let lastMessage = cm
-                    var from = ""
-                    from = lastMessage.date
-                    Message.getMessagesFromAPI(false, fromList: true, moc: self.managedObjectContext, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
-                        if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
-                            currentUser.initialLoad = 0
-                            currentUser.initialLogon = 0
-                            CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
-                        }
-//                        self.pokeFetchedResultsController()
-                    })
+        dispatch_async(backgroundQueue, { () -> Void in
+            if let str = CoreDID.getSelectedDID(self.managedObjectContext) {
+                if let cm = CoreMessage.getMessagesByDID(self.managedObjectContext, did: self.did).first {
+                    if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
+                        let lastMessage = cm
+                        var from = ""
+                        from = lastMessage.date
+                        Message.getMessagesFromAPI(false, fromList: true, moc: self.managedObjectContext, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
+                            if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
+                                currentUser.initialLoad = 0
+                                currentUser.initialLogon = 0
+                                CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
+                            }
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                self.pokeFetchedResultsController()
+                            })
+                        })
+                    }
+                    
                 }
-                
             }
-        }
-        
+        })
+        self.pokeFetchedResultsController()
     }
     
     override func didReceiveMemoryWarning() {
@@ -290,7 +298,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        //
+       
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -308,15 +316,13 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
-        
+
         let contact = fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
-        
-//        let sortDescriptor = NSSortDescriptor(key: "date", ascending: true)
-        
+                
 //        if var lastMessage = contact.messages.sortedArrayUsingDescriptors([sortDescriptor]).first! as? CoreMessage {
         if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
             var message = lastMessage as CoreMessage
-            var text2 = message.message //.stringByReplacingOccurrencesOfString("?", withString: "'", options: NSStringCompareOptions.LiteralSearch, range: nil)
+            var text2 = message.message
             if message.flag == message_status.PENDING.rawValue {
                 cell.detailTextLabel?.text = "\(text2) sending..."
             } else {
@@ -352,20 +358,20 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 cell.textLabel?.textColor = UIColor.blackColor()
                 cell.detailTextLabel?.textColor = UIColor.blackColor()
             }
+
             cell.contentView.addSubview(dateLbl)
         }
         
         if contact.fullName != nil {
-            cell.textLabel?.text = contact.fullName
+            cell.textLabel?.text = contact.fullName.truncatedString()
         } else {
-            cell.textLabel?.text = "\(contact.contactId.northAmericanPhoneNumberFormat())"  //.northAmericanPhoneNumberFormat()
+            cell.textLabel?.text = "\(contact.contactId.northAmericanPhoneNumberFormat())".truncatedString()  //.northAmericanPhoneNumberFormat()
         }
-        
-        
-        
         
         return cell
     }
+    
+
     
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPth: NSIndexPath) -> Bool {
         return true
@@ -561,12 +567,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         self.tableView.reloadData()
     }
     
-    
     //MARK: Class Delegate Methods
-    
     func triggerSegue(contact: String, moc: NSManagedObjectContext) {
         self.contactForSegue = contact
-        self.managedObjectContext = moc
+//        self.managedObjectContext = moc
 //        self.pokeFetchedResultsController()
         self.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
     }

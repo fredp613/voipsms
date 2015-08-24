@@ -108,9 +108,10 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     //MARK: - Searchbar delegate methods
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text != "" {
-//            self.contacts = Contact().getAllContacts(searchBar.text)
+            self.contacts = Contact().getAllContacts(searchBar.text)
+            println(self.contacts)
         } else {
-//            self.contacts = Contact().getAllContacts(nil)
+            self.contacts = Contact().getAllContacts(nil)
         }
         self.tableView.reloadData()        
     }
@@ -120,8 +121,6 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
         self.contacts = Contact().getAllContacts(nil)
         searchBar.resignFirstResponder()
     }
-
-
     
     //MARK: - Keyboard delegates
     
@@ -151,8 +150,6 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
 //        }
 //    }
 
-
-    
 
     /*
     // MARK: - Navigation

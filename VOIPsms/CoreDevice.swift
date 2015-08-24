@@ -46,25 +46,64 @@ class CoreDevice: NSManagedObject {
         let deviceMO : CoreDevice = NSEntityDescription.insertNewObjectForEntityForName("CoreDevice", inManagedObjectContext: managedObjectContext) as! CoreDevice
         deviceMO.deviceToken = device
         if managedObjectContext.save(nil) {
+            
             return deviceMO
         }
         return nil
     }
     
     class func createOrUpdateInMOC(moc: NSManagedObjectContext, token: String) -> CoreDevice? {
-        if let cd = CoreDevice.getToken(moc) {
-            if cd.deviceToken != token {
-                cd.deviceToken = token
-                moc.save(nil)
-            }
-        } else {
-            //create
-            if let cd = CoreDevice.createInManagedObjectContext(moc, device: token) {
-                println("deviced saved in MOC \(cd.deviceToken)")
+        println("this is being called")
+        if let cu = CoreUser.currentUser(moc) {
+            if let cd = CoreDevice.getToken(moc) {
+                if cd.deviceToken != token {
+                    cd.deviceToken = token
+                    if moc.save(nil) {
+                        sendDeviceDetailsToAPI(token, user: cu, moc: moc)
+                        return cd
+                    } else {
+                        return nil
+                    }
+                }
+            } else {
+                //create
+                if let cd = CoreDevice.createInManagedObjectContext(moc, device: token) {
+                    sendDeviceDetailsToAPI(token, user: cu, moc: moc)
+                    return cd
+                } else {
+                    return nil
+                }
             }
         }
-        
         return nil
+    }
+    
+    
+    class func sendDeviceDetailsToAPI(deviceId: String, user: CoreUser, moc: NSManagedObjectContext) {
+        println(deviceId)
+        var qualityOfServiceClass = Int(QOS_CLASS_DEFAULT.value)
+        var backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        dispatch_async(backgroundQueue, { () -> Void in
+            if let did = CoreDID.getSelectedDID(moc) {
+                println("hi we got a did" + did.did)
+                if let api_password = KeyChainHelper.retrieveForKey(user.email) {
+                    let params = [
+                        "user":[
+                            "email": user.email,
+                            "pwd": api_password,
+                            "did":did.did,
+                            "device": deviceId
+                        ]
+                    ]
+                    var url = "http://nodejs-voipsms.rhcloud.com/users"
+                    //                params should go in body of request
+                    
+                    VoipAPI(httpMethod: httpMethodEnum.POST, url: url, params: params).APIAuthenticatedRequest({ (responseObject, error) -> () in
+                        println(responseObject)
+                    })
+                }
+            }
+        })
     }
     
     

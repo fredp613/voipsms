@@ -25,6 +25,7 @@ class CoreMessage: NSManagedObject {
     @NSManaged var id: String
     @NSManaged var coreId: NSNumber
     @NSManaged var date: String
+    @NSManaged var dateForSort: String
     @NSManaged var flag: String
     @NSManaged var contact: CoreContact
     
@@ -36,6 +37,7 @@ class CoreMessage: NSManagedObject {
             coreMessage.id = id
             coreMessage.type = type
             coreMessage.date = date
+            coreMessage.dateForSort = date.removeSpaces()
             coreMessage.did = did
             coreMessage.flag = flag
         var uuid = NSNumber()
@@ -63,8 +65,8 @@ class CoreMessage: NSManagedObject {
                 coreMessage.contact = c
             }
         }
-        let err = NSError()
-                
+//        let err = NSError()
+        
         CoreDataStack().saveContext(managedObjectContext)
 //        if managedObjectContext.save(nil) {            
             return completionHandler(responseObject: coreMessage, error: nil)
@@ -74,10 +76,8 @@ class CoreMessage: NSManagedObject {
     }
     
     class func updateInManagedObjectContext(moc: NSManagedObjectContext, coreMessage: CoreMessage) {
+        coreMessage.dateForSort = coreMessage.date.removeSpaces()
         CoreDataStack().saveContext(moc)
-        
-//        if moc.save(nil) {
-//        }
     }
     
     class func deleteMessage(moc: NSManagedObjectContext, coreMessage: CoreMessage) {
@@ -330,11 +330,10 @@ class CoreMessage: NSManagedObject {
                 println("\(error?.userInfo)")
             }
             return nil
-
     }
     
     class func sendMessage(moc: NSManagedObjectContext, contact: String, messageText: String, did: String, completionHandler: (responseObject: CoreMessage?, error: NSError?) -> ()) {
-        let date = NSDate()
+        let date = NSDate().dateByAddingTimeInterval(NSTimeIntervalSince1970)
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
         var dateStr = formatter.stringFromDate(date)

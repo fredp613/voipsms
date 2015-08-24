@@ -30,7 +30,7 @@ class CoreContact: NSManagedObject {
             let parsedDate: NSDate = formatter1.dateFromString(lastModified)!
             contact.lastModified = parsedDate
         } else {
-            contact.lastModified = NSDate()
+            contact.lastModified = NSDate().dateByAddingTimeInterval(NSTimeIntervalSince1970)
         }
         let error : NSError? = nil
 //        if managedObjectContext.save(nil) {
@@ -56,7 +56,7 @@ class CoreContact: NSManagedObject {
                 }
             } else {
                 if fullName == nil {
-                    contact.lastModified = NSDate()
+                    contact.lastModified = NSDate().dateByAddingTimeInterval(NSTimeIntervalSince1970)
                 }
             }
             if let fullName = fullName {
@@ -355,19 +355,10 @@ class CoreContact: NSManagedObject {
         
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         fetchRequest.returnsObjectsAsFaults = false
+        let sortDescriptor = NSSortDescriptor(key: "dateForSort", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
         let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
-//        var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
-//        let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
-//        if let deletedMessages = CoreDeleteMessage.getAllDeletedMessages(managedObjectContext) {
-//            if let did = did {
-//                var secondPredicate = NSPredicate(format: "did == %@", did)
-//                var deletePredicate = NSPredicate(format: "!(id IN %@)", deletedMessages.map({$0.id}))
-//                let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate, deletePredicate])
-//                fetchRequest.predicate = predicate
-//            } else {
-//                fetchRequest.predicate = firstPredicate
-//            }
-//        } else {
             if let did = did {
                 var secondPredicate = NSPredicate(format: "did == %@", did)
                 let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
@@ -376,10 +367,6 @@ class CoreContact: NSManagedObject {
                 fetchRequest.predicate = firstPredicate
             }
 //        }
-       
-        
-        let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
         fetchRequest.fetchLimit = 1
         
         var coreMessages = [CoreMessage]()

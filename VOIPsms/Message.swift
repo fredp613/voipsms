@@ -95,7 +95,7 @@ class Message {
                 }
                 let did = t["did"].stringValue
                 
-                if CoreMessage.isExistingMessageById(moc, id: id) == false && CoreDeleteMessage.isDeletedMessage(moc, id: id) == false  {
+                if CoreMessage.isExistingMessageById(moc, id: id) == false /**&& CoreDeleteMessage.isDeletedMessage(moc, id: id) == false**/  {
                     if let currentUser = CoreUser.currentUser(moc) {
                         if type == true {
                             if currentUser.initialLogon == 1 || currentUser.initialLogon.boolValue == true  {

@@ -115,15 +115,15 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     lazy var messageFetchedResultsController: NSFetchedResultsController = {
         let messagesFetchRequest = NSFetchRequest(entityName: "CoreMessage")
+        
         let primarySortDescriptor = NSSortDescriptor(key: "date", ascending: true)
         messagesFetchRequest.sortDescriptors = [primarySortDescriptor]
+        
         let msgDIDPredicate = NSPredicate(format: "did == %@", self.did)
         let contactPredicate = NSPredicate(format: "contactId == %@", self.contactId)
         let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [msgDIDPredicate, contactPredicate])
         messagesFetchRequest.predicate = compoundPredicate
         //        messagesFetchRequest.fetchBatchSize = 20
-        
-        
         let frc = NSFetchedResultsController(
             fetchRequest: messagesFetchRequest,
             managedObjectContext: self.moc,
@@ -192,13 +192,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 if lastMessage.type.boolValue == true || lastMessage.type == 1 {
                     lastMessage.flag = message_status.READ.rawValue
                     CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: lastMessage)
-                    messageFetchedResultsController.performFetch(nil)
-                    self.tableView.reloadData()
+//                    messageFetchedResultsController.performFetch(nil)
+//                    self.tableView.reloadData()
                 }
             }
         }
         startTimer()
-        self.tableView.reloadData()
+//        self.tableView.reloadData()
     }
     
     
@@ -220,35 +220,15 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func dataSourceRefreshTimerDidFire(sender: NSTimer) {
         
-//        var error : NSError? = nil
-//        if messageFetchedResultsController.fetchedObjects?.count > 0 {
-//            var lastMessage = messageFetchedResultsController.fetchedObjects?.last! as! CoreMessage
-//            if let lastMsg = CoreContact.getLastIncomingMessageFromContact(moc, contactId: contactId, did: did) {
-//                let lastMsgDate = lastMsg.date
-//                Message.getIncomingMessagesFromAPI(self.moc, did: did, contact: contactId, from: lastMsgDate.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
-//                    if responseObject.count > 0 {
-//                        for (key: String, t: JSON) in responseObject["sms"] {
-//                            if let cm = CoreMessage.getMessageById(self.moc, Id: t["id"].stringValue) {
-//                            } else {
-//                                var error: NSError? = nil
-//                                if (self.messageFetchedResultsController.performFetch(&error)==false) {
-//                                    println("An error has occurred: \(error?.localizedDescription)")
-//                                }
-//                            }
-//                        }
-//                    }
-//                })
-//            }
-//        }
-        
         var error: NSError? = nil
         self.messageFetchedResultsController.fetchRequest.predicate = nil
-        self.messageFetchedResultsController.fetchRequest.sortDescriptors = nil
-        let primarySortDescriptor = NSSortDescriptor(key: "date", ascending: true)
+//        self.messageFetchedResultsController.fetchRequest.sortDescriptors = nil
+        
 
         let msgDIDPredicate = NSPredicate(format: "did == %@", self.did)
         let contactPredicate = NSPredicate(format: "contactId == %@", self.contactId)
         let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [msgDIDPredicate, contactPredicate])
+        let primarySortDescriptor = NSSortDescriptor(key: "dateForSort", ascending: true)
         self.messageFetchedResultsController.fetchRequest.sortDescriptors = [primarySortDescriptor]
         self.messageFetchedResultsController.fetchRequest.predicate = compoundPredicate
         self.messageFetchedResultsController.performFetch(nil)
@@ -259,9 +239,17 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func startTimer() {
+        var time = NSTimeInterval()
         if Reachability.isConnectedToNetwork() {
-            timer = NSTimer.scheduledTimerWithTimeInterval(240, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
-        } //else {
+            if UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
+                time = 120
+            } else {
+                time = 5
+            }
+            timer = NSTimer.scheduledTimerWithTimeInterval(time, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
+        }
+        
+        //else {
         //            let alert = UIAlertView(title: "Network Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
         //            alert.show()
         //        }
@@ -287,7 +275,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             Contact().getContactsDict({ (contacts) -> () in
                 if contacts[self.contactId] != nil {
                     let cText = contacts[self.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-                    self.navigationController?.navigationBar.topItem?.title = "\(cText!) (\(self.contactId.northAmericanPhoneNumberFormat()))"
+                    
+                    var finalTitle : String = "\(cText!)"
+
+                    self.navigationController?.navigationBar.topItem?.title = finalTitle.truncatedString()
                     
                 } else {
                     self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
@@ -301,11 +292,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         } else {
             self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //
         }
-        
 
-        
-        
-       
         self.tableViewScrollToBottomAnimated(false)
         self.tableViewScrollToBottomAnimated(false)
         
@@ -514,8 +501,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         if let message = messageFetchedResultsController.objectAtIndexPath(indexPath) as? CoreMessage {
             cell.configureWithMessage(message)
-
-
             
             var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
             allCellHeight += (size.height + 10)
