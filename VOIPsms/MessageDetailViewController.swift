@@ -109,6 +109,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     var scrollDirection = ScrollDirection()
     var tableFullyLoaded = false
     var retrying : Bool = false
+    var offsetHeight = CGFloat()
     
     //    var coreDid = CoreDID()
     var delegate:MessageListViewDelegate? = nil
@@ -148,6 +149,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         }
         self.textMessage.delegate = self
         self.textMessage.sizeToFit()
+        self.textMessage.scrollEnabled = false
         
         tableView.separatorStyle = .None
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
@@ -570,6 +572,15 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         } else {
             sendButton.enabled = true
         }
+
+        var offsetHeightTV = textView.frame.size.height
+        
+        self.tableView.frame.size.height = compressedTableViewHeight - offsetHeight
+        self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight - offsetHeightTV + 30
+        //                                    self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight
+        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+        scrollView.contentInset = contentInsets;
+
     }
     
 
@@ -634,7 +645,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                         //                case IPHONE_5 = 568
                         //                case IPHONE_6 = 667
                         //                case IPHONE_6P = 736
-                        var offsetHeight = CGFloat()
+
                         switch model.rawValue {
                         case 480:
                             offsetHeight = keyboardScreenEndFrame.height + 115
@@ -702,6 +713,14 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 }
             }
         }
+        
+//        var offsetHeightTV = self.textMessage.frame.size.height
+        
+        self.tableView.frame.size.height = compressedTableViewHeight - offsetHeight
+        self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight //- offsetHeightTV + 30
+        //                                    self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight
+        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+        scrollView.contentInset = contentInsets;
     }
 
     

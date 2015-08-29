@@ -421,7 +421,7 @@
                                         <rect key="frame" x="-4" y="0.0" width="608" height="495"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="495" id="9kw-oJ-rvL"/>
+                                            <constraint firstAttribute="height" constant="495" id="fpF-fh-b1W"/>
                                         </constraints>
                                         <prototypes>
                                             <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" id="yxS-FR-zvm">
@@ -448,10 +448,10 @@
                                         </connections>
                                     </textView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J98-40-cjO">
-                                        <rect key="frame" x="543" y="500" width="57" height="30"/>
+                                        <rect key="frame" x="543" y="503" width="57" height="30"/>
                                         <color key="backgroundColor" red="0.94467179229999998" green="0.94467179229999998" blue="0.94467179229999998" alpha="1" colorSpace="calibratedRGB"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="57" id="p9e-6w-orf"/>
+                                            <constraint firstAttribute="width" constant="57" id="qf8-1m-dft"/>
                                         </constraints>
                                         <state key="normal" title="send">
                                             <color key="titleColor" red="0.45375987509999999" green="0.53392431220000003" blue="0.69332904669999995" alpha="1" colorSpace="calibratedRGB"/>
@@ -464,21 +464,24 @@
                                 </subviews>
                                 <color key="backgroundColor" red="0.96296296299999995" green="0.96296296299999995" blue="0.96296296299999995" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="bottom" secondItem="J98-40-cjO" secondAttribute="bottom" constant="10" id="5xr-rG-AO4"/>
-                                    <constraint firstItem="LOV-x7-l3V" firstAttribute="leading" secondItem="qL9-TF-RCI" secondAttribute="leading" id="6p1-GP-N9I"/>
-                                    <constraint firstAttribute="trailing" secondItem="J98-40-cjO" secondAttribute="trailing" id="I44-qA-0Y1"/>
+                                    <constraint firstItem="LOV-x7-l3V" firstAttribute="top" secondItem="KSs-8p-4xD" secondAttribute="bottom" constant="5" id="H6Y-nh-Dg2"/>
+                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="leading" secondItem="qL9-TF-RCI" secondAttribute="leading" constant="-4" id="ITP-Sr-fVH"/>
                                     <constraint firstAttribute="bottom" secondItem="LOV-x7-l3V" secondAttribute="bottom" constant="7" id="PJ0-hB-UzA"/>
-                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="leading" secondItem="qL9-TF-RCI" secondAttribute="leading" constant="-4" id="QO7-kV-d5N"/>
                                     <constraint firstItem="J98-40-cjO" firstAttribute="top" secondItem="KSs-8p-4xD" secondAttribute="bottom" constant="2" id="RFP-qV-tly"/>
-                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="top" secondItem="qL9-TF-RCI" secondAttribute="topMargin" constant="-8" id="TM9-2A-raT"/>
-                                    <constraint firstAttribute="trailing" secondItem="KSs-8p-4xD" secondAttribute="trailing" constant="-4" id="b1I-ig-aja"/>
-                                    <constraint firstAttribute="bottom" secondItem="KSs-8p-4xD" secondAttribute="bottom" constant="45" id="c4d-Yg-Zbr"/>
+                                    <constraint firstItem="J98-40-cjO" firstAttribute="top" secondItem="KSs-8p-4xD" secondAttribute="bottom" constant="8" symbolic="YES" id="UyR-t1-APa"/>
+                                    <constraint firstItem="LOV-x7-l3V" firstAttribute="leading" secondItem="qL9-TF-RCI" secondAttribute="leading" id="YQL-KH-6gL"/>
+                                    <constraint firstAttribute="bottom" secondItem="LOV-x7-l3V" secondAttribute="bottom" constant="7" id="Z64-20-8Va"/>
                                     <constraint firstItem="LOV-x7-l3V" firstAttribute="top" secondItem="KSs-8p-4xD" secondAttribute="bottom" constant="4" id="cy8-pG-698"/>
-                                    <constraint firstItem="J98-40-cjO" firstAttribute="leading" secondItem="LOV-x7-l3V" secondAttribute="trailing" id="foA-0F-zvL"/>
-                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="centerX" secondItem="qL9-TF-RCI" secondAttribute="centerX" id="mMt-fu-7Ka"/>
+                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="top" secondItem="qL9-TF-RCI" secondAttribute="top" id="i7r-QL-XYo"/>
+                                    <constraint firstItem="J98-40-cjO" firstAttribute="leading" secondItem="LOV-x7-l3V" secondAttribute="trailing" id="jyS-WI-RMh"/>
+                                    <constraint firstAttribute="trailing" secondItem="KSs-8p-4xD" secondAttribute="trailing" constant="-4" id="lT0-vX-gdL"/>
+                                    <constraint firstAttribute="trailing" secondItem="J98-40-cjO" secondAttribute="trailing" id="udo-Gu-pVI"/>
+                                    <constraint firstItem="KSs-8p-4xD" firstAttribute="centerX" secondItem="qL9-TF-RCI" secondAttribute="centerX" id="vMQ-bx-BIu"/>
+                                    <constraint firstItem="LOV-x7-l3V" firstAttribute="bottom" secondItem="J98-40-cjO" secondAttribute="bottom" id="xrQ-Qx-5as"/>
                                 </constraints>
                                 <variation key="default">
                                     <mask key="constraints">
+                                        <exclude reference="PJ0-hB-UzA"/>
                                         <exclude reference="cy8-pG-698"/>
                                         <exclude reference="RFP-qV-tly"/>
                                     </mask>
@@ -487,11 +490,11 @@
                         </subviews>
                         <color key="backgroundColor" red="0.96470588235294119" green="0.96470588235294119" blue="0.96470588235294119" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="qL9-TF-RCI" firstAttribute="bottom" secondItem="Ssl-Tq-FOo" secondAttribute="top" constant="4" id="3Ji-Wn-Yt8"/>
-                            <constraint firstItem="qL9-TF-RCI" firstAttribute="leading" secondItem="Nbt-Ry-dVz" secondAttribute="leading" id="8pa-f3-r9s"/>
-                            <constraint firstItem="qL9-TF-RCI" firstAttribute="top" secondItem="3Pw-1i-Odi" secondAttribute="bottom" id="FnO-75-Q8c"/>
+                            <constraint firstItem="qL9-TF-RCI" firstAttribute="top" secondItem="3Pw-1i-Odi" secondAttribute="bottom" id="DYZ-hp-6Cq"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="qL9-TF-RCI" secondAttribute="bottom" constant="-4" id="HeF-rF-DbH"/>
                             <constraint firstItem="qL9-TF-RCI" firstAttribute="bottom" secondItem="Ssl-Tq-FOo" secondAttribute="top" id="Kl3-uK-CTN"/>
-                            <constraint firstAttribute="trailing" secondItem="qL9-TF-RCI" secondAttribute="trailing" id="wcf-xx-SjF"/>
+                            <constraint firstAttribute="trailing" secondItem="qL9-TF-RCI" secondAttribute="trailing" id="V3w-51-zlu"/>
+                            <constraint firstItem="qL9-TF-RCI" firstAttribute="leading" secondItem="Nbt-Ry-dVz" secondAttribute="leading" id="zbn-4q-6tu"/>
                         </constraints>
                         <variation key="default">
                             <mask key="constraints">
@@ -510,7 +513,7 @@
                         <outlet property="scrollView" destination="qL9-TF-RCI" id="6Cv-Sv-ace"/>
                         <outlet property="sendButton" destination="J98-40-cjO" id="EzK-WM-wBc"/>
                         <outlet property="tableView" destination="KSs-8p-4xD" id="5KN-yb-nzD"/>
-                        <outlet property="tableViewHeightConstraint" destination="9kw-oJ-rvL" id="d0x-hk-ycd"/>
+                        <outlet property="tableViewHeightConstraint" destination="fpF-fh-b1W" id="ess-b3-EK8"/>
                         <outlet property="textMessage" destination="LOV-x7-l3V" id="KBc-dK-Rbo"/>
                         <segue destination="gjZ-Zh-MF7" kind="presentation" identifier="showContactDetailSegue" id="PlH-4M-Ti2"/>
                         <segue destination="DNK-03-LAE" kind="show" identifier="showExistingContactDetailSegue" id="0k9-Wd-F0d"/>
@@ -862,6 +865,9 @@
                                     </textView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bUM-GM-HbV">
                                         <rect key="frame" x="578" y="500" width="34" height="30"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="34" id="uMd-r6-jBE"/>
+                                        </constraints>
                                         <state key="normal" title="send">
                                             <color key="titleColor" red="0.51132605820105814" green="0.51132605820105814" blue="0.51132605820105814" alpha="1" colorSpace="calibratedRGB"/>
                                             <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>

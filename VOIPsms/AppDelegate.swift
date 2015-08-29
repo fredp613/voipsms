@@ -63,7 +63,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // no notification
         }
         
-        refreshMessages()
+
         
         return true
     }
@@ -140,6 +140,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        app.cancelAllLocalNotifications()
 
 //        }
+        println("hi im in the foreground")
+        refreshMessages()
         
 
        

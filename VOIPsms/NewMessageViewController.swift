@@ -29,6 +29,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     var compressedTableViewHeight : CGFloat = CGFloat()
     var currentKeyboardSize : CGFloat = CGFloat()
     var currentTextViewSize : CGFloat = CGFloat()
+    var offsetHeight = CGFloat()
 
     
     override func viewDidLoad() {
@@ -149,9 +150,6 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     }
     
     func textViewDidChange(textView: UITextView) {
-        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
-        scrollView.contentInset = contentInsets;
-        
         if validateContactText(searchBar.text) {
             if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
                 sendButton.enabled = false
@@ -162,7 +160,14 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             self.sendButton.enabled = false
         }
         
-       
+        var offsetHeightTV = textView.frame.size.height
+        
+        self.tableView.frame.size.height = compressedTableViewHeight - offsetHeight
+        self.tableViewHeighConstraint.constant = compressedTableViewHeight - offsetHeight - offsetHeightTV + 30
+        //                                    self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight
+        let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
+        scrollView.contentInset = contentInsets;
+
     }
     
     func validateContactText(input: String) -> Bool {
@@ -356,7 +361,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
 //                case IPHONE_5 = 568
 //                case IPHONE_6 = 667
 //                case IPHONE_6P = 736
-                var offsetHeight = CGFloat()
+
                 switch model.rawValue {
                 case 480:
                     offsetHeight = keyboardScreenEndFrame.height + 115
