@@ -190,7 +190,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         var time = NSTimeInterval()
         if Reachability.isConnectedToNetwork() {
             if UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
-                time = 120
+                time = 45
                 println("registered")
             } else {
                 time = 5
@@ -261,6 +261,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     //MARK: Core Data Delegates
     
     func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        //here maybe activate spinner
         self.tableView.beginUpdates()
     }
     

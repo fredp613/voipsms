@@ -108,12 +108,11 @@ class Message {
                         }
                     }
                     
+                    
                     CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
                         dispatch_async(dispatch_get_main_queue(), { () -> Void in
                             println("message created")
                         })
-
-
                         if let contactOfMessage = CoreContact.currentContact(moc, contactId: contact) {
                             var formatter1: NSDateFormatter = NSDateFormatter()
                             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"

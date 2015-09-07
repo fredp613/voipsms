@@ -225,7 +225,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         var error: NSError? = nil
         self.messageFetchedResultsController.fetchRequest.predicate = nil
 //        self.messageFetchedResultsController.fetchRequest.sortDescriptors = nil
-        
+        Message.getIncomingMessagesFromAPI(self.moc, did: self.did, contact: self.contactId, from: nil) { (responseObject, error) -> () in
+            println("messages downloaded")
+        }
 
         let msgDIDPredicate = NSPredicate(format: "did == %@", self.did)
         let contactPredicate = NSPredicate(format: "contactId == %@", self.contactId)
@@ -244,9 +246,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         var time = NSTimeInterval()
         if Reachability.isConnectedToNetwork() {
             if UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
-                time = 120
+                time = 115
             } else {
-                time = 5
+                time = 2
             }
             timer = NSTimer.scheduledTimerWithTimeInterval(time, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
         }
@@ -273,26 +275,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
         
-        if Contact().checkAccess() {
-            Contact().getContactsDict({ (contacts) -> () in
-                if contacts[self.contactId] != nil {
-                    let cText = contacts[self.contactId]?.stringByReplacingOccurrencesOfString("nil", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-                    
-                    var finalTitle : String = "\(cText!)"
-
-                    self.navigationController?.navigationBar.topItem?.title = finalTitle.truncatedString()
-                    
-                } else {
-                    self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
-                }
-                
-                if CoreContact.currentContact(self.moc, contactId: self.contactId)?.fullName == nil {
-                    self.dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
-                    self.navigationItem.rightBarButtonItem = self.dynamicBarButton
-                }
-            })
+        if let currentContactFullName = CoreContact.currentContact(self.moc, contactId: self.contactId)?.fullName {
+            self.navigationController?.navigationBar.topItem?.title = currentContactFullName.truncatedString()
         } else {
-            self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //
+            self.dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
+            self.navigationItem.rightBarButtonItem = self.dynamicBarButton
+            self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
         }
 
         self.tableViewScrollToBottomAnimated(false)

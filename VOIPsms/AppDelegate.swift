@@ -29,6 +29,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
+//            refreshMessages()
+
         }
         
         if let cds = CoreDevice.getTokens(self.moc) {
@@ -71,6 +73,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didReceiveLocalNotification notification: UILocalNotification) {
 
     }
+    
+   
 
 //    func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
 //        println("house")
@@ -140,8 +144,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        app.cancelAllLocalNotifications()
 
 //        }
-        println("hi im in the foreground")
-        refreshMessages()
+
+//        refreshMessages()
         
 
        
@@ -150,6 +154,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
 
     func applicationDidBecomeActive(application: UIApplication) {
+        
+        refreshMessages()
+                    println("hi there active")
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 //        [[UIApplication sharedApplication] cancelAllLocalNotifications];
         //clear all notifications - refactor this - s/b only messages from open contact
@@ -158,6 +165,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
 //        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
 //        dispatch_async(backgroundQueue, { () -> Void in
+        
+        
 //            if let str = CoreDID.getSelectedDID(self.moc) {
 //                if let cm = CoreMessage.getMessagesByDID(self.moc, did: self.did).first {
 //                    if let currentUser = CoreUser.currentUser(self.moc) {
@@ -211,11 +220,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     //MARK: Custom methods
     func refreshMessages() {
-        if let str = CoreDID.getSelectedDID(moc) {
-            let fromStr = CoreMessage.getLastMsgByDID(moc, did: str.did)?.date.strippedDateFromString()
-            Message.getMessagesFromAPI(true, fromList: false, moc: moc, from: fromStr) { (responseObject, error) -> () in
-            }                        
-        }
+        
+    let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+    let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        dispatch_async(backgroundQueue, { () -> Void in
+            
+            if let str = CoreDID.getSelectedDID(self.moc) {
+                let fromStr = CoreMessage.getLastMsgByDID(self.moc, did: str.did)?.date.strippedDateFromString()
+                Message.getMessagesFromAPI(true, fromList: false, moc: self.moc, from: fromStr) { (responseObject, error) -> () in
+                }                        
+            }
+        })
     }
     
     func createOrUpdateMessage(userInfo: [NSObject : AnyObject], userActive: Bool) {
@@ -232,22 +247,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             flagValue = message_status.READ.rawValue
         }
         
-        if !CoreMessage.isExistingMessageById(self.moc, id: id) && !CoreDeleteMessage.isDeletedMessage(self.moc, id: id) {
-            CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: id, type: true, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
-                if let contactOfMessage = CoreContact.currentContact(self.moc, contactId: contact) {
-                    var formatter1: NSDateFormatter = NSDateFormatter()
-                    formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                    let parsedDate: NSDate = formatter1.dateFromString(date)!
-                    contactOfMessage.lastModified = parsedDate
-                    if contactOfMessage.deletedContact.boolValue {
-                        contactOfMessage.deletedContact = 0
+        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        dispatch_async(backgroundQueue, { () -> Void in
+            if !CoreMessage.isExistingMessageById(self.moc, id: id) && !CoreDeleteMessage.isDeletedMessage(self.moc, id: id) {
+                CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: id, type: true, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
+                    if let contactOfMessage = CoreContact.currentContact(self.moc, contactId: contact) {
+                        var formatter1: NSDateFormatter = NSDateFormatter()
+                        formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                            let parsedDate: NSDate = formatter1.dateFromString(date)!
+                        contactOfMessage.lastModified = parsedDate
+                        if contactOfMessage.deletedContact.boolValue {
+                            contactOfMessage.deletedContact = 0
+                        }
+                        CoreContact.updateContactInMOC(self.moc)
+                    } else {
+                        CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: date)
                     }
-                    CoreContact.updateContactInMOC(self.moc)
-                } else {
-                    CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: date)
-                }
-            })
-        }
+                })
+            }
+        })
         
     }
  

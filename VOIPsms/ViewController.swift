@@ -26,7 +26,6 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         textUserName.delegate = self
         textPwd.delegate = self
         textUserName.text = "fredp613@gmail.com"
-        textPwd.text = "Fredp613$"
         loginBtn.layer.cornerRadius = 10
         
         
@@ -55,6 +54,10 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         self.login()
     }
     
+    @IBAction func goBackPressed(sender: AnyObject) {
+//        self.performSegueWithIdentifier("showWizard", sender: self)
+        navigationController?.popViewControllerAnimated(true)
+    }
     func login() {
         CoreUser.authenticate(moc, email: self.textUserName.text, password: self.textPwd.text) { (success, error) -> Void in
             if error == nil {
@@ -65,7 +68,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
                     self.activityIndicator.stopAnimating()
                     if let currentUser = CoreUser.currentUser(self.moc) {
                         if currentUser.initialLogon.boolValue == true {
-                            self.performSegueWithIdentifier("segueDownloadMessages", sender: self)                                                      
+                            self.performSegueWithIdentifier("segueDownloadMessages", sender: self)
                         } else {
                             self.dismissViewControllerAnimated(true, completion: nil)
                         }
