@@ -15,11 +15,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+//    var privateMoc : NSManagedObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+    var privateMoc: NSManagedObjectContext = CoreDataStack().managedObjectContextPrivate!
     var backgroundTaskID : UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier()
     var did : String = String()
     let defaults = NSUserDefaults.standardUserDefaults()
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        
+//        privateMoc.persistentStoreCoordinator = CoreDataStack().persistentStoreCoordinator
         
         //sync addressBook when opening
         if Contact().checkAccess() {
@@ -33,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         }
         
-        if let cds = CoreDevice.getTokens(self.moc) {
+        if let cds = CoreDevice.getTokens(self.privateMoc) {
             println("tokens are")
             for c in cds {
                 println(c.deviceToken)
@@ -99,11 +103,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 println("contact is: " + notificationContact)
                 if let notificationDID = userInfo["did"] as? String {
                     println("did is:" + notificationDID)
-                    if let selectedDID = CoreDID.getSelectedDID(self.moc) {
+                    if let selectedDID = CoreDID.getSelectedDID(self.privateMoc) {
                         println("selected DID is: " + selectedDID.did)
                         if selectedDID.did != notificationDID {
-                            CoreDID.toggleSelected(self.moc, did: notificationDID)
-                            if let currentUser = CoreUser.currentUser(self.moc) {
+                            CoreDID.toggleSelected(self.privateMoc, did: notificationDID)
+                            if let currentUser = CoreUser.currentUser(self.privateMoc) {
                                 currentUser.notificationLoad = 1
                                 currentUser.notificationDID = notificationDID
                                 currentUser.notificationContact = notificationContact
@@ -167,17 +171,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        dispatch_async(backgroundQueue, { () -> Void in
         
         
-//            if let str = CoreDID.getSelectedDID(self.moc) {
-//                if let cm = CoreMessage.getMessagesByDID(self.moc, did: self.did).first {
-//                    if let currentUser = CoreUser.currentUser(self.moc) {
+//            if let str = CoreDID.getSelectedDID(self.privateMoc) {
+//                if let cm = CoreMessage.getMessagesByDID(self.privateMoc, did: self.did).first {
+//                    if let currentUser = CoreUser.currentUser(self.privateMoc) {
 //                        let lastMessage = cm
 //                        var from = ""
 //                        from = lastMessage.date
-//                        Message.getMessagesFromAPI(false, fromList: true, moc: self.moc, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
+//                        Message.getMessagesFromAPI(false, fromList: true, moc: self.privateMoc, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
 //                            if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
 //                                currentUser.initialLoad = 0
 //                                currentUser.initialLogon = 0
-//                                CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
+//                                CoreUser.updateInManagedObjectContext(self.privateMoc, coreUser: currentUser)
 //                            }
 //                            //                        self.pokeFetchedResultsController()
 //                        })
@@ -203,12 +207,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             .stringByTrimmingCharactersInSet( characterSet )
             .stringByReplacingOccurrencesOfString( " ", withString: "" ) as String
 //        
-//        if let cd = CoreDevice.createInManagedObjectContext(self.moc, device: deviceTokenString) {
+//        if let cd = CoreDevice.createInManagedObjectContext(self.privateMoc, device: deviceTokenString) {
 //              println("Got token data! \(cd.deviceToken)")
 //        }
         println(deviceToken)
         
-        if let coreDevice = CoreDevice.createOrUpdateInMOC(self.moc, token: deviceTokenString) {
+        if let coreDevice = CoreDevice.createOrUpdateInMOC(self.privateMoc, token: deviceTokenString) {
             println("got token data! \(coreDevice.deviceToken)")
         }
 
@@ -221,14 +225,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     //MARK: Custom methods
     func refreshMessages() {
         
-    let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-    let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-        dispatch_async(backgroundQueue, { () -> Void in
-            
-            if let str = CoreDID.getSelectedDID(self.moc) {
-                let fromStr = CoreMessage.getLastMsgByDID(self.moc, did: str.did)?.date.strippedDateFromString()
-                Message.getMessagesFromAPI(true, fromList: false, moc: self.moc, from: fromStr) { (responseObject, error) -> () in
-                }                        
+        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+            dispatch_async(backgroundQueue, { () -> Void in
+            self.privateMoc.performBlock { () -> Void in
+                if let str = CoreDID.getSelectedDID(self.privateMoc) {
+                    let fromStr = CoreMessage.getLastMsgByDID(self.privateMoc, did: str.did)?.date.strippedDateFromString()
+                    Message.getMessagesFromAPI(true, fromList: false, moc: self.privateMoc, from: fromStr) { (responseObject, error) -> () in
+                    }
+                }
             }
         })
     }
@@ -250,22 +255,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let qualityOfServiceClass = QOS_CLASS_BACKGROUND
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
         dispatch_async(backgroundQueue, { () -> Void in
-            if !CoreMessage.isExistingMessageById(self.moc, id: id) && !CoreDeleteMessage.isDeletedMessage(self.moc, id: id) {
-                CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: id, type: true, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
-                    if let contactOfMessage = CoreContact.currentContact(self.moc, contactId: contact) {
+        
+//         self.privateMoc.performBlock { () -> Void in
+            if !CoreMessage.isExistingMessageById(self.privateMoc, id: id) && !CoreDeleteMessage.isDeletedMessage(self.privateMoc, id: id) {
+                CoreMessage.createInManagedObjectContext(self.privateMoc, contact: contact, id: id, type: true, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
+                    if let contactOfMessage = CoreContact.currentContact(self.privateMoc, contactId: contact) {
                         var formatter1: NSDateFormatter = NSDateFormatter()
                         formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                            let parsedDate: NSDate = formatter1.dateFromString(date)!
+                        let parsedDate: NSDate = formatter1.dateFromString(date)!
                         contactOfMessage.lastModified = parsedDate
                         if contactOfMessage.deletedContact.boolValue {
                             contactOfMessage.deletedContact = 0
                         }
-                        CoreContact.updateContactInMOC(self.moc)
+                        CoreContact.updateContactInMOC(self.privateMoc)
                     } else {
-                        CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: date)
+                        CoreContact.createInManagedObjectContext(self.privateMoc, contactId: contact, lastModified: date)
                     }
                 })
             }
+//        }
+        
+        
         })
         
     }

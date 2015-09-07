@@ -58,6 +58,7 @@ class CoreMessage: NSManagedObject {
             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
             let parsedDate: NSDate = formatter1.dateFromString(date)!
             c.lastModified = parsedDate
+            c.deletedContact = 0
             CoreContact.updateContactInMOC(managedObjectContext)
             
         } else {
@@ -84,8 +85,9 @@ class CoreMessage: NSManagedObject {
         if coreMessage.id != "" {
 //            println(coreMessage.id)
             CoreDeleteMessage.createInManagedObjectContext(moc, id: coreMessage.id)
-//            Message.deleteMessagesFromAPI([coreMessage.id], completionHandler: { (responseObject, error) -> () in
-//            })
+            Message.deleteMessagesFromAPI([coreMessage.id], completionHandler: { (responseObject, error) -> () in
+                println("done")
+            })
         }
         var contact = coreMessage.contactId
         var did = coreMessage.did

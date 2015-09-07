@@ -32,6 +32,9 @@ class Message {
     
     class func getMessagesFromAPI(fromAppDelegate: Bool,fromList: Bool, moc: NSManagedObjectContext, from: String!, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         
+        let privateContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+        privateContext.parentContext = moc
+        
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "YYYY-MM-dd"
         //from should be last date in core data
@@ -73,65 +76,70 @@ class Message {
                 ]
             }
         }
-        var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
-
-
-        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
-            println(error)
-            let json = responseObject
-            for (key: String, t: JSON) in json["sms"] {
-                let contact = t["contact"].stringValue
-                let id = t["id"].stringValue
-                let typeStr = t["type"].stringValue
-                var type : Bool
-                let date = t["date"].stringValue
-                let message = t["message"].stringValue.stringByReplacingOccurrencesOfString("?", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-                var flagValue = String()
-                if typeStr == "0" {
-                    type = false
-                    flagValue = message_status.DELIVERED.rawValue
-                } else {
-                    type = true
-                }
-                let did = t["did"].stringValue
-                
-                if CoreMessage.isExistingMessageById(moc, id: id) == false /**&& CoreDeleteMessage.isDeletedMessage(moc, id: id) == false**/  {
-                    if let currentUser = CoreUser.currentUser(moc) {
-                        if type == true {
-                            if currentUser.initialLogon == 1 || currentUser.initialLogon.boolValue == true  {
-                                flagValue = message_status.READ.rawValue
-                            } else if fromList {
-                                flagValue = message_status.DELIVERED.rawValue
-                            } else {
-                                flagValue = message_status.READ.rawValue
+        
+        privateContext.performBlock { () -> Void in
+            var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
+                        
+            VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
+                println(error)
+                let json = responseObject
+                for (key: String, t: JSON) in json["sms"] {
+                    let contact = t["contact"].stringValue
+                    let id = t["id"].stringValue
+                    let typeStr = t["type"].stringValue
+                    var type : Bool
+                    let date = t["date"].stringValue
+                    let message = t["message"].stringValue.stringByReplacingOccurrencesOfString("?", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+                    var flagValue = String()
+                    if typeStr == "0" {
+                        type = false
+                        flagValue = message_status.DELIVERED.rawValue
+                    } else {
+                        type = true
+                    }
+                    let did = t["did"].stringValue
+                    
+                    if CoreMessage.isExistingMessageById(moc, id: id) == false /**&& CoreDeleteMessage.isDeletedMessage(moc, id: id) == false**/  {
+                        if let currentUser = CoreUser.currentUser(privateContext) {
+                            if type == true {
+                                if currentUser.initialLogon == 1 || currentUser.initialLogon.boolValue == true  {
+                                    flagValue = message_status.READ.rawValue
+                                } else if fromList {
+                                    flagValue = message_status.DELIVERED.rawValue
+                                } else {
+                                    flagValue = message_status.READ.rawValue
+                                }
                             }
                         }
-                    }
-                    
-                    
-                    CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
-                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            println("message created")
+                        
+                        
+                        CoreMessage.createInManagedObjectContext(privateContext, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
+                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                println("message created")
+                            })
+                            if let contactOfMessage = CoreContact.currentContact(privateContext, contactId: contact) {
+                                var formatter1: NSDateFormatter = NSDateFormatter()
+                                formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                                let parsedDate: NSDate = formatter1.dateFromString(date)!
+                                contactOfMessage.lastModified = parsedDate
+//                                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                    CoreContact.updateContactInMOC(privateContext)
+
+//                                })
+                            } else {
+//                                                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                                CoreContact.createInManagedObjectContext(privateContext, contactId: contact, lastModified: date)
+//                                                            })
+                            }
+                            
                         })
-                        if let contactOfMessage = CoreContact.currentContact(moc, contactId: contact) {
-                            var formatter1: NSDateFormatter = NSDateFormatter()
-                            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                            let parsedDate: NSDate = formatter1.dateFromString(date)!
-                            contactOfMessage.lastModified = parsedDate
-//                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                CoreContact.updateContactInMOC(moc)
-//                            })
-                        } else {
-//                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                CoreContact.createInManagedObjectContext(moc, contactId: contact, lastModified: date)
-//                            })
-                        }
-                       
-                    })
+                    }
                 }
+                return completionHandler(responseObject: json, error: nil)
             }
-            return completionHandler(responseObject: json, error: nil)
         }
+        
+        
     }
     
 
@@ -180,7 +188,7 @@ class Message {
                     "did" : did,
                     "contact" : contact,
                     "to" : dateFormatter.stringFromDate(NSDate()) as String,
-                    "limit" : "500"
+                    "limit" : "1500"
                 ]
             } else {
                 params = [

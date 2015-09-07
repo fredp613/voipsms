@@ -15,17 +15,17 @@
                         <viewControllerLayoutGuide type="bottom" id="Fwc-EV-61c"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="0X0-2d-zW0">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Before you start" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5XB-Ld-y4Y">
-                                <rect key="frame" x="16" y="112" width="568" height="69"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Before you start" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5XB-Ld-y4Y">
+                                <rect key="frame" x="16" y="146" width="343" height="69"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" image="chat-2x" translatesAutoresizingMaskIntoConstraints="NO" id="T5R-5q-ZA8">
-                                <rect key="frame" x="275" y="70" width="50" height="41"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" misplaced="YES" image="chat-2x" translatesAutoresizingMaskIntoConstraints="NO" id="T5R-5q-ZA8">
+                                <rect key="frame" x="276" y="70" width="50" height="75"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="50" id="2yU-F5-MHX"/>
                                     <constraint firstAttribute="width" secondItem="T5R-5q-ZA8" secondAttribute="height" multiplier="50:41" id="3eb-Xe-DWz"/>
@@ -48,8 +48,8 @@
                                     </mask>
                                 </variation>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="You need a Voip.ms account to use this messaging app" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kwC-2o-gF3">
-                                <rect key="frame" x="94" y="170" width="425" height="40"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="You need a Voip.ms account to use this messaging app" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kwC-2o-gF3">
+                                <rect key="frame" x="94" y="204" width="425" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="ECf-NC-DTs"/>
                                 </constraints>
@@ -57,8 +57,8 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Go to: http://www.voip.ms/ to sign up" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VNo-94-1mr">
-                                <rect key="frame" x="161" y="218" width="290" height="40"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Go to: http://www.voip.ms/ to sign up" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VNo-94-1mr">
+                                <rect key="frame" x="161" y="252" width="290" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="Qq7-0e-gyB"/>
                                 </constraints>
@@ -66,14 +66,14 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="If you already have an account please make sure of the following:" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6Hu-0I-sue">
-                                <rect key="frame" x="22" y="266" width="568" height="69"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="If you already have an account please make sure of the following:" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6Hu-0I-sue">
+                                <rect key="frame" x="22" y="300" width="568" height="69"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Go to: https://voip.ms/m/api.php" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OQc-wy-4ze">
-                                <rect key="frame" x="22" y="320" width="290" height="40"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Go to: https://voip.ms/m/api.php" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OQc-wy-4ze">
+                                <rect key="frame" x="22" y="354" width="290" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="290" id="Tqa-IV-JBy"/>
                                     <constraint firstAttribute="height" constant="40" id="rgG-h6-COk"/>
@@ -82,8 +82,8 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="go to API Configuration" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wQO-4b-LZA">
-                                <rect key="frame" x="22" y="368" width="290" height="40"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="go to API Configuration" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wQO-4b-LZA">
+                                <rect key="frame" x="22" y="402" width="290" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="Aea-q5-ZBa"/>
                                 </constraints>
@@ -91,27 +91,27 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Enter an API password (this can be the same or different to your main voip.ms user account password)" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Z0V-c7-gAt">
-                                <rect key="frame" x="22" y="409" width="470" height="74"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Enter an API password (this can be the same or different to your main voip.ms user account password)" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Z0V-c7-gAt">
+                                <rect key="frame" x="22" y="443" width="245" height="107"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="In the Enable IP Addresses enter: 0.0.0.0" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dLE-UU-ZHu">
-                                <rect key="frame" x="22" y="467" width="470" height="74"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="In the Enable IP Addresses enter: 0.0.0.0" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dLE-UU-ZHu">
+                                <rect key="frame" x="22" y="501" width="245" height="107"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="voiplogo" translatesAutoresizingMaskIntoConstraints="NO" id="Ed8-xc-gEI">
-                                <rect key="frame" x="250" y="28" width="100" height="30"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="voiplogo" translatesAutoresizingMaskIntoConstraints="NO" id="Ed8-xc-gEI">
+                                <rect key="frame" x="251" y="28" width="100" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="ClT-T3-dRD"/>
                                     <constraint firstAttribute="height" constant="30" id="O1a-UI-tcR"/>
                                 </constraints>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xgy-94-zOC">
-                                <rect key="frame" x="491" y="540" width="93" height="40"/>
+                                <rect key="frame" x="266" y="607" width="93" height="40"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="93" id="Iai-MB-eM8"/>
@@ -381,7 +381,7 @@
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
                     <connections>
                         <outlet property="activityIndicator" destination="WsS-UJ-WfI" id="gfp-7U-aNo"/>
-                        <segue destination="6K7-kf-s7U" kind="show" identifier="segueToMessages" id="hoS-LS-Jb5"/>
+                        <segue destination="6K7-kf-s7U" kind="presentation" identifier="segueToMessages" id="hoS-LS-Jb5"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OuZ-Sn-MjY" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -472,6 +472,7 @@
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="gCf-UD-Ufr"/>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="btnNewMessage" destination="qaa-B9-1rE" id="oHu-QL-dei"/>
@@ -624,8 +625,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4ho-fC-zTZ">
-                                <rect key="frame" x="176" y="226" width="250" height="60"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4ho-fC-zTZ">
+                                <rect key="frame" x="175" y="226" width="250" height="60"/>
                                 <color key="backgroundColor" red="0.96296296299999995" green="0.96296296299999995" blue="0.96296296299999995" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="250" id="IPp-St-0Im"/>
@@ -639,8 +640,8 @@
                                     <segue destination="OCV-Og-9aj" kind="presentation" identifier="createNewContactSegue" id="t2h-1l-LH2"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gE8-nZ-LOe">
-                                <rect key="frame" x="176" y="310" width="250" height="60"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gE8-nZ-LOe">
+                                <rect key="frame" x="175" y="310" width="250" height="60"/>
                                 <color key="backgroundColor" red="0.96296296299999995" green="0.96296296299999995" blue="0.96296296299999995" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="5DK-o8-G2o"/>
@@ -654,16 +655,16 @@
                                     <segue destination="Awu-3x-aRO" kind="presentation" identifier="existingContactSegue" id="ryC-c5-TmQ"/>
                                 </connections>
                             </button>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="voiplogo" translatesAutoresizingMaskIntoConstraints="NO" id="ycr-nr-GRx">
-                                <rect key="frame" x="261" y="152" width="80" height="30"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="voiplogo" translatesAutoresizingMaskIntoConstraints="NO" id="ycr-nr-GRx">
+                                <rect key="frame" x="260" y="152" width="80" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="80" id="Fdf-Tt-cNq"/>
                                     <constraint firstAttribute="height" constant="30" id="W1u-nG-mwm"/>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="30" id="k5r-xU-YV8"/>
                                 </constraints>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K13-rr-Hlt">
-                                <rect key="frame" x="343" y="415" width="83" height="44"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K13-rr-Hlt">
+                                <rect key="frame" x="342" y="415" width="83" height="44"/>
                                 <color key="backgroundColor" red="0.24453905610000001" green="0.2890764327" blue="0.3810596114" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="83" id="UVk-0p-69B"/>
@@ -731,8 +732,8 @@
                                     <outlet property="delegate" destination="Awu-3x-aRO" id="lkR-nH-wgt"/>
                                 </connections>
                             </tableView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Select contact" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bpa-jf-l5F">
-                                <rect key="frame" x="133" y="49" width="111" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select contact" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bpa-jf-l5F">
+                                <rect key="frame" x="245" y="49" width="111" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.95163690479999996" green="0.95163690479999996" blue="0.95163690479999996" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -1015,8 +1016,8 @@
                                     <constraint firstItem="nOF-ri-dBn" firstAttribute="top" secondItem="GCc-sL-LH8" secondAttribute="top" id="wqq-Bd-7CE"/>
                                 </constraints>
                             </scrollView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="New Message" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gdK-sV-vNZ">
-                                <rect key="frame" x="134" y="32" width="109" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Message" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gdK-sV-vNZ">
+                                <rect key="frame" x="246" y="32" width="109" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -1077,7 +1078,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JJ0-6y-keZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1528.5" y="1056.5"/>
+            <point key="canvasLocation" x="1354.5" y="-0.5"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="zQ6-1I-hXn">
@@ -1105,7 +1106,7 @@
         <image name="voiplogo" width="169" height="37"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="meH-hc-SMK"/>
         <segue reference="zHH-S2-ci6"/>
+        <segue reference="yKZ-gd-B0X"/>
     </inferredMetricsTieBreakers>
 </document>

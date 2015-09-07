@@ -55,7 +55,7 @@ class CoreDataStack {
         if coordinator == nil {
             return nil
         }
-        var managedObjectContext = NSManagedObjectContext()
+        var managedObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.MainQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = coordinator
         return managedObjectContext
         }()
@@ -72,20 +72,37 @@ class CoreDataStack {
         }()
     // MARK: - Core Data Saving support
     
+    
+    
+    // save NSManagedObjectContext
     func saveContext (context: NSManagedObjectContext) {
-        if let moc = self.managedObjectContext {
-//            context.save(nil)
-                //        }
-            var error: NSError? = nil
-            if context.hasChanges && !context.save(&error) {
-                println(error)
-                // Replace this implementation with code to handle the error appropriately.
-                // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                NSLog("Unresolved error \(error), \(error!.userInfo)")
-//                abort()
-            }
+        var error: NSError? = nil
+        if context.hasChanges && !context.save(&error) {
+            // Replace this implementation with code to handle the error appropriately.
+            // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+            NSLog("Unresolved error \(error), \(error!.userInfo)")
+            abort()
         }
     }
+    
+    func saveContext () {
+        self.saveContext( self.managedObjectContextPrivate! )
+    }
+    
+//    func saveContext (context: NSManagedObjectContext) {
+//        if let moc = self.managedObjectContext {
+////            context.save(nil)
+//                //        }
+//            var error: NSError? = nil
+//            if context.hasChanges && !context.save(&error) {
+//                println(error)
+//                // Replace this implementation with code to handle the error appropriately.
+//                // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+//                NSLog("Unresolved error \(error), \(error!.userInfo)")
+////                abort()
+//            }
+//        }
+//    }
     
     func savePrivateContext() {
         self.saveContext(self.managedObjectContextPrivate!)

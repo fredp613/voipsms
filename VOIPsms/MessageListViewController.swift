@@ -24,18 +24,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     var did : String = String()
     var titleBtn: UIButton = UIButton()
     var timer : NSTimer = NSTimer()
-//    var managedObjectContext : NSManagedObjectContext = CoreDataStack().managedObjectContext!
     var searchKeyword: String = String()
     var didView : UIPickerView = UIPickerView()
     var contactForSegue : String = String()
-    
-//    lazy var managedObjectContext : NSManagedObjectContext = {
-//        // Error at the next line "Use of undeclared type 'NSSAppDelegate'"
-//        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-//        
-//        let managedObjectContext = appDelegate.moc
-//        return managedObjectContext
-//    }()
     let managedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).moc
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
@@ -220,9 +211,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 }
             }
         }
-        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-        dispatch_async(backgroundQueue, { () -> Void in
+//        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+//        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+//        dispatch_async(backgroundQueue, { () -> Void in
             if let str = CoreDID.getSelectedDID(self.managedObjectContext) {
                 if let cm = CoreMessage.getMessagesByDID(self.managedObjectContext, did: self.did).first {
                     if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
@@ -243,7 +234,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                     
                 }
             }
-        })
+//        })
         self.pokeFetchedResultsController()
     }
     
@@ -396,13 +387,16 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
 //            self.pokeFetchedResultsController()
 //            self.tableView.reloadData()
             
-            let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-            dispatch_async(backgroundQueue, { () -> Void in
-                let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-                CoreMessage.deleteAllMessagesFromContact(moc, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
+//            let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+//            let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+//            dispatch_async(backgroundQueue, { () -> Void in
+                let privateMocDel : NSManagedObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+                privateMocDel.parentContext = self.managedObjectContext
+                privateMocDel.performBlock({ () -> Void in
+                    CoreMessage.deleteAllMessagesFromContact(privateMocDel, contactId: contact.contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
+                    })
                 })
-            })
+//            })
         }
         self.startTimer()
     }

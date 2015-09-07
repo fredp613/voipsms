@@ -87,6 +87,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     @IBOutlet weak var textMessage: UITextView!
     
     var moc : NSManagedObjectContext! //CoreDataStack().managedObjectContext!
+    var mainMoc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
     var messages : [CoreMessage]!
     var contactId = String()
     var cellHeights = [CGFloat]()
@@ -150,6 +151,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         self.textMessage.delegate = self
         self.textMessage.sizeToFit()
         self.textMessage.scrollEnabled = false
+        
         
         tableView.separatorStyle = .None
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
@@ -274,13 +276,15 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
-        
+
         if let currentContactFullName = CoreContact.currentContact(self.moc, contactId: self.contactId)?.fullName {
-            self.navigationController?.navigationBar.topItem?.title = currentContactFullName.truncatedString()
+//            self.navigationController?.navigationBar.topItem?.title = currentContactFullName.truncatedString()
+            self.title = currentContactFullName.truncatedString()
         } else {
             self.dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
             self.navigationItem.rightBarButtonItem = self.dynamicBarButton
-            self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
+//            self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
+            self.title = self.contactId.northAmericanPhoneNumberFormat()
         }
 
         self.tableViewScrollToBottomAnimated(false)
@@ -722,7 +726,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             if let cc = CoreContact.currentContact(self.moc, contactId: self.contactId) {
                 println(cc.lastModified)
             }
-            
         }
         let msg : String = cm.message.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         
