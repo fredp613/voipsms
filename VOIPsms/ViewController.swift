@@ -11,9 +11,7 @@ import CoreData
 
 
 class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate {
- 
-    
-
+     
     @IBOutlet weak var textPwd: TextField!
     @IBOutlet weak var textUserName: TextField!
     @IBOutlet weak var loginBtn: UIButton!
@@ -25,7 +23,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         super.viewDidLoad()
         textUserName.delegate = self
         textPwd.delegate = self
-        textUserName.text = "fredp613@gmail.com"
+//        textUserName.text = "fredp613@gmail.com"
         loginBtn.layer.cornerRadius = 10
         
         

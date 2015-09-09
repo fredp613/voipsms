@@ -86,7 +86,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
                                 }
                             }
                             if Contact().checkAccess() {
-                                Contact().syncAddressBook1()
+                                Contact().syncAddressBook1(backgroundMOC)
                             }
                             
                             println("done")

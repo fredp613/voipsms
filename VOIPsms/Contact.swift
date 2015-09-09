@@ -142,8 +142,8 @@ class Contact {
         return self.contactsArr
     }
     
-    func syncAddressBook1() {
-        let moc: NSManagedObjectContext = CoreDataStack().managedObjectContext!
+    func syncAddressBook1(moc: NSManagedObjectContext) {
+//        let moc: NSManagedObjectContext = CoreDataStack().managedObjectContext!
         if let coreContacts = CoreContact.getAllContacts(moc) {
             for cc in coreContacts {
                 self.loadAddressBook { (responseObject, error) -> () in

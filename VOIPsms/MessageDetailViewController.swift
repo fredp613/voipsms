@@ -87,7 +87,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     @IBOutlet weak var textMessage: UITextView!
     
     var moc : NSManagedObjectContext! //CoreDataStack().managedObjectContext!
-    var mainMoc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
     var messages : [CoreMessage]!
     var contactId = String()
     var cellHeights = [CGFloat]()
@@ -717,24 +716,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
 
     
     func processMessage(cm: CoreMessage) {
-        if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
-            var formatter1: NSDateFormatter = NSDateFormatter()
-            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-            let parsedDate: NSDate = formatter1.dateFromString(cm.date)!
-            currentContact.lastModified = parsedDate
-            CoreContact.updateContactInMOC(self.moc)
-            if let cc = CoreContact.currentContact(self.moc, contactId: self.contactId) {
-                println(cc.lastModified)
-            }
-        }
+
         let msg : String = cm.message.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         
-        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
         if Reachability.isConnectedToNetwork() {
-//            dispatch_async(backgroundQueue, { () -> Void in
+            self.moc.performBlock({ () -> Void in
                 Message.sendMessageAPI(self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
-
+                    
                     if responseObject["status"].stringValue == "success" {
                         cm.id = responseObject["sms"].stringValue
                         cm.flag = message_status.DELIVERED.rawValue
@@ -742,18 +730,16 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                         formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                         let parsedDate: String = formatter1.stringFromDate(NSDate())
                         cm.date = parsedDate
-//                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-//                        })
-                        
                     } else {
-//                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            cm.flag = message_status.UNDELIVERED.rawValue
-                            CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
-//                        })
+                        cm.flag = message_status.UNDELIVERED.rawValue
                     }
                 })
-//            })
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
+                })
+            })
+            
+            
         } else {
             if !retrying {
                 cm.flag = message_status.UNDELIVERED.rawValue

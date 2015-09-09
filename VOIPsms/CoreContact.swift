@@ -69,6 +69,7 @@ class CoreContact: NSManagedObject {
                 contact.addressBookSyncLastModified = sync
             }
 //            managedObjectContext.save(nil)
+        
             CoreDataStack().saveContext(managedObjectContext)
             return true
         }
@@ -358,13 +359,22 @@ class CoreContact: NSManagedObject {
         let sortDescriptor = NSSortDescriptor(key: "dateForSort", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         
+//        enum message_status : String {
+//            case PENDING = "pending"
+//            case DELIVERED = "delivered"
+//            case UNDELIVERED = "undelivered"
+//            case READ = "read"
+//        }
+        
         let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
+        let validMessagePredicate = NSPredicate(format: "flag != %@ ", message_status.UNDELIVERED.rawValue)
             if let did = did {
                 var secondPredicate = NSPredicate(format: "did == %@", did)
-                let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate])
+                let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate, validMessagePredicate])
                 fetchRequest.predicate = predicate
             } else {
-                fetchRequest.predicate = firstPredicate
+                let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, validMessagePredicate])
+                fetchRequest.predicate = predicate
             }
 //        }
         fetchRequest.fetchLimit = 1

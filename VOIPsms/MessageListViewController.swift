@@ -211,9 +211,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 }
             }
         }
-//        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-//        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-//        dispatch_async(backgroundQueue, { () -> Void in
+        
             if let str = CoreDID.getSelectedDID(self.managedObjectContext) {
                 if let cm = CoreMessage.getMessagesByDID(self.managedObjectContext, did: self.did).first {
                     if let currentUser = CoreUser.currentUser(self.managedObjectContext) {

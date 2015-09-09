@@ -32,8 +32,6 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
         self.httpMethod = httpMethod.rawValue
         self.params = params
         //initialize a connection from request
-
-        
     }
     
     func APIAuthenticatedRequest(completionHandler: (responseObject: JSON, error: NSError?) -> ()) {

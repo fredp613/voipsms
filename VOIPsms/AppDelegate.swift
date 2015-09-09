@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
 //    var privateMoc : NSManagedObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
-    var privateMoc: NSManagedObjectContext = CoreDataStack().managedObjectContextPrivate!
+
     var backgroundTaskID : UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier()
     var did : String = String()
     let defaults = NSUserDefaults.standardUserDefaults()
@@ -24,20 +24,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
 //        privateMoc.persistentStoreCoordinator = CoreDataStack().persistentStoreCoordinator
+        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+        privateMOC.parentContext = privateMOC
         
         //sync addressBook when opening
-        if Contact().checkAccess() {
-            Contact().syncAddressBook1()
+        privateMOC.performBlock { () -> Void in
+            if Contact().checkAccess() {
+                Contact().syncAddressBook1(privateMOC)
+            }
         }
+        
         
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
 //            refreshMessages()
-
+            pingPushServer()
         }
         
-        if let cds = CoreDevice.getTokens(self.privateMoc) {
+        if let cds = CoreDevice.getTokens(moc) {
             println("tokens are")
             for c in cds {
                 println(c.deviceToken)
@@ -54,8 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //ask for contact access
         Contact().getContactsDict({ (contacts) -> () in
         })
-        
-        
+                
 //        if (launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]) {
 //            [self application:application didReceiveRemoteNotification:launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]];
 //        }
@@ -68,6 +72,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             println("not from remote")
             // no notification
         }
+        
+
         
 
         
@@ -103,11 +109,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 println("contact is: " + notificationContact)
                 if let notificationDID = userInfo["did"] as? String {
                     println("did is:" + notificationDID)
-                    if let selectedDID = CoreDID.getSelectedDID(self.privateMoc) {
+                    if let selectedDID = CoreDID.getSelectedDID(self.moc) {
                         println("selected DID is: " + selectedDID.did)
                         if selectedDID.did != notificationDID {
-                            CoreDID.toggleSelected(self.privateMoc, did: notificationDID)
-                            if let currentUser = CoreUser.currentUser(self.privateMoc) {
+                            CoreDID.toggleSelected(self.moc, did: notificationDID)
+                            if let currentUser = CoreUser.currentUser(self.moc) {
                                 currentUser.notificationLoad = 1
                                 currentUser.notificationDID = notificationDID
                                 currentUser.notificationContact = notificationContact
@@ -171,17 +177,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        dispatch_async(backgroundQueue, { () -> Void in
         
         
-//            if let str = CoreDID.getSelectedDID(self.privateMoc) {
-//                if let cm = CoreMessage.getMessagesByDID(self.privateMoc, did: self.did).first {
-//                    if let currentUser = CoreUser.currentUser(self.privateMoc) {
+//            if let str = CoreDID.getSelectedDID(self.moc) {
+//                if let cm = CoreMessage.getMessagesByDID(self.moc, did: self.did).first {
+//                    if let currentUser = CoreUser.currentUser(self.moc) {
 //                        let lastMessage = cm
 //                        var from = ""
 //                        from = lastMessage.date
-//                        Message.getMessagesFromAPI(false, fromList: true, moc: self.privateMoc, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
+//                        Message.getMessagesFromAPI(false, fromList: true, moc: self.moc, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
 //                            if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
 //                                currentUser.initialLoad = 0
 //                                currentUser.initialLogon = 0
-//                                CoreUser.updateInManagedObjectContext(self.privateMoc, coreUser: currentUser)
+//                                CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
 //                            }
 //                            //                        self.pokeFetchedResultsController()
 //                        })
@@ -207,12 +213,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             .stringByTrimmingCharactersInSet( characterSet )
             .stringByReplacingOccurrencesOfString( " ", withString: "" ) as String
 //        
-//        if let cd = CoreDevice.createInManagedObjectContext(self.privateMoc, device: deviceTokenString) {
+//        if let cd = CoreDevice.createInManagedObjectContext(self.moc, device: deviceTokenString) {
 //              println("Got token data! \(cd.deviceToken)")
 //        }
         println(deviceToken)
         
-        if let coreDevice = CoreDevice.createOrUpdateInMOC(self.privateMoc, token: deviceTokenString) {
+        if let coreDevice = CoreDevice.createOrUpdateInMOC(self.moc, token: deviceTokenString) {
             println("got token data! \(coreDevice.deviceToken)")
         }
 
@@ -224,18 +230,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     //MARK: Custom methods
     func refreshMessages() {
-        
-        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-            dispatch_async(backgroundQueue, { () -> Void in
-            self.privateMoc.performBlock { () -> Void in
-                if let str = CoreDID.getSelectedDID(self.privateMoc) {
-                    let fromStr = CoreMessage.getLastMsgByDID(self.privateMoc, did: str.did)?.date.strippedDateFromString()
-                    Message.getMessagesFromAPI(true, fromList: false, moc: self.privateMoc, from: fromStr) { (responseObject, error) -> () in
-                    }
-                }
+        if let str = CoreDID.getSelectedDID(moc) {
+            let fromStr = CoreMessage.getLastMsgByDID(self.moc, did: str.did)?.date.strippedDateFromString()
+            Message.getMessagesFromAPI(true, fromList: false, moc: self.moc, from: fromStr) { (responseObject, error) -> () in
             }
-        })
+        }
     }
     
     func createOrUpdateMessage(userInfo: [NSObject : AnyObject], userActive: Bool) {
@@ -245,21 +244,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let message = userInfo["message"] as! String
         let contact = userInfo["contact"] as! String
         let date = userInfo["date"] as! String
-
+        
         
         var flagValue = message_status.DELIVERED.rawValue
         if userActive {
             flagValue = message_status.READ.rawValue
         }
-        
-        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-        dispatch_async(backgroundQueue, { () -> Void in
-        
-//         self.privateMoc.performBlock { () -> Void in
-            if !CoreMessage.isExistingMessageById(self.privateMoc, id: id) && !CoreDeleteMessage.isDeletedMessage(self.privateMoc, id: id) {
-                CoreMessage.createInManagedObjectContext(self.privateMoc, contact: contact, id: id, type: true, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
-                    if let contactOfMessage = CoreContact.currentContact(self.privateMoc, contactId: contact) {
+
+            if !CoreMessage.isExistingMessageById(moc, id: id) && !CoreDeleteMessage.isDeletedMessage(moc, id: id) {
+                CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: true, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
+                    if let contactOfMessage = CoreContact.currentContact(self.moc, contactId: contact) {
                         var formatter1: NSDateFormatter = NSDateFormatter()
                         formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                         let parsedDate: NSDate = formatter1.dateFromString(date)!
@@ -267,17 +261,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         if contactOfMessage.deletedContact.boolValue {
                             contactOfMessage.deletedContact = 0
                         }
-                        CoreContact.updateContactInMOC(self.privateMoc)
+                        CoreContact.updateContactInMOC(self.moc)
                     } else {
-                        CoreContact.createInManagedObjectContext(self.privateMoc, contactId: contact, lastModified: date)
+                        CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: date)
                     }
                 })
             }
 //        }
         
         
-        })
+//        })
         
+    }
+    
+    func pingPushServer() {
+        var url = "http://nodejs-voipsms.rhcloud.com/users"
+        //                params should go in body of request
+        
+        VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest({ (responseObject, error) -> () in
+            if responseObject != nil {
+                println(responseObject)
+            }
+            if error != nil {
+                println(error)
+            }
+
+        })
     }
  
 
