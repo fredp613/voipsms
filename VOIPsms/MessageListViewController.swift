@@ -27,7 +27,9 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     var searchKeyword: String = String()
     var didView : UIPickerView = UIPickerView()
     var contactForSegue : String = String()
+    var fromClosedState : Bool = false
     let managedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).moc
+    
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
 //        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -75,6 +77,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         return frc
         }()
     
+   
+    
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         var error: NSError? = nil
@@ -98,6 +104,27 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         let identifier = UIDevice.currentDevice().identifierForVendor.UUIDString
         println(identifier)
         
+               
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "handlePushNotification:", name: "appRestorePush", object: nil)
+        
+    }
+    
+    func handlePushNotification(notification: NSNotification) {
+        println("received a push notification - i'm in the list controller")
+        println(notification.userInfo)
+
+        if let did = notification.userInfo?["did"] as? String {
+            if let contact = notification.userInfo?["contact"] as? String {
+                self.contactForSegue = contact
+                self.did = did
+                
+                self.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
+            }
+        }
+        
+    }
+    func handlePushNotification1() {
+        self.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -575,49 +602,60 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
     }
     
+    
     // MARK: - Navigation
     
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        //        self.pokeFetchedResultsController()
-        
-        timer.invalidate()
-//        startTimer()
-        if (segue.identifier == "showMessageDetailSegue") {
-            self.searchBar.resignFirstResponder()
+
+            if (segue.identifier == "showMessageDetailSegue") {
+              
+            
             var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
-            if let indexPath = self.tableView.indexPathForSelectedRow() {
-                var contact: CoreContact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
-                detailSegue.contactId = contact.contactId as String
-                if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
-                    var formatter1: NSDateFormatter = NSDateFormatter()
-                    formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                    let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
-                    contact.lastModified = parsedDate
-                    CoreContact.updateContactInMOC(self.managedObjectContext)
-                    if lastMessage.type.boolValue == true {
-                        lastMessage.flag = message_status.READ.rawValue
-                        CoreMessage.updateInManagedObjectContext(self.managedObjectContext, coreMessage: lastMessage)
-                    } else if (lastMessage.id != "") {
-                        lastMessage.flag = message_status.DELIVERED.rawValue
-                        CoreMessage.updateInManagedObjectContext(self.managedObjectContext, coreMessage: lastMessage)
+                
+            if !fromClosedState {
+                timer.invalidate()
+                self.searchBar.resignFirstResponder()
+                
+                if let indexPath = self.tableView.indexPathForSelectedRow() {
+                    
+                    var contact: CoreContact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
+                    detailSegue.contactId = contact.contactId as String
+                    if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
+                        var formatter1: NSDateFormatter = NSDateFormatter()
+                        formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                        let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
+                        contact.lastModified = parsedDate
+                        CoreContact.updateContactInMOC(self.managedObjectContext)
+                        if lastMessage.type.boolValue == true {
+                            lastMessage.flag = message_status.READ.rawValue
+                            CoreMessage.updateInManagedObjectContext(self.managedObjectContext, coreMessage: lastMessage)
+                        } else if (lastMessage.id != "") {
+                            lastMessage.flag = message_status.DELIVERED.rawValue
+                            CoreMessage.updateInManagedObjectContext(self.managedObjectContext, coreMessage: lastMessage)
+                        }
+                    }
+                    
+                } else {
+                    detailSegue.contactId = self.contactForSegue
+                }
+                
+                if self.did == "" {
+                    if let selectedDID = CoreDID.getSelectedDID(self.managedObjectContext) {
+                        self.did = selectedDID.did
                     }
                 }
                 
+                self.searchBar.text = ""
+                self.searchBar.resignFirstResponder()
                 
             } else {
                 detailSegue.contactId = self.contactForSegue
             }
-            
-            if let selectedDID = CoreDID.getSelectedDID(self.managedObjectContext) {
-                self.did = selectedDID.did
-            }
+        
             detailSegue.did = self.did
             detailSegue.moc = self.managedObjectContext
             detailSegue.delegate = self
-            self.searchBar.text = ""
-            self.searchBar.resignFirstResponder()
-            
         }
         
         if segue.identifier == "segueToNewMessage" {
@@ -626,7 +664,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             newMsgVC?.delegate = self
             newMsgVC?.moc = self.managedObjectContext
         }
-        
+    
     }
     
     

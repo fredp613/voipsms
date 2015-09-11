@@ -16,6 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
 //    var privateMoc : NSManagedObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+    var remoteNotification : NSDictionary?
 
     var backgroundTaskID : UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier()
     var did : String = String()
@@ -59,19 +60,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //ask for contact access
         Contact().getContactsDict({ (contacts) -> () in
         })
-                
-//        if (launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]) {
-//            [self application:application didReceiveRemoteNotification:launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey]];
-//        }
         
+        if let userInfo = launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? [NSObject : AnyObject] {
+//
+//            let sb = UIStoryboard(name: "Main", bundle: nil)
+//             NSNotificationCenter.defaultCenter().postNotificationName("appRestorePush", object: nil, userInfo: userInfo as [NSObject : AnyObject])
+            
+            let did = userInfo["did"] as! String
+            let id = userInfo["id"] as! String
+            let message = userInfo["message"] as! String
+            let contact = userInfo["contact"] as! String
+            let date = userInfo["date"] as! String
 
-        if let myDict = launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? NSDictionary {
-            println("from remote")
-            println(myDict)
-        } else {
-            println("not from remote")
-            // no notification
+            let navController = window?.rootViewController as! UINavigationController
+            let firstVC = navController.viewControllers[0] as! MessageListViewController
+            
+            firstVC.did = did
+            firstVC.contactForSegue = contact
+            firstVC.fromClosedState = true
+            firstVC.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
+         
         }
+       
         
 
         
@@ -84,51 +94,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     }
     
-   
-
-//    func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-//        println("house")
-//        if (application.applicationState == UIApplicationState.Active) {
-//            println("done")
-//        } else {
-//        // app was just brought from background to foreground
-//            println("ross")
-//        }
-//        
-//    }
-    
+ 
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject], fetchCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
         
-//        NSString *job = [[userInfo valueForKey:@"aps"] valueForKey:@"job"];
-
+        remoteNotification = userInfo
+        
+        
+        
         if (application.applicationState == UIApplicationState.Active) {
             self.createOrUpdateMessage(userInfo, userActive: true)
         } else {
             self.createOrUpdateMessage(userInfo, userActive: false)
-            if let notificationContact = userInfo["contact"] as? String {
-                println("contact is: " + notificationContact)
-                if let notificationDID = userInfo["did"] as? String {
-                    println("did is:" + notificationDID)
-                    if let selectedDID = CoreDID.getSelectedDID(self.moc) {
-                        println("selected DID is: " + selectedDID.did)
-                        if selectedDID.did != notificationDID {
-                            CoreDID.toggleSelected(self.moc, did: notificationDID)
-                            if let currentUser = CoreUser.currentUser(self.moc) {
-                                currentUser.notificationLoad = 1
-                                currentUser.notificationDID = notificationDID
-                                currentUser.notificationContact = notificationContact
-                                CoreDataStack().saveContext(moc)
-                            }
-                        }
-                       
-                    }
-                }
-            }
+//            if let notificationContact = userInfo["contact"] as? String {
+//                println("contact is: " + notificationContact)
+//                if let notificationDID = userInfo["did"] as? String {
+//                    println("did is:" + notificationDID)
+//                    if let selectedDID = CoreDID.getSelectedDID(self.moc) {
+//                        println("selected DID is: " + selectedDID.did)
+//                        if selectedDID.did != notificationDID {
+//                            CoreDID.toggleSelected(self.moc, did: notificationDID)
+//                            if let currentUser = CoreUser.currentUser(self.moc) {
+//                                currentUser.notificationLoad = 1
+//                                currentUser.notificationDID = notificationDID
+//                                currentUser.notificationContact = notificationContact
+//                                CoreDataStack().saveContext(moc)
+//                            }
+//                        }
+//                       
+//                    }
+//                }
+//            }
         }
         
     }
-    
-
     
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -156,47 +154,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        }
 
 //        refreshMessages()
-        
-
-       
-        
-    }
     
+    }
 
     func applicationDidBecomeActive(application: UIApplication) {
         
-        refreshMessages()
-                    println("hi there active")
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-//        [[UIApplication sharedApplication] cancelAllLocalNotifications];
-        //clear all notifications - refactor this - s/b only messages from open contact
-//        UIApplication.sharedApplication().cancelAllLocalNotifications()
-        
-//        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-//        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-//        dispatch_async(backgroundQueue, { () -> Void in
-        
-        
-//            if let str = CoreDID.getSelectedDID(self.moc) {
-//                if let cm = CoreMessage.getMessagesByDID(self.moc, did: self.did).first {
-//                    if let currentUser = CoreUser.currentUser(self.moc) {
-//                        let lastMessage = cm
-//                        var from = ""
-//                        from = lastMessage.date
-//                        Message.getMessagesFromAPI(false, fromList: true, moc: self.moc, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
-//                            if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
-//                                currentUser.initialLoad = 0
-//                                currentUser.initialLogon = 0
-//                                CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
-//                            }
-//                            //                        self.pokeFetchedResultsController()
-//                        })
-//                    }
-//                    
+//        if remoteNotification != nil {
+//            println("ok we are golen")
+//            let sb = UIStoryboard(name: "Main", bundle: nil)
+//            let mnvc = sb.instantiateViewControllerWithIdentifier("mnvc") as! UINavigationController
+//            let messageListVC: MessageListViewController = mnvc.viewControllers[0] as!
+//            MessageListViewController
+//            if let notificationContact = remoteNotification?["contact"] as? String {
+//                println("contact is:" + notificationContact)
+//                if let notificationDID = remoteNotification?["did"] as? String {
+//                    println("did is:" + notificationDID)
+//                    messageListVC.navToDetailFromNotification(notificationDID, contact: notificationContact)
 //                }
 //            }
-//        })
+//        }
         
+
+        refreshMessages()
+
     }
 
     func applicationWillTerminate(application: UIApplication) {
@@ -267,11 +247,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     }
                 })
             }
-//        }
         
+        handlePushNotification(userInfo)
+    }
+    
+    func handlePushNotification(userInfo: [NSObject : AnyObject]) {
+        var appState = UIApplication.sharedApplication().applicationState
         
-//        })
-        
+        if appState == UIApplicationState.Inactive || appState == UIApplicationState.Background {
+            NSNotificationCenter.defaultCenter().postNotificationName("appRestorePush", object: nil, userInfo: userInfo)
+        } else {
+            NSNotificationCenter.defaultCenter().postNotificationName("appOpenPush", object: nil, userInfo: userInfo)
+        }
+
     }
     
     func pingPushServer() {
