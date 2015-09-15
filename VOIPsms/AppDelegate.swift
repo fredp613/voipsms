@@ -28,18 +28,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
         privateMOC.parentContext = privateMOC
         
-        //sync addressBook when opening
-        privateMOC.performBlock { () -> Void in
-            if Contact().checkAccess() {
-                Contact().syncAddressBook1(privateMOC)
-            }
-        }
-        
-        
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
 //            refreshMessages()
+            //sync addressBook when opening
+            privateMOC.performBlock { () -> Void in
+                if Contact().checkAccess() {
+                    Contact().syncAddressBook1(privateMOC)
+                }
+            }
             pingPushServer()
         }
         

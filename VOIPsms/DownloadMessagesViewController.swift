@@ -18,9 +18,6 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     var timer : NSTimer = NSTimer()
     var notificationCenter = NSNotificationCenter.defaultCenter()
     var totalCount : Int = Int()
-
-    
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
