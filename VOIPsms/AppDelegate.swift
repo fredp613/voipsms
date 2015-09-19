@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
 //        privateMoc.persistentStoreCoordinator = CoreDataStack().persistentStoreCoordinator
         let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
-        privateMOC.parentContext = privateMOC
+        privateMOC.parentContext = moc
         
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
@@ -42,9 +42,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         if let cds = CoreDevice.getTokens(moc) {
-            println("tokens are")
+            print("tokens are")
             for c in cds {
-                println(c.deviceToken)
+                print(c.deviceToken)
             }
         }
         
@@ -185,25 +185,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
-        var characterSet: NSCharacterSet = NSCharacterSet( charactersInString: "<>" )
+        let characterSet: NSCharacterSet = NSCharacterSet( charactersInString: "<>" )
         
-        var deviceTokenString: String = ( deviceToken.description as NSString )
+        let deviceTokenString: String = ( deviceToken.description as NSString )
             .stringByTrimmingCharactersInSet( characterSet )
             .stringByReplacingOccurrencesOfString( " ", withString: "" ) as String
 //        
 //        if let cd = CoreDevice.createInManagedObjectContext(self.moc, device: deviceTokenString) {
 //              println("Got token data! \(cd.deviceToken)")
 //        }
-        println(deviceToken)
+        print(deviceToken)
         
         if let coreDevice = CoreDevice.createOrUpdateInMOC(self.moc, token: deviceTokenString) {
-            println("got token data! \(coreDevice.deviceToken)")
+            print("got token data! \(coreDevice.deviceToken)")
         }
 
     }
     
     func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
-        println("Couldn't register: \(error)")
+        print("Couldn't register: \(error)")
     }
     
     //MARK: Custom methods
@@ -216,7 +216,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func createOrUpdateMessage(userInfo: [NSObject : AnyObject], userActive: Bool) {
-        println(userInfo)
+        print(userInfo)
         let did = userInfo["did"] as! String
         let id = userInfo["id"] as! String
         let message = userInfo["message"] as! String
@@ -232,7 +232,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if !CoreMessage.isExistingMessageById(moc, id: id) && !CoreDeleteMessage.isDeletedMessage(moc, id: id) {
                 CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: true, date: date, message: message, did: did, flag: flagValue, completionHandler: { (responseObject, error) -> () in
                     if let contactOfMessage = CoreContact.currentContact(self.moc, contactId: contact) {
-                        var formatter1: NSDateFormatter = NSDateFormatter()
+                        let formatter1: NSDateFormatter = NSDateFormatter()
                         formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                         let parsedDate: NSDate = formatter1.dateFromString(date)!
                         contactOfMessage.lastModified = parsedDate
@@ -250,7 +250,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func handlePushNotification(userInfo: [NSObject : AnyObject]) {
-        var appState = UIApplication.sharedApplication().applicationState
+        let appState = UIApplication.sharedApplication().applicationState
         
         if appState == UIApplicationState.Inactive || appState == UIApplicationState.Background {
             NSNotificationCenter.defaultCenter().postNotificationName("appRestorePush", object: nil, userInfo: userInfo)
@@ -261,15 +261,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func pingPushServer() {
-        var url = "http://nodejs-voipsms.rhcloud.com/users"
+        let url = "https://mighty-springs-3852.herokuapp.com/users"
         //                params should go in body of request
         
         VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest({ (responseObject, error) -> () in
             if responseObject != nil {
-                println(responseObject)
+                print(responseObject)
             }
             if error != nil {
-                println(error)
+                print(error)
             }
 
         })

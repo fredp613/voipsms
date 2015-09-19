@@ -13,7 +13,7 @@ extension NSMutableAttributedString {
         let txtToManipulate = String("\(textToFind)")
         let foundRange = self.mutableString.rangeOfString(linkURL!)
         if foundRange.location != NSNotFound {
-            println("found")
+            print("found")
             self.addAttribute(NSLinkAttributeName, value: linkURL!, range: foundRange)
             return true
         }
@@ -34,7 +34,7 @@ extension NSMutableAttributedString {
         
         let txtToManipulate = NSString(string: "\(mutableString)")
         let foundRange = txtToManipulate.substringWithRange(result.range) as String
-        println(foundRange)
+        print(foundRange)
         self.replaceCharactersInRange(result.range, withString: "booya")
         self.replaceCharactersInRange(result.range, withString: "asdfsdfsdffds")
 //        self.addAttribute(NSLinkAttributeName, value: result.URL!.absoluteString!, range: result.range)

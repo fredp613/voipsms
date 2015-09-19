@@ -99,10 +99,10 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             contact = selectedContact
         } else {
             
-            var cleanedSearchBarText = NSString(string: self.searchBar.text)
+            var cleanedSearchBarText = NSString(string: self.searchBar.text!)
             if cleanedSearchBarText.length > 10 {
                 cleanedSearchBarText = cleanedSearchBarText.substringWithRange(NSMakeRange(1, 10))
-                println(cleanedSearchBarText)
+                print(cleanedSearchBarText)
             }
             contact = cleanedSearchBarText as String
 //            contact = self.searchBar.text
@@ -138,7 +138,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     //MARK: UITextView Delegate Methods
     
     func textViewDidBeginEditing(textView: UITextView) {
-        if validateContactText(searchBar.text) {
+        if validateContactText(searchBar.text!) {
             if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
                 sendButton.enabled = false
             } else {
@@ -150,7 +150,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     }
     
     func textViewDidChange(textView: UITextView) {
-        if validateContactText(searchBar.text) {
+        if validateContactText(searchBar.text!) {
             if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
                 sendButton.enabled = false
             } else {
@@ -173,8 +173,8 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     func validateContactText(input: String) -> Bool {
         if self.selectedContact == "" {
             let strToFormat = input as NSString
-            let regex = NSRegularExpression(pattern: "[0-9]", options: nil, error: nil)
-            if (regex?.matchesInString(input, options: nil, range: NSMakeRange(0, strToFormat.length)) != nil) {
+            let regex = try? NSRegularExpression(pattern: "[0-9]", options: [])
+            if (regex?.matchesInString(input, options: [], range: NSMakeRange(0, strToFormat.length)) != nil) {
                 if strToFormat.length >= 10 && strToFormat.length <= 11 {
                    return true
                 }
@@ -223,7 +223,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         
         if searchText != "" {
             CoreContact.getContacts(moc, did: did, dst: searchText, name: nil, message: nil, completionHandler: { (responseObject, error) -> () in
-                var coreContacts = responseObject as! [CoreContact]
+                let coreContacts = responseObject as! [CoreContact]
                 CoreContact.findAllContactsByName(self.moc, searchTerm: searchText, existingContacts: coreContacts, completionHandler: { (contacts) -> () in
                     self.contacts = contacts!
                     self.tableView.reloadData()
@@ -235,7 +235,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             self.tableView.reloadData()
         }
         
-        if validateContactText(searchBar.text) {
+        if validateContactText(searchBar.text!) {
             if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
                 sendButton.enabled = false
             } else {
@@ -266,8 +266,8 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
-        var contact = self.contacts[indexPath.row]
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) 
+        let contact = self.contacts[indexPath.row]
         
         if Contact().checkAccess() {
             Contact().getContactsDict { (contacts) -> () in
@@ -323,7 +323,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         self.contacts = [ContactStruct]()
         self.tableView.reloadData()
         
-        if validateContactText(searchBar.text) {
+        if validateContactText(searchBar.text!) {
             if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
                 sendButton.enabled = false
             } else {
@@ -352,7 +352,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         
         if notification.name == UIKeyboardWillHideNotification {
 //            scrollView.contentInset = UIEdgeInsetsZero
-            println("keyboardhiding")
+            print("keyboardhiding")
             
         } else {
             if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {

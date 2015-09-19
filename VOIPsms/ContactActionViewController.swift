@@ -52,14 +52,14 @@ class ContactActionViewController: UIViewController, ContactActionViewController
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "createNewContactSegue") {
-            var newContactSegue : NewContactViewController = segue.destinationViewController as! NewContactViewController
+            let newContactSegue : NewContactViewController = segue.destinationViewController as! NewContactViewController
             newContactSegue.delegate = self
             newContactSegue.contactId = self.contactId
             newContactSegue.moc = self.moc
         }
         
         if (segue.identifier == "existingContactSegue") {
-            var newExistingContactSegue : NewExistingContactViewController = segue.destinationViewController as! NewExistingContactViewController
+            let newExistingContactSegue : NewExistingContactViewController = segue.destinationViewController as! NewExistingContactViewController
             newExistingContactSegue.delegate = self
             newExistingContactSegue.contactId = self.contactId
             newExistingContactSegue.moc = self.moc

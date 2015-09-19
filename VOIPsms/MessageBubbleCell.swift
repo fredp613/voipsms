@@ -9,16 +9,16 @@ class CustomTextViewForCell : UITextView, UITextViewDelegate {
         self.delegate = self
     }
 
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     func textView(textView: UITextView, shouldInteractWithURL URL: NSURL, inRange characterRange: NSRange) -> Bool {
-        println("hi")
+        print("hi")
         return true
     }
     func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
-        println("asdf")
+        print("asdf")
         return false
     }
 }
@@ -57,8 +57,8 @@ class MessageBubbleCell: UITableViewCell, TTTAttributedLabelDelegate  {
         bubbleImageView.addSubview(messageLabel)
         
         
-        bubbleImageView.setTranslatesAutoresizingMaskIntoConstraints(false)
-        messageLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        bubbleImageView.translatesAutoresizingMaskIntoConstraints = false
+        messageLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addConstraint(NSLayoutConstraint(item: bubbleImageView, attribute: .Left, relatedBy: .Equal, toItem: contentView, attribute: .Left, multiplier: 1, constant: 10))
         contentView.addConstraint(NSLayoutConstraint(item: bubbleImageView, attribute: .Top, relatedBy: .Equal, toItem: contentView, attribute: .Top, multiplier: 1, constant: 4.5))
         bubbleImageView.addConstraint(NSLayoutConstraint(item: bubbleImageView, attribute: .Width, relatedBy: .Equal, toItem: messageLabel, attribute: .Width, multiplier: 1, constant: 30))
@@ -70,14 +70,14 @@ class MessageBubbleCell: UITableViewCell, TTTAttributedLabelDelegate  {
         bubbleImageView.addConstraint(NSLayoutConstraint(item: messageLabel, attribute: .Height, relatedBy: .Equal, toItem: bubbleImageView, attribute: .Height, multiplier: 1, constant: -15))
     }
     
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     func configureWithMessage(message: CoreMessage) {
         let messageFont:UIFont? = UIFont(name: "Helvetica", size: 15.0)
         let dateFont:UIFont? = UIFont(name: "Helvetica-Oblique", size: 12.0)
-        var mutableStr = NSMutableAttributedString()
+        let mutableStr = NSMutableAttributedString()
         var humanDate = String()
         if message.date != "" {
             humanDate = message.date.dateFormattedString()
@@ -165,11 +165,11 @@ class MessageBubbleCell: UITableViewCell, TTTAttributedLabelDelegate  {
 //                messageLabel.linkTextAttributes = attributes
             }
             
-            let layoutConstraint: NSLayoutConstraint = bubbleImageView.constraints()[1] as! NSLayoutConstraint // `messageLabel` CenterX
+            let layoutConstraint: NSLayoutConstraint = bubbleImageView.constraints[1] // `messageLabel` CenterX
             layoutConstraint.constant = -layoutConstraint.constant
             
-            let constraints: NSArray = contentView.constraints()
-            let indexOfConstraint = constraints.indexOfObjectPassingTest { (var constraint, idx, stop) in
+            let constraints: NSArray = contentView.constraints
+            let indexOfConstraint = constraints.indexOfObjectPassingTest { (constraint, idx, stop) in
                 return (constraint.firstItem as! UIView).tag == bubbleTag && (constraint.firstAttribute == NSLayoutAttribute.Left || constraint.firstAttribute == NSLayoutAttribute.Right)
             }
             contentView.removeConstraint(constraints[indexOfConstraint] as! NSLayoutConstraint)
@@ -185,12 +185,12 @@ class MessageBubbleCell: UITableViewCell, TTTAttributedLabelDelegate  {
     
     //MARK: TTTAttributedLabel delegate methods
     func attributedLabel(label: TTTAttributedLabel!, didLongPressLinkWithURL url: NSURL!, atPoint point: CGPoint) {
-        println("did select link")
+        print("did select link")
         UIApplication.sharedApplication().openURL(url)
     }
     
     func attributedLabel(label: TTTAttributedLabel!, didSelectLinkWithPhoneNumber phoneNumber: String!) {
-        var actionablePN = "tel://" + phoneNumber
+        let actionablePN = "tel://" + phoneNumber
         UIApplication.sharedApplication().openURL(NSURL(string: actionablePN)!)
     }
 }
@@ -199,17 +199,17 @@ let bubbleImage = bubbleImageMake()
 
 func bubbleImageMake() -> (incoming: UIImage, incomingHighlighed: UIImage, outgoing: UIImage, outgoingHighlighed: UIImage) {
     let maskOutgoing = UIImage(named: "MessageBubble")!
-    let maskIncoming = UIImage(CGImage: maskOutgoing.CGImage, scale: 2, orientation: .UpMirrored)!
+    let maskIncoming = UIImage(CGImage: maskOutgoing.CGImage!, scale: 2, orientation: .UpMirrored)
     
     let capInsetsIncoming = UIEdgeInsets(top: 17, left: 26.5, bottom: 17.5, right: 21)
     let capInsetsOutgoing = UIEdgeInsets(top: 17, left: 21, bottom: 17.5, right: 26.5)
     
-    let incoming = coloredImage(maskIncoming, 229/255.0, 229/255.0, 234/255.0, 1).resizableImageWithCapInsets(capInsetsIncoming)
-    let incomingHighlighted = coloredImage(maskIncoming, 206/255.0, 206/255.0, 210/255.0, 1).resizableImageWithCapInsets(capInsetsIncoming)
+    let incoming = coloredImage(maskIncoming, red: 229/255.0, green: 229/255.0, blue: 234/255.0, alpha: 1).resizableImageWithCapInsets(capInsetsIncoming)
+    _ = coloredImage(maskIncoming, red: 206/255.0, green: 206/255.0, blue: 210/255.0, alpha: 1).resizableImageWithCapInsets(capInsetsIncoming)
     
 //    UIColor(red: 179/255, green: 176/255, blue: 77/255, alpha: 1)
-    let outgoing = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 195/255.0, 1).resizableImageWithCapInsets(capInsetsOutgoing)
-    let outgoingHighlighted = coloredImage(maskOutgoing, 116/255.0, 136/255.0, 195/255.0, 0.7).resizableImageWithCapInsets(capInsetsOutgoing)
+    let outgoing = coloredImage(maskOutgoing, red: 116/255.0, green: 136/255.0, blue: 195/255.0, alpha: 1).resizableImageWithCapInsets(capInsetsOutgoing)
+    _ = coloredImage(maskOutgoing, red: 116/255.0, green: 136/255.0, blue: 195/255.0, alpha: 0.7).resizableImageWithCapInsets(capInsetsOutgoing)
     
 //    return (incoming, incomingHighlighted, outgoing, outgoingHighlighted)
     return (incoming, incoming, outgoing, outgoing)
@@ -221,7 +221,7 @@ func coloredImage(image: UIImage, red: CGFloat, green: CGFloat, blue: CGFloat, a
     let context = UIGraphicsGetCurrentContext()
     image.drawInRect(rect)
     CGContextSetRGBFillColor(context, red, green, blue, alpha)
-    CGContextSetBlendMode(context, kCGBlendModeSourceAtop)
+    CGContextSetBlendMode(context, CGBlendMode.SourceAtop)
     CGContextFillRect(context, rect)
     let result = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()

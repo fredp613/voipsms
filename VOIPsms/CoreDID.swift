@@ -37,8 +37,10 @@ class CoreDID: NSManagedObject {
         }
 
         
-        if managedObjectContext.save(nil) {
+        do {
+            try managedObjectContext.save()
             return true
+        } catch _ {
         }
         return false
     }
@@ -48,17 +50,20 @@ class CoreDID: NSManagedObject {
         let fetchRequest = NSFetchRequest(entityName: "CoreDID")
         fetchRequest.returnsObjectsAsFaults = false
         var coreDIDs = [CoreDID]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDID]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreDID]
         if fetchResults?.count > 0 {
             coreDIDs = fetchResults!
             for c in coreDIDs {
                 if c.did == did {
                     c.currentlySelected = 1
-                    println(c.did + " is currently selected")
+                    print(c.did + " is currently selected")
                 } else {
                     c.currentlySelected = 0
                 }
-                moc.save(nil)
+                do {
+                    try moc.save()
+                } catch _ {
+                }
             }
         }
     }
@@ -70,7 +75,7 @@ class CoreDID: NSManagedObject {
         let predicate = NSPredicate(format: "did == %@", didnum)
         fetchRequest.predicate = predicate
         
-        let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: nil) as? [CoreDID]
+        let fetchResults = (try? managedObjectContext.executeFetchRequest(fetchRequest)) as? [CoreDID]
         if fetchResults?.count > 0 {
             return true
         }
@@ -84,7 +89,7 @@ class CoreDID: NSManagedObject {
         fetchRequest.predicate = predicate
         
         var coreDIDs = [CoreDID]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDID]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreDID]
         if fetchResults?.count > 0 {
             coreDIDs = fetchResults!
             return coreDIDs[0]
@@ -102,7 +107,7 @@ class CoreDID: NSManagedObject {
         
         fetchRequest.returnsObjectsAsFaults = false
         var coreDIDs = [CoreDID]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDID]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreDID]
         if fetchResults?.count > 0 {
             coreDIDs = fetchResults!
             return coreDIDs
@@ -116,15 +121,29 @@ class CoreDID: NSManagedObject {
         fetchRequest.predicate = predicate
                 
         var coreDIDs = [CoreDID]()
-        var error : NSError? = nil
-        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: &error) as? [CoreDID] {
+        
+        do {
+            let fetchResults = try managedObjectContext.executeFetchRequest(fetchRequest) as! [CoreDID]
             coreDIDs = fetchResults
             if fetchResults.count > 0 {
                 return coreDIDs[0]
             }
-        } else {
-            println("\(error?.userInfo)")
         }
+        catch {
+            print(error)
+            return nil
+        }
+        
+        
+//        let error : NSError? = nil
+//        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest) as? [CoreDID] {
+//            coreDIDs = fetchResults
+//            if fetchResults.count > 0 {
+//                return coreDIDs[0]
+//            }
+//        } else {
+//            print("\(error?.userInfo)")
+//        }
         return nil
     }
     
@@ -139,7 +158,7 @@ class CoreDID: NSManagedObject {
             
             let json = responseObject
 
-            for (index, (key: String, t: JSON)) in enumerate(json["dids"]) {
+            for (index, element: (_, t)) in json["dids"].enumerate() {
                 var type : String
                 if index == 0 {
                     type = didType.PRIMARY.rawValue

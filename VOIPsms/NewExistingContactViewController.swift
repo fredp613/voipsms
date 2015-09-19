@@ -64,8 +64,8 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
-        var contact = self.contacts[indexPath.row]
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) 
+        let contact = self.contacts[indexPath.row]
         cell.textLabel?.text = contact.contactFullName //+ "-" + contact.recordId
         return cell
     }
@@ -73,18 +73,21 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
         if Contact().addPhoneToExistingContact(self.contacts[indexPath.row].recordId, phone: self.contactId) {
-            println("all good")
+            print("all good")
         }
-        var alertController = UIAlertController(title: "Confirm", message: "Are you sure you want to add \(self.contactId.northAmericanPhoneNumberFormat()) to this contact: \(self.contacts[indexPath.row].contactFullName)", preferredStyle: .Alert)
+        let alertController = UIAlertController(title: "Confirm", message: "Are you sure you want to add \(self.contactId.northAmericanPhoneNumberFormat()) to this contact: \(self.contacts[indexPath.row].contactFullName)", preferredStyle: .Alert)
         
-        var okAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default) {
+        let okAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default) {
             UIAlertAction in
-            println("pressed")
+            print("pressed")
 //            let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
             if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
                 currentContact.fullName = self.contacts[indexPath.row].contactFullName
-                println("saving to contact")
-                self.moc.save(nil)
+                print("saving to contact")
+                do {
+                    try self.moc.save()
+                } catch _ {
+                }
             }
 //            CoreContact.updateInManagedObjectContext(moc, contactId: self.contactId, lastModified: nil, fullName: self.contacts[indexPath.row].contactFullName, phoneLabel: nil, addressBookLastModified: NSDate())
 
@@ -92,9 +95,9 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
             self.dismissViewControllerAnimated(true, completion: { () -> Void in
             })
         }
-        var cancelAction = UIAlertAction(title: "No, cancel", style: UIAlertActionStyle.Cancel) {
+        let cancelAction = UIAlertAction(title: "No, cancel", style: UIAlertActionStyle.Cancel) {
             UIAlertAction in
-            println("cancelled")
+            print("cancelled")
         }
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
@@ -109,7 +112,7 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text != "" {
             self.contacts = Contact().getAllContacts(searchBar.text)
-            println(self.contacts)
+            print(self.contacts)
         } else {
             self.contacts = Contact().getAllContacts(nil)
         }

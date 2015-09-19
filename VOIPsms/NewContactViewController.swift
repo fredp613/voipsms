@@ -60,11 +60,11 @@ class NewContactViewController: UIViewController, UITextFieldDelegate, ContactAc
         if self.textFirstName.text != "" {
             var fullName = String()
             if self.textLastName.text != "" {
-                fullName = self.textFirstName.text + " " + self.textLastName.text
+                fullName = self.textFirstName.text! + " " + self.textLastName.text!
             } else {
-                fullName = self.textFirstName.text
+                fullName = self.textFirstName.text!
             }
-            if Contact().createContact(contactId, firstName: self.textFirstName.text, lastName: self.textLastName.text) {
+            if Contact().createContact(contactId, firstName: self.textFirstName.text!, lastName: self.textLastName.text!) {
                 CoreContact.updateInManagedObjectContext(self.moc, contactId: contactId, lastModified: nil, fullName: fullName, phoneLabel: nil, addressBookLastModified: NSDate())
             }
             self.dismissContactActionVC()
@@ -96,7 +96,7 @@ class NewContactViewController: UIViewController, UITextFieldDelegate, ContactAc
     
     func textFieldShouldReturn(textField: UITextField) -> Bool {
 
-        var nextTag = textField.tag + 1
+        let nextTag = textField.tag + 1
         if let nextResponder = textField.superview?.viewWithTag(nextTag) {
             nextResponder.becomeFirstResponder()
         } else {

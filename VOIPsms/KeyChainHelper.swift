@@ -37,7 +37,7 @@ class KeyChainHelper {
     }
     
     class func setData(value: NSData, forKey: String) -> Bool {
-        var keyChainQueryDictionary: NSMutableDictionary = self.setupKeychainQueryDictionaryForKey(forKey)
+        let keyChainQueryDictionary: NSMutableDictionary = self.setupKeychainQueryDictionaryForKey(forKey)
         keyChainQueryDictionary[SecValueData] = value
         
         keyChainQueryDictionary[SecAttrAccessible] = kSecAttrAccessibleWhenUnlocked
@@ -76,7 +76,7 @@ class KeyChainHelper {
     
     class func retrieveForKey(keyName: String) -> String? {
         
-        var keychainData: NSData? = self.dataForKey(keyName)
+        let keychainData: NSData? = self.dataForKey(keyName)
         var stringValue: String?
         if let data = keychainData {
             stringValue = NSString(data: data, encoding: NSUTF8StringEncoding) as String?
@@ -100,7 +100,7 @@ class KeyChainHelper {
     
     private class func dataForKey(keyName: String) -> NSData? {
         
-        var keychainQueryDictionary = self.setupKeychainQueryDictionaryForKey(keyName)
+        let keychainQueryDictionary = self.setupKeychainQueryDictionaryForKey(keyName)
         
         // Limit search results to one
         keychainQueryDictionary[SecMatchLimit] = kSecMatchLimitOne
@@ -109,26 +109,37 @@ class KeyChainHelper {
         keychainQueryDictionary[SecReturnData] = kCFBooleanTrue
         
         // Search
-        var searchResultRef: Unmanaged<AnyObject>?
+        var searchResultRef: AnyObject?
         var keychainValue: NSData?
-        
-        let status: OSStatus = SecItemCopyMatching(keychainQueryDictionary, &searchResultRef)
+
+        let status : OSStatus =  SecItemCopyMatching(keychainQueryDictionary, &searchResultRef)
+        let resultRef = searchResultRef
         
         if status == noErr {
-            if let resultRef = searchResultRef {
-                keychainValue = resultRef.takeUnretainedValue() as? NSData
-            }
+            keychainValue = resultRef as? NSData
         }
+
         
+//        } catch _ {
+//            return nil
+//        }
+//        let status: OSStatus = SecItemCopyMatching(keychainQueryDictionary, &searchResultRef)
+//        
+//        if status == noErr {
+//            if let resultRef = searchResultRef {
+//                keychainValue = resultRef.takeUnretainedValue() as? NSData
+//            }
+//        }
+//        
         return keychainValue;
         
     }
     
     private class func setupKeychainQueryDictionaryForKey(keyName: String) -> NSMutableDictionary {
-        var keychainQueryDictionary: NSMutableDictionary = [SecClass:kSecClassGenericPassword]
+        let keychainQueryDictionary: NSMutableDictionary = [SecClass:kSecClassGenericPassword]
         keychainQueryDictionary[SecAttrService] = KeyChainHelper.serviceName
         
-        var encodedIdentifer: NSData? = keyName.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)
+        let encodedIdentifer: NSData? = keyName.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)
         
         keychainQueryDictionary[SecAttrGeneric] = encodedIdentifer
         keychainQueryDictionary[SecAttrAccount] = encodedIdentifer

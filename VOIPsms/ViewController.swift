@@ -57,7 +57,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         navigationController?.popViewControllerAnimated(true)
     }
     func login() {
-        CoreUser.authenticate(moc, email: self.textUserName.text, password: self.textPwd.text) { (success, error) -> Void in
+        CoreUser.authenticate(moc, email: self.textUserName.text!, password: self.textPwd.text!) { (success, error, status) -> Void in
             if error == nil {
                 if success {
                     let alert = UIAlertView(title: "Login successful", message: "Checking for messages", delegate: self, cancelButtonTitle: nil)
@@ -76,7 +76,14 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
                 } else {
                     self.activityIndicator.stopAnimating()
                     self.loginBtn.setTitle("Sign in", forState: UIControlState.Normal)
-                    let alert = UIAlertView(title: "Invalid Login Credentials", message: "Please try again", delegate: self, cancelButtonTitle: "Ok")
+                    var messageTitle : String = ""
+                    if status == "api not enabled" {
+                        messageTitle = "API not enabled"
+                    } else {
+                        messageTitle = "Invalid login credentials"
+                    }
+
+                    let alert = UIAlertView(title: messageTitle, message: "Please try again", delegate: self, cancelButtonTitle: "Ok")
                     alert.show()
                 }
             } else {
@@ -86,16 +93,16 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     }
     
     func showErrorController() {
-        var alertController = UIAlertController(title: "Network Error", message: "We are having trouble reaching the voip.ms servers, click Ok to try again or No to cancel to try again later", preferredStyle: .Alert)
+        let alertController = UIAlertController(title: "Network Error", message: "We are having trouble reaching the voip.ms servers, click Ok to try again or No to cancel to try again later", preferredStyle: .Alert)
         
-        var okAction = UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default) {
+        let okAction = UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default) {
             UIAlertAction in
-            println("pressed")
+            print("pressed")
             self.login()
         }
-        var cancelAction = UIAlertAction(title: "No, cancel", style: UIAlertActionStyle.Cancel) {
+        let cancelAction = UIAlertAction(title: "No, cancel", style: UIAlertActionStyle.Cancel) {
             UIAlertAction in
-            println("cancelled")
+            print("cancelled")
         }
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
@@ -106,9 +113,9 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         let fromStr = CoreDID.getSelectedDID(moc)!.registeredOn.strippedDateFromString()        
         Message.getMessagesFromAPI(false, fromList: false, moc: self.moc, from: fromStr, completionHandler: { (responseObject, error) -> () in
             if responseObject.count > 0 {
-                println("success")
+                print("success")
             } else {
-                println("no messages yet")
+                print("no messages yet")
             }
         })
     }

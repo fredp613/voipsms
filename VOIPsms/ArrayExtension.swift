@@ -9,7 +9,7 @@
 import Foundation
 
 extension Array {
-    var last: T {
+    var last: Element {
         return self[self.endIndex - 1]
     }
 }

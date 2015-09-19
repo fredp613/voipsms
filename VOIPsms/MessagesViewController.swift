@@ -74,13 +74,13 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 //                        self.askPermissionForNotifications()
                     }
                 } else {
-                    var alertController = UIAlertController(title: "No contact access", message: "In order to link to your messages to your contacts, voip.ms sms requires access to your contacts. You will need to grant access for this app to sync with your phone contacts in your phone settings", preferredStyle: .Alert)
+                    let alertController = UIAlertController(title: "No contact access", message: "In order to link to your messages to your contacts, voip.ms sms requires access to your contacts. You will need to grant access for this app to sync with your phone contacts in your phone settings", preferredStyle: .Alert)
                     
-                    var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
+                    let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
                         UIAlertAction in
 //                        self.askPermissionForNotifications()
                     }
-                    var cancelAction = UIAlertAction(title: "No, do not sync my contacts", style: UIAlertActionStyle.Cancel) {
+                    let cancelAction = UIAlertAction(title: "No, do not sync my contacts", style: UIAlertActionStyle.Cancel) {
                         UIAlertAction in
 //                        self.askPermissionForNotifications()
                     }
@@ -98,11 +98,11 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     func askPermissionForNotifications() -> Bool {
         
         
-        var application = UIApplication.sharedApplication()
+        let application = UIApplication.sharedApplication()
         if application.respondsToSelector("isRegisteredForRemoteNotifications")
         {
            
-            application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Badge | .Sound | .Alert, categories: nil))
+            application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: [.Badge, .Sound, .Alert], categories: nil))
             let grantSettings = application.currentUserNotificationSettings()
             var cu = true
             if let currentUser = CoreUser.currentUser(self.moc) {
@@ -113,7 +113,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 }
             }
             
-            if grantSettings.types == UIUserNotificationType.None && cu.boolValue == true {
+            if grantSettings!.types == UIUserNotificationType.None && cu.boolValue == true {
 //                println("not registered for local notifications")
                 var alertController = UIAlertController(title: "Notifications", message: "This app has not been granted permission to send you notifications - if you want to recieve notifications when a user sends you a message please go into your phone settings and allow notifications for this app", preferredStyle: .Alert)
                 var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
@@ -140,7 +140,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             return true
         }else{
             // iOS < 8 Notifications
-            application.registerForRemoteNotificationTypes(.Badge | .Sound | .Alert)
+            application.registerForRemoteNotificationTypes([.Badge, .Sound, .Alert])
         }
         return false
     }
@@ -176,7 +176,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 performSegueWithIdentifier("showLoginSegue", sender: self)
             }
             
-            CoreUser.authenticate(moc, email: currentUser!.email, password: pwd!, completionHandler: { (success, error) -> Void in
+            CoreUser.authenticate(moc, email: currentUser!.email, password: pwd!, completionHandler: { (success, error, status) -> Void in
                 if success == false || currentUser?.remember == false {
                     self.performSegueWithIdentifier("showLoginSegue", sender: self)
                 }
@@ -190,7 +190,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         startTimer()
         
         if self.searchBar.text != "" {
-            self.search(self.searchBar.text)
+            self.search(self.searchBar.text!)
             timer.invalidate()
         }
     }
@@ -211,9 +211,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
             }
             var searchTerm = ""
             if self.searchBar != nil {
-                searchTerm = self.searchBar.text
+                searchTerm = self.searchBar.text!
             }
-             var initialMessageCount = CoreMessage.getMessages(moc, ascending: false).count
+             _ = CoreMessage.getMessages(moc, ascending: false).count
             
             CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm, completionHandler: { (responseObject, error) -> () in
                 self.contacts = responseObject as! [CoreContact]
@@ -240,7 +240,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     if self.tableView != nil {
                         dispatch_async(dispatch_get_main_queue(), { () -> Void in
                             if !fromSegue {
-                                self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
+                                self.contactsArray.sortInPlace({$0.lastMsgDate > $1.lastMsgDate})
                                 self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.Automatic)
                             }
                         })
@@ -262,7 +262,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     func timerDidFire(sender: NSTimer) {
 
-        var initialMessageCount = CoreMessage.getMessages(moc, ascending: false).count
+        let initialMessageCount = CoreMessage.getMessages(moc, ascending: false).count
         if CoreUser.userExists(moc) {
             if let str = CoreDID.getSelectedDID(moc) {
                 let fromStr = CoreMessage.getLastMsgByDID(moc, did: did)?.date.strippedDateFromString()
@@ -275,7 +275,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
                         CoreContact.getContacts(self.moc, did: self.did, dst: self.searchBar.text, name: self.searchBar.text, message: self.searchBar.text, completionHandler: { (responseObject, error) -> () in
                             self.contacts = responseObject as! [CoreContact]
-                            var newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
+                            let newMessageCount = CoreMessage.getMessages(self.moc, ascending: false).count
                             var initialLogon = false
                             if let cu = CoreUser.currentUser(self.moc) {
                                 if cu.initialLogon == true {
@@ -299,7 +299,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
 
                                 }
                                 
-                                self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
+                                self.contactsArray.sortInPlace({$0.lastMsgDate > $1.lastMsgDate})
                                 let indexSet = NSIndexSet(index: 0)
                                 dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                     self.tableView.reloadSections(indexSet, withRowAnimation: UITableViewRowAnimation.None)
@@ -321,7 +321,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                         })
                         
                     } else {
-                        println("no messages yet")
+                        print("no messages yet")
                     }
                 })
             }
@@ -357,9 +357,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        var cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) 
        
-        var contact = self.contactsArray[indexPath.row]
+        let contact = self.contactsArray[indexPath.row]
         var contactName = String()
         
         if Contact().checkAccess() {
@@ -434,7 +434,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         if editingStyle == UITableViewCellEditingStyle.Delete {
 
             let contactId = contacts[indexPath.row].contactId
-            var ids = CoreContact.getMsgsByContact(moc, contactId: contactId, did: self.did).map {$0.id}
+            let ids = CoreContact.getMsgsByContact(moc, contactId: contactId, did: self.did).map {$0.id}
 
             CoreMessage.deleteAllMessagesFromContact(moc, contactId: contactId, did: self.did, completionHandler: { (responseObject, error) -> () in
                 
@@ -472,7 +472,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 })
             })
         }
-        self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
+        self.contactsArray.sortInPlace({$0.lastMsgDate > $1.lastMsgDate})
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -500,7 +500,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                 didArr.append(c.did)
             }
         }
-        let currentDIDIndex = find(didArr, self.did)
+        let currentDIDIndex = didArr.indexOf(self.did)
         didView.selectRow(currentDIDIndex!, inComponent: 0, animated: false)
         drawMaskView()
         self.view.addSubview(didView)
@@ -526,7 +526,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         return CoreDID.getDIDs(self.moc)!.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         let formattedDID = CoreDID.getDIDs(self.moc)![row].did.northAmericanPhoneNumberFormat()
         return formattedDID
     }
@@ -550,7 +550,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         clearSearch()
     }
     
-    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         searchBar.resignFirstResponder()
         maskView.removeFromSuperview()
         didView.removeFromSuperview()
@@ -605,7 +605,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     }
                     self.contactsArray.append(contact)
                 }
-                self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
+                self.contactsArray.sortInPlace({$0.lastMsgDate > $1.lastMsgDate})
                 self.tableView.reloadData()
             })
         }
@@ -613,9 +613,9 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
     
     func search(searchTerm: String) {
         timer.invalidate()
-        if count(searchTerm) > 0 {
+        if searchTerm.characters.count > 0 {
             CoreContact.getContacts(moc, did: did, dst: searchTerm, name: searchTerm, message: searchTerm, completionHandler: { (responseObject, error) -> () in
-                var contacts1 = responseObject as! [CoreContact]
+                let contacts1 = responseObject as! [CoreContact]
                 CoreContact.findByName(self.moc, searchTerm: searchTerm, existingContacts: contacts1, completionHandler: { (contacts) -> () in
                     if let contact = contacts {
                         self.contacts = contact
@@ -633,7 +633,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                             }
                             self.contactsArray.append(contact)
                         }
-                        self.contactsArray.sort({$0.lastMsgDate > $1.lastMsgDate})
+                        self.contactsArray.sortInPlace({$0.lastMsgDate > $1.lastMsgDate})
                         let indexSet = NSIndexSet(index: 0)
 //                        let t  = self.tableView.indexPathsForVisibleRows()
 //                        self.tableView.reloadRowsAtIndexPaths(t!, withRowAnimation: UITableViewRowAnimation.None)
@@ -656,8 +656,8 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
         
         if (segue.identifier == "showMessagesSegue") {
             self.searchBar.resignFirstResponder()
-            var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
-            if let indexPath = self.tableView.indexPathForSelectedRow() {
+            let detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
+            if let indexPath = self.tableView.indexPathForSelectedRow {
                 detailSegue.contactId = self.contactsArray[indexPath.row].contactId
             } else {
                 detailSegue.contactId = self.contactForSegue

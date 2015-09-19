@@ -50,14 +50,14 @@ class Message {
         if let currentUser = CoreUser.currentUser(moc) {
 
             
-            var calendar: NSCalendar = NSCalendar.currentCalendar()
+            let calendar: NSCalendar = NSCalendar.currentCalendar()
             let strDate = dateFormatter.stringFromDate(NSDate())
             // Replace the hour (time) of both dates with 00:00
             let date1 : NSDate = dateFormatter.dateFromString(fromStr)!
             let date2 : NSDate = dateFormatter.dateFromString(strDate)!
             
-            let flags = NSCalendarUnit.CalendarUnitDay
-            let components = calendar.components(flags, fromDate: date1, toDate: date2, options: nil)
+            let flags = NSCalendarUnit.Day
+            let components = calendar.components(flags, fromDate: date1, toDate: date2, options: [])
             
             if components.day > 91 {
                 fromStr = dateFormatter.stringFromDate(date2.dateByAddingTimeInterval(60*60*24*(-91)))
@@ -81,9 +81,9 @@ class Message {
             var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
                         
             VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
-                println(error)
+                print(error)
                 let json = responseObject
-                for (key: String, t: JSON) in json["sms"] {
+                for (key, t): (String, JSON) in json["sms"] {
                     let contact = t["contact"].stringValue
                     let id = t["id"].stringValue
                     let typeStr = t["type"].stringValue
@@ -137,10 +137,10 @@ class Message {
                 contactStr = contact.northAmericanPhoneNumberFormat()
             }
         }
-        var boldText  = contactStr
-        var attrs = [NSFontAttributeName : UIFont.boldSystemFontOfSize(15)]
+        let boldText  = contactStr
+        let attrs = [NSFontAttributeName : UIFont.boldSystemFontOfSize(15)]
         var boldString = NSMutableAttributedString(string:boldText, attributes:attrs)
-        var localNotification = UILocalNotification()
+        let localNotification = UILocalNotification()
         localNotification.alertBody = "\(contactStr)\r\n\(message)"
 //        UIApplication.sharedApplication().presentLocalNotificationNow(localNotification)
         UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
@@ -190,7 +190,7 @@ class Message {
             VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
                 
                 let json = responseObject
-                for (key: String, t: JSON) in json["sms"] {
+                for (key, t): (String, JSON) in json["sms"] {
                     
                     let contact = t["contact"].stringValue
                     let id = t["id"].stringValue
@@ -245,10 +245,10 @@ class Message {
             ]
         VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
                 if responseObject {
-                   println(responseObject)
+                   print(responseObject)
                 }
                 if error != nil {
-                    println(error)
+                    print(error)
                 }
             }
         }

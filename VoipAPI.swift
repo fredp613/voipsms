@@ -46,11 +46,16 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
         var err: NSError?
         if httpMethod != "GET" { //httpMethod.rawValue != "GET"  {
             if let params = self.params {
-                request.HTTPBody = NSJSONSerialization.dataWithJSONObject(params, options: nil, error: &err)
+                do {
+                    request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params, options: [])
+                } catch var error as NSError {
+                    err = error
+                    request.HTTPBody = nil
+                }
             }
         }
         
-        NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.new()) { (response, data, error) -> Void in
+        NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response, data, error) -> Void in
 //            println(response)
             if let err = error {
                 
@@ -59,7 +64,7 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
             
             if error == nil {
                 
-                if let json: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers, error: nil) {
+                if let json: AnyObject? = try? NSJSONSerialization.JSONObjectWithData(data!, options: .MutableContainers) {
                     let parsedData = JSON(json!)
                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
                         return completionHandler(responseObject: parsedData, error: nil)
@@ -76,18 +81,18 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
     }
     
     func connection(connection: NSURLConnection, didFailWithError error: NSError) {
-        println("did fail with error")
-        println(error)
+        print("did fail with error")
+        print(error)
     }
     
     func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
-        println("did receive response")
-        println(response)
+        print("did receive response")
+        print(response)
     }
     
     func connection(connection: NSURLConnection, willSendRequest request: NSURLRequest, redirectResponse response: NSURLResponse?) -> NSURLRequest? {
 
-        println("did receive response")
+        print("did receive response")
         return request
     }
     
@@ -105,7 +110,12 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
         var err: NSError?
         if httpMethod.rawValue != "GET"  {
             if let params = params {
-                request.HTTPBody = NSJSONSerialization.dataWithJSONObject(params, options: nil, error: &err)
+                do {
+                    request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params, options: [])
+                } catch var error as NSError {
+                    err = error
+                    request.HTTPBody = nil
+                }
             }
         }
         
@@ -120,7 +130,7 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
             
             if error == nil {
                 
-                if let json: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers, error: nil) {
+                if let json: AnyObject? = try? NSJSONSerialization.JSONObjectWithData(data!, options: .MutableContainers) {
                     let parsedData = JSON(json!)
                     return completionHandler(responseObject: parsedData, error: nil)
                 } else {

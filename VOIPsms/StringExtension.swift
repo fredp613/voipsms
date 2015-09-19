@@ -13,8 +13,8 @@ extension String {
     func northAmericanPhoneNumberFormat() -> String {
        
         let strToFormat = self as NSString
-        let regex = NSRegularExpression(pattern: "[0-9]", options: nil, error: nil)
-        if (regex?.matchesInString(self, options: nil, range: NSMakeRange(0, strToFormat.length)) != nil) {
+        let regex = try? NSRegularExpression(pattern: "[0-9]", options: [])
+        if (regex?.matchesInString(self, options: [], range: NSMakeRange(0, strToFormat.length)) != nil) {
             if strToFormat.length > 9 {
                 let areaCode = strToFormat.substringWithRange(NSRange(location: 0, length: 3))
                 let firstPart = strToFormat.substringWithRange(NSRange(location: 3, length: 3))
@@ -34,17 +34,17 @@ extension String {
     }
     
     func removeSpaces() -> String {
-        var str = self.stringByReplacingOccurrencesOfString(" ", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-        var str1 = str.stringByReplacingOccurrencesOfString("-", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-        var final = str1.stringByReplacingOccurrencesOfString(":", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+        let str = self.stringByReplacingOccurrencesOfString(" ", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+        let str1 = str.stringByReplacingOccurrencesOfString("-", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+        let final = str1.stringByReplacingOccurrencesOfString(":", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
         return final
     }
     
     func truncatedString() -> String {
-        if count(self) > 15 {
+        if self.characters.count > 15 {
             //truncate
-            var firstPart = self.substringToIndex(advance(self.startIndex, 23))
-            var truncateIndicator = "..."
+            let firstPart = self.substringToIndex(self.startIndex.advancedBy(23))
+            let truncateIndicator = "..."
             return firstPart + truncateIndicator
         }
         return self
@@ -71,16 +71,16 @@ extension String {
         
         let messageDateFormatter = NSDateFormatter()
         messageDateFormatter.dateFormat = "YYYY-MM-dd"
-        var messageDateToCompare = messageDateFormatter.stringFromDate(tempDate!)
+        let messageDateToCompare = messageDateFormatter.stringFromDate(tempDate!)
         
         var finalDate = String()
         if todaysDate == messageDateToCompare {
             finalDate = "Today " + dateFormatterToday.stringFromDate(tempDate!)
         } else {
             
-            var cleanDate1 = todaysDate.stringByReplacingOccurrencesOfString("-", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-            var cleanDate2 = messageDateToCompare.stringByReplacingOccurrencesOfString("-", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
-            if cleanDate1.toInt()! - cleanDate2.toInt()! > 5 {
+            let cleanDate1 = todaysDate.stringByReplacingOccurrencesOfString("-", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+            let cleanDate2 = messageDateToCompare.stringByReplacingOccurrencesOfString("-", withString: "", options: NSStringCompareOptions.LiteralSearch, range: nil)
+            if Int(cleanDate1)! - Int(cleanDate2)! > 5 {
                 finalDate = dateFormatterPast.stringFromDate(tempDate!)
             } else {
                 finalDate = dateFormatterWeek.stringFromDate(tempDate!)

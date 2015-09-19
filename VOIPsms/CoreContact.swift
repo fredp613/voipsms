@@ -25,7 +25,7 @@ class CoreContact: NSManagedObject {
         contact.contactId = contactId
         if let lastModified = lastModified {
 
-            var formatter1: NSDateFormatter = NSDateFormatter()
+            let formatter1: NSDateFormatter = NSDateFormatter()
             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
             let parsedDate: NSDate = formatter1.dateFromString(lastModified)!
             contact.lastModified = parsedDate
@@ -49,7 +49,7 @@ class CoreContact: NSManagedObject {
             if let lastModified = lastModified {
                 
                 if let cc = CoreContact.getLastMessageFromContact(managedObjectContext, contactId: contactId, did: CoreDID.getSelectedDID(managedObjectContext)!.did) {
-                    var formatter1: NSDateFormatter = NSDateFormatter()
+                    let formatter1: NSDateFormatter = NSDateFormatter()
                     formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                     let parsedDate: NSDate = formatter1.dateFromString(cc.date)!
                     contact.lastModified = parsedDate
@@ -81,18 +81,37 @@ class CoreContact: NSManagedObject {
         CoreDataStack().saveContext(moc)
     }
     
-    class func getAllContacts(managedObjectContext: NSManagedObjectContext) -> [CoreContact]? {
-        let fetchRequest = NSFetchRequest(entityName: "CoreContact")
+    class func getAllContacts(managedObjectContext: NSManagedObjectContext) throws -> [CoreContact]? {
+//        let fetchRequest = NSFetchRequest(entityName: "CoreContact")
+//        let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
         var coreContacts = [CoreContact]()
-        var error : NSError? = nil
-        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: &error) as? [CoreContact] {
+        
+        let fetchRequest = NSFetchRequest(entityName: "CoreContact")
+        
+        let entity = NSEntityDescription.entityForName("CoreContact", inManagedObjectContext: managedObjectContext)
+        fetchRequest.entity = entity
+
+        print("this is caleld")
+        do {
+            let fetchResults = try managedObjectContext.executeFetchRequest(fetchRequest) as! [CoreContact]
             coreContacts = fetchResults
             if fetchResults.count > 0 {
                 return coreContacts
             }
-        } else {
-            println("\(error?.userInfo)")
         }
+        catch let error {
+            print("this is caleld")
+            print(error)
+            return nil
+        }
+//        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest) as? [CoreContact] {
+//            coreContacts = fetchResults
+//            if fetchResults.count > 0 {
+//                return coreContacts
+//            }
+//        } else {
+//            print("\(error?.userInfo)")
+//        }
         
         return nil
     }
@@ -102,15 +121,29 @@ class CoreContact: NSManagedObject {
         let predicate = NSPredicate(format: "contactId == %@", contactId)
         fetchRequest.predicate = predicate
         var coreContact = [CoreContact]()
-        var error : NSError? = nil
-        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: &error) as? [CoreContact] {
+//        let error : NSError? = nil
+        
+        do {
+            let fetchResults = try managedObjectContext.executeFetchRequest(fetchRequest) as! [CoreContact]
             coreContact = fetchResults
             if fetchResults.count > 0 {
                 return coreContact[0]
             }
-        } else {
-            println("\(error?.userInfo)")
         }
+        catch {
+            print(error)
+            return nil
+        }
+        
+        
+//        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest) as? [CoreContact] {
+//            coreContact = fetchResults
+//            if fetchResults.count > 0 {
+//                return coreContact[0]
+//            }
+//        } else {
+//            print("\(error?.userInfo)")
+//        }
         return nil
     }
     
@@ -129,7 +162,7 @@ class CoreContact: NSManagedObject {
                 if let messagesByDst = CoreMessage.getMessagesByDST(moc, dst: dst, did: did) {
                     for m in messagesByDst {
                         if let contact = CoreContact.currentContact(moc, contactId: m.contactId) {
-                            if !contains(coreContacts, contact) {
+                            if !coreContacts.contains(contact) {
                                 coreContacts.append(contact)
                             }
                         }
@@ -141,7 +174,7 @@ class CoreContact: NSManagedObject {
                 if let messagesByString = CoreMessage.getMessagesByString(moc, message: message, did: did) {
                     for m in messagesByString {
                         if let contact = CoreContact.currentContact(moc, contactId: m.contactId) {
-                            if !contains(coreContacts, contact) {
+                            if !coreContacts.contains(contact) {
                                 coreContacts.append(contact)
                             }
                         }
@@ -157,7 +190,7 @@ class CoreContact: NSManagedObject {
                             for (key,value) in contacts {
                                 if (value.rangeOfString(name) != nil) {
                                     if let contact1 = CoreContact.currentContact(moc, contactId: key) {
-                                        if !contains(coreContacts, contact1) {
+                                        if !coreContacts.contains(contact1) {
                                             coreContacts.append(contact1)
                                         }
                                     }
@@ -172,7 +205,7 @@ class CoreContact: NSManagedObject {
                 for m in messagesByDid {
                     // do some if msg id not already in
                     if let contact = CoreContact.currentContact(moc, contactId: m.contactId) {
-                        if !contains(coreContacts, contact) {
+                        if !coreContacts.contains(contact) {
                             coreContacts.append(contact)
                         }
                     }
@@ -187,7 +220,7 @@ class CoreContact: NSManagedObject {
             let sortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
             fetchRequest.sortDescriptors = [sortDescriptor]
             fetchRequest.returnsObjectsAsFaults = false
-            let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreContact]
+            let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreContact]
             if fetchResults?.count > 0 {
                 coreContacts = fetchResults!
             }
@@ -206,7 +239,7 @@ class CoreContact: NSManagedObject {
                     for (key,value) in contacts {
                         if (value.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) {
                             if let contact1 = CoreContact.currentContact(moc, contactId: key) {
-                                if !contains(existingContacts, contact1) {
+                                if !existingContacts.contains(contact1) {
                                     coreContacts.append(contact1)
                                 }
                             }
@@ -219,7 +252,7 @@ class CoreContact: NSManagedObject {
     
     class func findAllContactsByName(moc: NSManagedObjectContext, searchTerm: String, existingContacts: [CoreContact], completionHandler: ([ContactStruct]?)->()) {
         
-        var coreContacts = existingContacts
+        let coreContacts = existingContacts
         var contactResult = [ContactStruct]()
         
         for c in coreContacts {
@@ -232,14 +265,14 @@ class CoreContact: NSManagedObject {
         }
         if Contact().checkAccess() {
             Contact().loadAddressBook { (responseObject, error) -> () in
-                var contacts = responseObject
+                let contacts = responseObject
                 for c in contacts {
                     if (c.contactFullName.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) || (c.recordId.rangeOfString(searchTerm.lowercaseString) != nil) {
                         var contactStruct = ContactStruct()
                         contactStruct.contactId = c.recordId
                         contactStruct.contactName = c.contactFullName
                         contactStruct.phoneLabel = c.phoneLabel
-                        if !contains(contactResult.map({$0.contactId}), c.recordId) {
+                        if !contactResult.map({$0.contactId}).contains(c.recordId) {
                             contactResult.append(contactStruct)
                         }
                     }
@@ -265,7 +298,7 @@ class CoreContact: NSManagedObject {
         let sortDescriptor = NSSortDescriptor(key: "id", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         var coreMessages = [CoreMessage]()
-        let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        let fetchResults = (try? managedObjectContext.executeFetchRequest(fetchRequest)) as? [CoreMessage]
         if fetchResults?.count > 0 {
             coreMessages = fetchResults!
         }
@@ -288,7 +321,7 @@ class CoreContact: NSManagedObject {
         let sortDescriptor = NSSortDescriptor(key: "date", ascending: true)
         fetchRequest.sortDescriptors = [sortDescriptor]
         var coreMessages = [CoreMessage]()
-        let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        let fetchResults = (try? managedObjectContext.executeFetchRequest(fetchRequest)) as? [CoreMessage]
         if fetchResults?.count > 0 {
             coreMessages = fetchResults!
         }
@@ -303,7 +336,10 @@ class CoreContact: NSManagedObject {
             for cm in coreMessages {
                 if cm.type == 1 || cm.type.boolValue == true {
                     cm.flag = message_status.READ.rawValue
-                    moc.save(nil)
+                    do {
+                        try moc.save()
+                    } catch _ {
+                    }
                 }
             }
     }
@@ -318,7 +354,7 @@ class CoreContact: NSManagedObject {
         let predicate = NSPredicate(format: "contactId == %@", contactId)
         fetchRequest.predicate = predicate
         
-        let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: nil) as? [CoreContact]
+        let fetchResults = (try? managedObjectContext.executeFetchRequest(fetchRequest)) as? [CoreContact]
         if fetchResults?.count > 0 {
             return true
         }
@@ -340,15 +376,29 @@ class CoreContact: NSManagedObject {
         fetchRequest.fetchLimit = 1
         
         var coreMessages = [CoreMessage]()
-        var error : NSError? = nil
-        if let fetchResults = moc.executeFetchRequest(fetchRequest, error: &error) as? [CoreMessage] {
+//        let error : NSError? = nil
+        
+        do {
+            let fetchResults = try moc.executeFetchRequest(fetchRequest) as! [CoreMessage]
             coreMessages = fetchResults
             if fetchResults.count > 0 {
                 return coreMessages[0]
             }
-        } else {
-            println("\(error?.userInfo)")
         }
+        catch {
+            print(error)
+            return nil
+        }
+        
+        
+//        if let fetchResults = moc.executeFetchRequest(fetchRequest) as? [CoreMessage] {
+//            coreMessages = fetchResults
+//            if fetchResults.count > 0 {
+//                return coreMessages[0]
+//            }
+//        } else {
+//            print("\(error?.userInfo)")
+//        }
         return nil
     }
     
@@ -369,7 +419,7 @@ class CoreContact: NSManagedObject {
         let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
         let validMessagePredicate = NSPredicate(format: "flag != %@ ", message_status.UNDELIVERED.rawValue)
             if let did = did {
-                var secondPredicate = NSPredicate(format: "did == %@", did)
+                let secondPredicate = NSPredicate(format: "did == %@", did)
                 let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate, validMessagePredicate])
                 fetchRequest.predicate = predicate
             } else {
@@ -380,15 +430,28 @@ class CoreContact: NSManagedObject {
         fetchRequest.fetchLimit = 1
         
         var coreMessages = [CoreMessage]()
-        var error : NSError? = nil
-        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: &error) as? [CoreMessage] {
+//        let error : NSError? = nil
+        
+        do {
+            let fetchResults = try managedObjectContext.executeFetchRequest(fetchRequest) as! [CoreMessage]
             coreMessages = fetchResults
             if fetchResults.count > 0 {
                 return coreMessages[0]
             }
-        } else {
-            println("\(error?.userInfo)")
         }
+        catch {
+            print(error)
+            return nil
+        }
+        
+//        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest) as? [CoreMessage] {
+//            coreMessages = fetchResults
+//            if fetchResults.count > 0 {
+//                return coreMessages[0]
+//            }
+//        } else {
+//            print("\(error?.userInfo)")
+//        }
         return nil
         
     }

@@ -18,7 +18,7 @@ class CoreDevice: NSManagedObject {
         fetchRequest.returnsObjectsAsFaults = false
         
         var coreDevices = [CoreDevice]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDevice]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreDevice]
         if fetchResults?.count > 0 {
             coreDevices = fetchResults!
             return coreDevices[0]
@@ -32,7 +32,7 @@ class CoreDevice: NSManagedObject {
         fetchRequest.returnsObjectsAsFaults = false
         
         var coreDevices = [CoreDevice]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDevice]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreDevice]
         if fetchResults?.count > 0 {
             coreDevices = fetchResults!
             return coreDevices
@@ -45,23 +45,26 @@ class CoreDevice: NSManagedObject {
         
         let deviceMO : CoreDevice = NSEntityDescription.insertNewObjectForEntityForName("CoreDevice", inManagedObjectContext: managedObjectContext) as! CoreDevice
         deviceMO.deviceToken = device
-        if managedObjectContext.save(nil) {
+        do {
+            try managedObjectContext.save()
             
             return deviceMO
+        } catch _ {
         }
         return nil
     }
     
     class func createOrUpdateInMOC(moc: NSManagedObjectContext, token: String) -> CoreDevice? {
-        println("this is being called")
+        print("this is being called")
         if let cu = CoreUser.currentUser(moc) {
             if let cd = CoreDevice.getToken(moc) {
                 if cd.deviceToken != token {
                     cd.deviceToken = token
-                    if moc.save(nil) {
+                    do {
+                        try moc.save()
                         sendDeviceDetailsToAPI(token, user: cu, moc: moc)
                         return cd
-                    } else {
+                    } catch _ {
                         return nil
                     }
                 }
@@ -80,12 +83,12 @@ class CoreDevice: NSManagedObject {
     
     
     class func sendDeviceDetailsToAPI(deviceId: String, user: CoreUser, moc: NSManagedObjectContext) {
-        println(deviceId)
-        var qualityOfServiceClass = Int(QOS_CLASS_DEFAULT.value)
-        var backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        print(deviceId)
+        let qualityOfServiceClass = Int(QOS_CLASS_DEFAULT.rawValue)
+        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
         dispatch_async(backgroundQueue, { () -> Void in
             if let did = CoreDID.getSelectedDID(moc) {
-                println("hi we got a did" + did.did)
+                print("hi we got a did" + did.did)
                 if let api_password = KeyChainHelper.retrieveForKey(user.email) {
                     let params = [
                         "user":[
@@ -95,11 +98,11 @@ class CoreDevice: NSManagedObject {
                             "device": deviceId
                         ]
                     ]
-                    var url = "http://nodejs-voipsms.rhcloud.com/users"
+                    let url = "https://mighty-springs-3852.herokuapp.com/users"
                     //                params should go in body of request
                     
                     VoipAPI(httpMethod: httpMethodEnum.POST, url: url, params: params).APIAuthenticatedRequest({ (responseObject, error) -> () in
-                        println(responseObject)
+                        print(responseObject)
                     })
                 }
             }

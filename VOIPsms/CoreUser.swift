@@ -34,11 +34,13 @@ class CoreUser: NSManagedObject {
         coreUser.notificationsFlag = true
         coreUser.messagesLoaded = false
         
-        if managedObjectContext.save(nil) {
+        do {
+            try managedObjectContext.save()
 
             KeyChainHelper.createORupdateForKey(pwd, keyName: email)
             //create dids
             return true
+        } catch _ {
         }
         
         return false
@@ -50,7 +52,9 @@ class CoreUser: NSManagedObject {
     
     class func logoutUser(managedObjectContext: NSManagedObjectContext, coreUser: CoreUser) {
         coreUser.remember = false
-        if managedObjectContext.save(nil) {
+        do {
+            try managedObjectContext.save()
+        } catch _ {
         }
     }
     
@@ -63,16 +67,26 @@ class CoreUser: NSManagedObject {
     class func currentUser(managedObjectContext: NSManagedObjectContext) -> CoreUser? {
 //        let moc = CoreDataStack().managedObjectContext!
         let fetchRequest = NSFetchRequest(entityName: "CoreUser")
-        var coreUser = [CoreUser]()
-        var error : NSError? = nil
-        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest, error: &error) as? [CoreUser] {
-            coreUser = fetchResults
+       
+        do {
+           let fetchResults = try managedObjectContext.executeFetchRequest(fetchRequest) as! [CoreUser]
+
             if fetchResults.count > 0 {
-                return coreUser[0]
+                return fetchResults[0]
             }
-        } else {
-            println("\(error?.userInfo)")
         }
+        catch {
+            print(error)            
+        }
+        
+//        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest) as? [CoreUser] {
+//            coreUser = fetchResults
+//            if fetchResults.count > 0 {
+//                return coreUser[0]
+//            }
+//        } else {
+//            print("\(error?.userInfo)")
+//        }
         return nil
     }
     
@@ -83,21 +97,20 @@ class CoreUser: NSManagedObject {
     }
     
     class func userExists(moc: NSManagedObjectContext) -> Bool {
-        if let currentUser = CoreUser.currentUser(moc) {
+        if let _ = CoreUser.currentUser(moc) {
             return true
         }
         return false
     }
         
     
-    class func authenticate(moc: NSManagedObjectContext, email: String, password: String, completionHandler: ((Bool, error: NSError?) -> Void)!) -> Void {
+    class func authenticate(moc: NSManagedObjectContext, email: String, password: String, completionHandler: ((Bool, error: NSError?, status: String?) -> Void)!) -> Void {
                 
         var url = APIUrls.getUrl + "api_username=" + email + "&api_password=" + password + "&method=getDIDsInfo"
         
          VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest { (data, error) -> () in
             if data != nil {
-                println(data)
-
+                print(data)
                 if data["status"] == "success" {
                     
                     if self.userExists(moc) == false {
@@ -105,13 +118,14 @@ class CoreUser: NSManagedObject {
                         
 //                        CoreDID.createOrUpdateDID(moc)
                         let json = data
-                        
-                        for (index, (key: String, t: JSON)) in enumerate(json["dids"]) {
-                            var type : String
+//                        for (index, element: (key, t): (String, JSON)) in json["sms"] {
+//                        for (key, t) in json["dids"] {
+                        for (index, element: (_, t)) in json["dids"].enumerate() {
+                            var dtype = ""
                             if index == 0 {
-                                type = didType.PRIMARY.rawValue
+                                dtype = didType.PRIMARY.rawValue
                             } else {
-                                type = didType.SUB.rawValue
+                                dtype = didType.SUB.rawValue
                             }
                             let did = t["did"].stringValue
                             
@@ -120,29 +134,31 @@ class CoreUser: NSManagedObject {
                             
                             if sms_enabled == "1" {
                                 if !CoreDID.isExistingDID(moc, didnum: did) {
-                                    CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: type, didRegisteredOn: registeredOn)
+                                    CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: dtype, didRegisteredOn: registeredOn)
                                     
                                     //here call your web service send the device id
                                 }
                             } else {
                                 // error should be something like, please enable SMS
-                                return completionHandler(false, error:nil)
+                                return completionHandler(false, error:nil, status: nil)
                                 //some error to user
                             }
                         }
                     } else {
                         let currentUser = CoreUser.currentUser(moc)
                         currentUser?.remember = true
-                        moc.save(nil)
+                        do {
+                            try moc.save()
+                        } catch _ {
+                        }
                     }
-                    return completionHandler(true, error: nil)
+                    return completionHandler(true, error: nil, status: "success")
                 } else {
-                    return completionHandler(false, error: nil)
+                    return completionHandler(false, error: nil, status: "api not enabled")
                 }
                 
             } else {
-                println(error)
-                return completionHandler(false, error: error)
+                return completionHandler(false, error: error, status: nil)
             }
         }
         

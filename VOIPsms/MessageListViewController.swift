@@ -32,6 +32,26 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
+        
+        
+//        var messagePredicate : NSPredicate?
+//        if let messages = CoreMessage.getMessagesByString(managedObjectContext, message: self.searchBar.text!, did: self.did) {
+//            if messages.count > 0 {
+//                messagePredicate = NSPredicate(format: "contactId IN %@", messages.map({$0.contactId}))
+//            }
+//        }
+//        let firstPredicate = NSPredicate(format: "contactId contains[cd] %@", self.searchKeyword)
+//        let secondPredicate = NSPredicate(format: "fullName contains[cd] %@", self.searchKeyword)
+//        if let messagePredicate = messagePredicate {
+//            let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType, subpredicates: [firstPredicate, secondPredicate, messagePredicate])
+//            fetchedResultsController.fetchRequest.predicate = compoundPredicate
+//        } else {
+//            let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType, subpredicates: [firstPredicate, secondPredicate])
+//            fetchedResultsController.fetchRequest.predicate = compoundPredicate
+//        }
+        
+        
+        
 //        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreContact")
         let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
@@ -83,14 +103,28 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        var error: NSError? = nil
-        if (fetchedResultsController.performFetch(&error)==false) {
-            println("An error has occurred: \(error?.localizedDescription)")
+//        var error: NSError? = nil
+        
+        do {
+            try fetchedResultsController.performFetch()        }
+        catch {
+            print(error)
         }
         
-        if (messageFetchedResultsController.performFetch(&error)==false) {
-            println("An error has occurred: \(error?.localizedDescription)")
+        do {
+            try messageFetchedResultsController.performFetch()        }
+        catch {
+            print(error)
         }
+
+        
+//        if (fetchedResultsController.performFetch()==false) {
+//            print("An error has occurred: \(error?.localizedDescription)")
+//        }
+        
+//        if (messageFetchedResultsController.performFetch()==false) {
+//            print("An error has occurred: \(error?.localizedDescription)")
+//        }
         
         if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
             currentUser.initialLoad = true
@@ -101,8 +135,8 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         self.view.bringSubviewToFront(self.btnNewMessage)
         self.pokeFetchedResultsController()
 //        NSString *identifier = [[UIDevice currentDevice].identifierForVendor UUIDString];
-        let identifier = UIDevice.currentDevice().identifierForVendor.UUIDString
-        println(identifier)
+        let identifier = UIDevice.currentDevice().identifierForVendor!.UUIDString
+        print(identifier)
         
                
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "handlePushNotification:", name: "appRestorePush", object: nil)
@@ -110,8 +144,8 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     func handlePushNotification(notification: NSNotification) {
-        println("received a push notification - i'm in the list controller")
-        println(notification.userInfo)
+        print("received a push notification - i'm in the list controller")
+        print(notification.userInfo)
 
         if let did = notification.userInfo?["did"] as? String {
             if let contact = notification.userInfo?["contact"] as? String {
@@ -147,7 +181,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             let currentUser = CoreUser.currentUser(managedObjectContext)
             let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
             
-            CoreUser.authenticate(managedObjectContext, email: currentUser!.email, password: pwd!, completionHandler: { (success, error) -> Void in
+            CoreUser.authenticate(managedObjectContext, email: currentUser!.email, password: pwd!, completionHandler: { (success, error, status) -> Void in
                 if success == false || currentUser?.remember == false {
                     self.performSegueWithIdentifier("showLoginSegue", sender: self)
                 } else {
@@ -184,13 +218,13 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                         //                        self.askPermissionForNotifications()
                     }
                 } else {
-                    var alertController = UIAlertController(title: "No contact access", message: "In order to link to your messages to your contacts, voip.ms sms requires access to your contacts. You will need to grant access for this app to sync with your phone contacts in your phone settings", preferredStyle: .Alert)
+                    let alertController = UIAlertController(title: "No contact access", message: "In order to link to your messages to your contacts, voip.ms sms requires access to your contacts. You will need to grant access for this app to sync with your phone contacts in your phone settings", preferredStyle: .Alert)
                     
-                    var okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
+                    let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default) {
                         UIAlertAction in
                         //                        self.askPermissionForNotifications()
                     }
-                    var cancelAction = UIAlertAction(title: "No, do not sync my contacts", style: UIAlertActionStyle.Cancel) {
+                    let cancelAction = UIAlertAction(title: "No, do not sync my contacts", style: UIAlertActionStyle.Cancel) {
                         UIAlertAction in
                         //                        self.askPermissionForNotifications()
                     }
@@ -209,10 +243,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if Reachability.isConnectedToNetwork() {
             if UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
                 time = 45
-                println("registered")
+                print("registered")
             } else {
                 time = 5
-                println("no registered")
+                print("no registered")
             }
             timer = NSTimer.scheduledTimerWithTimeInterval(time, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         }
@@ -251,16 +285,11 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                                 currentUser.initialLogon = 0
                                 CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
                             }
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                                self.pokeFetchedResultsController()
-                            })
                         })
                     }
                     
                 }
             }
-//        })
-        self.pokeFetchedResultsController()
     }
     
     override func didReceiveMemoryWarning() {
@@ -282,22 +311,39 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-        
         if controller == fetchedResultsController {
             switch type {
             case .Insert:
                 self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
             case .Delete:
-                println("deleting")
+                print("deleting")
                 self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
             case .Update:
-                println("updating contact")
+                print("updating contact")
                 self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
             default:
                 self.pokeFetchedResultsController()
             }
         }
     }
+    
+//    func controller(controller: NSFetchedResultsController, didChangeObject anObject: NSManagedObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+//        
+//        if controller == fetchedResultsController {
+//            switch type {
+//            case .Insert:
+//                self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
+//            case .Delete:
+//                print("deleting")
+//                self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
+//            case .Update:
+//                print("updating contact")
+//                self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
+//            default:
+//                self.pokeFetchedResultsController()
+//            }
+//        }
+//    }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.endUpdates()
@@ -320,26 +366,26 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let sections = fetchedResultsController.sections {
-            let currentSection = sections[section] as! NSFetchedResultsSectionInfo
+            let currentSection = sections[section] 
             return currentSection.numberOfObjects
         }
         return 0
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        println("selected row")
+        print("selected row")
         self.timer.invalidate()
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) 
 
         let contact = fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
                 
 //        if var lastMessage = contact.messages.sortedArrayUsingDescriptors([sortDescriptor]).first! as? CoreMessage {
         if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
-            var message = lastMessage as CoreMessage
-            var text2 = message.message
+            let message = lastMessage as CoreMessage
+            let text2 = message.message
             if message.flag == message_status.PENDING.rawValue {
                 cell.detailTextLabel?.text = "\(text2) sending..."
             } else {
@@ -404,7 +450,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if editingStyle == UITableViewCellEditingStyle.Delete {
             
             var contactId = String()
-            var contact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
+            let contact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
             contactId = contact.contactId
             contact.deletedContact = 1
             CoreContact.updateContactInMOC(self.managedObjectContext)
@@ -457,7 +503,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 if self.fetchedResultsController.fetchedObjects?.count > 0 {
                     for c in self.fetchedResultsController.fetchedObjects as! [CoreContact] {
                         if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: c.contactId, did: self.did) {
-                            var formatter1: NSDateFormatter = NSDateFormatter()
+                            let formatter1: NSDateFormatter = NSDateFormatter()
                             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                             let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
                             c.lastModified = parsedDate
@@ -497,7 +543,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if self.searchBar.text != "" {
             
             var messagePredicate : NSPredicate?
-            if let messages = CoreMessage.getMessagesByString(managedObjectContext, message: self.searchBar.text, did: self.did) {
+            if let messages = CoreMessage.getMessagesByString(managedObjectContext, message: self.searchBar.text!, did: self.did) {
                 if messages.count > 0 {
                     messagePredicate = NSPredicate(format: "contactId IN %@", messages.map({$0.contactId}))
                 }
@@ -512,7 +558,10 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 fetchedResultsController.fetchRequest.predicate = compoundPredicate
             }
             
-            self.fetchedResultsController.performFetch(nil)
+            do {
+                try self.fetchedResultsController.performFetch()
+            } catch _ {
+            }
             tableView.reloadData()
         } else {
             clearSearch()
@@ -542,7 +591,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 didArr.append(c.did)
             }
         }
-        let currentDIDIndex = find(didArr, self.did)
+        let currentDIDIndex = didArr.indexOf(self.did)
         didView.selectRow(currentDIDIndex!, inComponent: 0, animated: false)
         drawMaskView()
         self.view.addSubview(didView)
@@ -559,7 +608,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     
-    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         searchBar.resignFirstResponder()
         maskView.removeFromSuperview()
         didView.removeFromSuperview()
@@ -577,13 +626,16 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         fetchedResultsController.fetchRequest.sortDescriptors = [primarySortDescriptor]
         if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
             self.did = did.did
-            var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
+            let contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
             let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
             let contactPredicateDeleted = NSPredicate(format: "deletedContact == 0")
             let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [contactPredicate, contactPredicateDeleted])
             fetchedResultsController.fetchRequest.predicate = compoundPredicate
         }
-        fetchedResultsController.performFetch(nil)
+        do {
+            try fetchedResultsController.performFetch()
+        } catch _ {
+        }
         self.tableView.reloadData()
     }
     
@@ -596,7 +648,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     func updateMessagesTableView() {
-        println("delegate called")
+        print("delegate called")
 //        self.pokeFetchedResultsController()
 //        self.tableView.reloadData()
         
@@ -611,18 +663,18 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             if (segue.identifier == "showMessageDetailSegue") {
               
             
-            var detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
+            let detailSegue : MessageDetailViewController = segue.destinationViewController as! MessageDetailViewController
                 
             if !fromClosedState {
                 timer.invalidate()
                 self.searchBar.resignFirstResponder()
                 
-                if let indexPath = self.tableView.indexPathForSelectedRow() {
+                if let indexPath = self.tableView.indexPathForSelectedRow {
                     
-                    var contact: CoreContact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
+                    let contact: CoreContact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
                     detailSegue.contactId = contact.contactId as String
                     if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
-                        var formatter1: NSDateFormatter = NSDateFormatter()
+                        let formatter1: NSDateFormatter = NSDateFormatter()
                         formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                         let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
                         contact.lastModified = parsedDate
@@ -659,7 +711,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         }
         
         if segue.identifier == "segueToNewMessage" {
-            var newMsgVC = segue.destinationViewController as? NewMessageViewController
+            let newMsgVC = segue.destinationViewController as? NewMessageViewController
             newMsgVC?.did = self.did
             newMsgVC?.delegate = self
             newMsgVC?.moc = self.managedObjectContext

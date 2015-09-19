@@ -12,7 +12,7 @@ import CoreData
 
 class APIUrls {
     
-    static let getUrl = "https://voip.ms/api/v1/rest.php?"
+    static let getUrl = "http://voip.ms/api/v1/rest.php?"
     var moc : NSManagedObjectContext
     
     init() {
@@ -26,7 +26,7 @@ class APIUrls {
         let moc1 = CoreDataStack().managedObjectContext!
         if let currentUser = CoreUser.currentUser(moc1) {
             if let api_password = KeyChainHelper.retrieveForKey(currentUser.email) {
-                var url = APIUrls.getUrl + "api_username=" + currentUser.email + "&api_password=" + api_password
+                let url = APIUrls.getUrl + "api_username=" + currentUser.email + "&api_password=" + api_password
                 return url
             }
             return nil
@@ -42,8 +42,8 @@ class APIUrls {
 
             if var url = APIUrls.authenticatedUrl() {
                 url += "&"
-                for (i, p) in enumerate(params!) {
-                    var lastIndexElement : Int = Int(params!.count - 1)
+                for (i, p) in (params!).enumerate() {
+                    let lastIndexElement : Int = Int(params!.count - 1)
                     if lastIndexElement == 0 {
                        url += (p.0 + "=" + p.1)
                     } else {

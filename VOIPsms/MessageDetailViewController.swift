@@ -165,10 +165,15 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         scrollView.bringSubviewToFront(tableView)
         
         var error : NSError? = nil
-        if (messageFetchedResultsController.performFetch(&error)==false) {
-            println("An error has occurred: \(error?.localizedDescription)")
-        }
         
+        do {
+            try messageFetchedResultsController.performFetch()
+        } catch _ {
+        }
+//        if (messageFetchedResultsController.performFetch()==false) {
+//            print("An error has occurred: \(error?.localizedDescription)")
+//        }
+//        
 
         compressedTableViewHeight = self.tableView.frame.size.height
         
@@ -188,7 +193,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         if let lastMessage = messageFetchedResultsController.fetchedObjects?.last! as? CoreMessage {
             if lastMessage.flag == message_status.PENDING.rawValue {
-                println("last message here")
+                print("last message here")
                 self.processMessage(lastMessage)
             }
             if lastMessage.flag == message_status.DELIVERED.rawValue {
@@ -206,7 +211,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     
     @IBAction func handleSwipe(sender: AnyObject) {
-        println("handle swipe down")
+        print("handle swipe down")
         self.textMessage.resignFirstResponder()
     }
     
@@ -227,7 +232,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         self.messageFetchedResultsController.fetchRequest.predicate = nil
 //        self.messageFetchedResultsController.fetchRequest.sortDescriptors = nil
         Message.getIncomingMessagesFromAPI(self.moc, did: self.did, contact: self.contactId, from: nil) { (responseObject, error) -> () in
-            println("messages downloaded")
+            print("messages downloaded")
         }
 
         let msgDIDPredicate = NSPredicate(format: "did == %@", self.did)
@@ -236,7 +241,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let primarySortDescriptor = NSSortDescriptor(key: "dateForSort", ascending: true)
         self.messageFetchedResultsController.fetchRequest.sortDescriptors = [primarySortDescriptor]
         self.messageFetchedResultsController.fetchRequest.predicate = compoundPredicate
-        self.messageFetchedResultsController.performFetch(nil)
+        do {
+            try self.messageFetchedResultsController.performFetch()
+        } catch _ {
+        }
 //        self.tableView.reloadData()
 //        if (self.messageFetchedResultsController.performFetch(&error)==false) {
 //            println("An error has occurred: \(error?.localizedDescription)")
@@ -315,11 +323,11 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         if self.lastContentOffset > scrollView.contentOffset.y {
             scrollDirection = ScrollDirection.ScrollDirectionUp
-            println("yes")
+            print("yes")
         }
         if self.lastContentOffset < scrollView.contentOffset.y {
             scrollDirection = ScrollDirection.ScrollDirectionDown
-            println("no")
+            print("no")
             if scrollView == self.scrollView {
               self.textMessage.resignFirstResponder()
             }
@@ -340,22 +348,39 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-        
         if controller == messageFetchedResultsController {
             switch type {
             case .Insert:
-                println("inserting")
+                print("inserting")
                 self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Bottom)
             case .Delete:
                 self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.None)
             case .Update:
-                println("updating")
+                print("updating")
                 self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
             default:
                 self.tableView.reloadData()
             }
         }
     }
+    
+//    func controller(controller: NSFetchedResultsController, didChangeObject anObject: NSManagedObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+//        
+//        if controller == messageFetchedResultsController {
+//            switch type {
+//            case .Insert:
+//                print("inserting")
+//                self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Bottom)
+//            case .Delete:
+//                self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.None)
+//            case .Update:
+//                print("updating")
+//                self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+//            default:
+//                self.tableView.reloadData()
+//            }
+//        }
+//    }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.endUpdates()
@@ -375,13 +400,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
         
         
-        var indexPaths = tableView.indexPathsForVisibleRows()
+        let indexPaths = tableView.indexPathsForVisibleRows
         
-        var test = indexPaths?.last as! NSIndexPath
+        let test = indexPaths!.last
         if test.row == indexPath.row {
             if !self.tableFullyLoaded {
                 if !deleteMenuActivated {
-                    println("asdfdsfasfdsdsfdsdf potential problem here")
+                    print("asdfdsfasfdsdsfdsdf potential problem here")
 //                    self.tableViewScrollToBottomAnimated(false)
 //                    self.tableViewScrollToBottomAnimated(false)
                 }
@@ -401,7 +426,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let sections = messageFetchedResultsController.sections {
-            let currentSection = sections[section] as! NSFetchedResultsSectionInfo
+            let currentSection = sections[section] 
             return currentSection.numberOfObjects
         }
         
@@ -411,7 +436,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let cell = tableView.cellForRowAtIndexPath(indexPath)
         if let message = messageFetchedResultsController.objectAtIndexPath(indexPath) as? CoreMessage {
-            var deleteViewButton = self.view.viewWithTag(indexPath.row + 100)
+            let deleteViewButton = self.view.viewWithTag(indexPath.row + 100)
             if deleteMenuActivated {
                 if deleteViewButton!.backgroundColor == UIColor.lightGrayColor() {
                     deleteViewButton!.backgroundColor = nil
@@ -424,8 +449,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 //retry button exists
                 if message.flag == message_status.UNDELIVERED.rawValue {
 //                    if (self.view.viewWithTag(33000) != nil) {
-                        var cell = self.tableView.cellForRowAtIndexPath(self.messageFetchedResultsController.indexPathForObject(message)!)
-                        var activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+                        let cell = self.tableView.cellForRowAtIndexPath(self.messageFetchedResultsController.indexPathForObject(message)!)
+                        let activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
                         activityIndicator.tag = 10
                         cell!.accessoryView = activityIndicator
                         activityIndicator.startAnimating()
@@ -460,7 +485,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         } else {
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 for v in self.view.subviews {
-                    let vi = v as! UIView
+                    let vi = v 
                     if vi.tag == 31 || vi.tag == 30 {
                         vi.removeFromSuperview()
                     }
@@ -495,7 +520,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         if let message = messageFetchedResultsController.objectAtIndexPath(indexPath) as? CoreMessage {
             cell.configureWithMessage(message)
             
-            var size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
+            let size = cell.contentView.systemLayoutSizeFittingSize(UILayoutFittingExpandedSize)
             allCellHeight += (size.height + 10)
             self.configureAccessoryView(cell, message: message)
             
@@ -564,7 +589,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             sendButton.enabled = true
         }
 
-        var offsetHeightTV = textView.frame.size.height
+        let offsetHeightTV = textView.frame.size.height
         
         self.tableView.frame.size.height = compressedTableViewHeight - offsetHeight
         self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight - offsetHeightTV + 30
@@ -689,13 +714,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     @IBAction func sendWasPressed(sender: AnyObject) {
         var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
-        var msgForCoreData = self.textMessage.text
+        let msgForCoreData = self.textMessage.text
         self.textMessage.text = ""
         
         let date = NSDate()
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
-        var dateStr = formatter.stringFromDate(date)
+        let dateStr = formatter.stringFromDate(date)
         
         CoreMessage.createInManagedObjectContext(self.moc, contact: self.contactId, id: "", type: false, date: dateStr, message: msgForCoreData, did: self.did, flag: message_status.PENDING.rawValue) { (responseObject, error) -> () in
             if error == nil {
@@ -726,7 +751,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                     if responseObject["status"].stringValue == "success" {
                         cm.id = responseObject["sms"].stringValue
                         cm.flag = message_status.DELIVERED.rawValue
-                        var formatter1: NSDateFormatter = NSDateFormatter()
+                        let formatter1: NSDateFormatter = NSDateFormatter()
                         formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                         let parsedDate: String = formatter1.stringFromDate(NSDate())
                         cm.date = parsedDate
@@ -766,14 +791,14 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         cell.accessoryView?.removeFromSuperview()
         if message.id == "" {
             if ((message.flag == message_status.PENDING.rawValue) && (self.isLastMessage(message))) {
-                var activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+                let activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
                 activityIndicator.tag = 10
                 activityIndicator.startAnimating()
                 cell.accessoryView = activityIndicator
             }
             if message.flag == message_status.UNDELIVERED.rawValue {
-                var btnFrame = CGRectMake(cell.frame.origin.x, cell.frame.origin.y, 24, 24)
-                var btnRetry = UIView(frame: btnFrame)
+                let btnFrame = CGRectMake(cell.frame.origin.x, cell.frame.origin.y, 24, 24)
+                let btnRetry = UIView(frame: btnFrame)
                 btnRetry.backgroundColor = UIColor.redColor()
                 btnRetry.tag = 33000
                 btnRetry.layer.cornerRadius = btnRetry.frame.size.width / 2
@@ -785,7 +810,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func retryWasPressed(sender: UIButton) {
-        println("hi")
+        print("hi")
         //        let cm : CoreMessage = self.messageFetchedResultsController.objectAtIndexPath(self.selectedIndexPath) as! CoreMessage
         //        processMessage(cm)
     }
@@ -842,14 +867,14 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     // 2. Copy text to pasteboard
     func messageCopyTextAction(menuController: UIMenuController) {
-        if let selectedIndexPath = tableView.indexPathForSelectedRow() {
+        if let selectedIndexPath = tableView.indexPathForSelectedRow {
             let selectedMessage = messageFetchedResultsController.objectAtIndexPath(selectedIndexPath) as! CoreMessage
             UIPasteboard.generalPasteboard().string = selectedMessage.message
         }
     }
     // 3. Deselect row
     func menuControllerWillHide(notification: NSNotification) {
-        if let selectedIndexPath = tableView.indexPathForSelectedRow() {
+        if let selectedIndexPath = tableView.indexPathForSelectedRow {
             tableView.deselectRowAtIndexPath(selectedIndexPath, animated: false)
         }
         (notification.object as! UIMenuController).menuItems = nil
@@ -863,7 +888,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         dynamicBarButton.title = "Cancel"
         dynamicBarButton.action = "cancelDeleteAction:"
         self.tableView.reloadData()
-        if let selectedIndexPath = tableView.indexPathForSelectedRow() {
+        if let selectedIndexPath = tableView.indexPathForSelectedRow {
             tableView.deselectRowAtIndexPath(selectedIndexPath, animated: false)
         }
     }
@@ -881,13 +906,16 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         for (key, value) in self.messagesToDelete {
             CoreMessage.deleteMessage(self.moc, coreMessage: value)
             
-            var deleteViewButton = self.view.viewWithTag(key)
+            let deleteViewButton = self.view.viewWithTag(key)
             deleteViewButton!.backgroundColor = nil
         }
         self.messagesToDelete.removeAll(keepCapacity: false)
         deleteMenuActivated = false
         
-        messageFetchedResultsController.performFetch(nil)
+        do {
+            try messageFetchedResultsController.performFetch()
+        } catch _ {
+        }
         self.tableView.reloadData()
         deleteMenuActivated = false
         self.delegate?.updateMessagesTableView!()
@@ -899,7 +927,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         dynamicBarButton.title = "Details"
         dynamicBarButton.action = "segueToContactDetails:"
         for v in self.view.subviews {
-            let vi = v as! UIView
+            let vi = v 
             if vi.tag == 31 || vi.tag == 30 {
                 vi.removeFromSuperview()
             }
@@ -914,7 +942,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         
         if (segue.identifier == "showContactDetailSegue") {
-            var actionSegue : ContactActionViewController = segue.destinationViewController as! ContactActionViewController
+            let actionSegue : ContactActionViewController = segue.destinationViewController as! ContactActionViewController
             actionSegue.contactId = self.contactId
             actionSegue.moc = self.moc
         }

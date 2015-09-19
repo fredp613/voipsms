@@ -28,7 +28,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
 
-        var qualityOfServiceClass = Int(QOS_CLASS_DEFAULT.value)
+        let qualityOfServiceClass = Int(QOS_CLASS_DEFAULT.rawValue)
         var backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
 //        dispatch_async(backgroundQueue, { () -> Void in
              self.getMessages()
@@ -37,7 +37,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     }      
     
     @IBAction func testPressed(sender: AnyObject) {
-        println("testing")
+        print("testing")
     }
     func contextDidSave(notification: NSNotification) {
 //        self.testBtn.setTitle(String(totalCount), forState: UIControlState.Normal)
@@ -61,9 +61,9 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     
     //MARK: Custom Methods
     func getMessages() {                
-        var backgroundMOC : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+        let backgroundMOC : NSManagedObjectContext = CoreDataStack().managedObjectContext!
         if let dids = CoreDID.getDIDs(backgroundMOC) {
-            println(dids)
+            print(dids)
             if let str = dids.filter({$0.currentlySelected.boolValue == true}).first {
                 if let currentUser = CoreUser.currentUser(backgroundMOC) {
                     Message.getMessagesFromAPI(false, fromList: false, moc: backgroundMOC, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
@@ -71,22 +71,27 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
                     
                         if error == nil {
                            
-                            if let contacts = CoreContact.getAllContacts(backgroundMOC) {
-                                for c in contacts {
-                                    if let lastMessage = CoreContact.getLastMessageFromContact(backgroundMOC, contactId: c.contactId, did: nil) {
-                                        var formatter1: NSDateFormatter = NSDateFormatter()
-                                        formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-                                        let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
-                                        c.lastModified = parsedDate
-                                        CoreContact.updateContactInMOC(backgroundMOC)
+                            do {
+                                 let contacts = try CoreContact.getAllContacts(backgroundMOC)
+                                    for c in contacts! {
+                                        if let lastMessage = CoreContact.getLastMessageFromContact(backgroundMOC, contactId: c.contactId, did: nil) {
+                                            let formatter1: NSDateFormatter = NSDateFormatter()
+                                            formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
+                                            let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
+                                            c.lastModified = parsedDate
+                                            CoreContact.updateContactInMOC(backgroundMOC)
+                                        }
                                     }
-                                }
+                                
+                            } catch {
+                                return
                             }
+                            
                             if Contact().checkAccess() {
                                 Contact().syncAddressBook1(backgroundMOC)
                             }
                             
-                            println("done")
+                            print("done")
                             currentUser.initialLogon = 0
                             currentUser.messagesLoaded = 1
                             CoreUser.updateInManagedObjectContext(backgroundMOC, coreUser: currentUser)
@@ -98,7 +103,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
                             })
                             
                         } else {
-                            println(error)
+                            print(error)
                             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 self.showErrorController()
                             })
@@ -110,16 +115,16 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     }
     
     func showErrorController() {
-        var alertController = UIAlertController(title: "Network Error", message: "We are having trouble reaching the voip.ms servers, click Ok to try again or No to cancel to try again later", preferredStyle: .Alert)
+        let alertController = UIAlertController(title: "Network Error", message: "We are having trouble reaching the voip.ms servers, click Ok to try again or No to cancel to try again later", preferredStyle: .Alert)
         
-        var okAction = UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default) {
+        let okAction = UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default) {
             UIAlertAction in
-            println("pressed")
+            print("pressed")
             self.getMessages()
         }
-        var cancelAction = UIAlertAction(title: "No, cancel", style: UIAlertActionStyle.Cancel) {
+        let cancelAction = UIAlertAction(title: "No, cancel", style: UIAlertActionStyle.Cancel) {
             UIAlertAction in
-            println("cancelled")
+            print("cancelled")
         }
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)

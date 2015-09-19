@@ -25,7 +25,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             let currentUser = CoreUser.currentUser(moc)
             let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
             
-            CoreUser.authenticate(moc, email: currentUser!.email, password: pwd!, completionHandler: { (success, error) -> Void in
+            CoreUser.authenticate(moc, email: currentUser!.email, password: pwd!, completionHandler: { (success, error, status) -> Void in
                 if success == false || currentUser?.remember == false {
                     self.performSegueWithIdentifier("showLoginSegue", sender: self)
                 }

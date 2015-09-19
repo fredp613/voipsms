@@ -19,9 +19,11 @@ class CoreDeleteMessage: NSManagedObject {
         let coreDeleteMessage : CoreDeleteMessage = NSEntityDescription.insertNewObjectForEntityForName("CoreDeleteMessage", inManagedObjectContext: moc) as! CoreDeleteMessage
         coreDeleteMessage.id = id
         
-        let err = NSError()
-        if moc.save(nil) {
+//        let err = NSError()
+        do {
+            try moc.save()
             return true
+        } catch _ {
         }
         return false
     }
@@ -33,13 +35,16 @@ class CoreDeleteMessage: NSManagedObject {
         fetchRequest.entity = entity
         fetchRequest.returnsObjectsAsFaults = false
         var coreDeleteMessages = [CoreDeleteMessage]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDeleteMessage]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreDeleteMessage]
         if fetchResults?.count > 0 {
             coreDeleteMessages = fetchResults!
         }
         for cm in coreDeleteMessages {
             moc.deleteObject(cm)
-            moc.save(nil)
+            do {
+                try moc.save()
+            } catch _ {
+            }
             return true
         }
         return false
@@ -50,7 +55,7 @@ class CoreDeleteMessage: NSManagedObject {
         fetchRequest.entity = entity
         fetchRequest.returnsObjectsAsFaults = false
         var coreMessages = [CoreDeleteMessage]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDeleteMessage]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreDeleteMessage]
         if fetchResults?.count > 0 {
             coreMessages = fetchResults!
             return coreMessages
@@ -66,7 +71,7 @@ class CoreDeleteMessage: NSManagedObject {
         fetchRequest.entity = entity
         fetchRequest.returnsObjectsAsFaults = false
         var coreMessages = [CoreDeleteMessage]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreDeleteMessage]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreDeleteMessage]
         if fetchResults?.count > 0 {
             return true
         }

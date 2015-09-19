@@ -23,7 +23,7 @@ class ProfileViewController: UIViewController {
         
         if Contact().checkAccess() {
             Contact().getContactsDict({ (contacts) -> () in
-                println(contacts)
+                print(contacts)
             })
         }
         
@@ -34,13 +34,13 @@ class ProfileViewController: UIViewController {
     }
     func matchesForRegexInText(regex: String!, text: String!) -> [String] {
         
-        let regex = NSRegularExpression(pattern: regex,
-            options: nil, error: nil)!
+        let regex = try! NSRegularExpression(pattern: regex,
+            options: [])
         let nsString = text as NSString
         let results = regex.matchesInString(text,
-            options: nil, range: NSMakeRange(0, nsString.length))
-            as! [NSTextCheckingResult]
-        return map(results) { nsString.substringWithRange($0.range)}
+            options: [], range: NSMakeRange(0, nsString.length))
+            
+        return results.map { nsString.substringWithRange($0.range)}
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -52,7 +52,7 @@ class ProfileViewController: UIViewController {
         if profileAccessSwitch.on {
             
         } else {
-            println("off")
+            print("off")
         }
     }
     

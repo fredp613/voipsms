@@ -20,22 +20,22 @@ private let DeviceList = [
     /* Simulator */       "x86_64": "Simulator", "i386": "Simulator"
 ]
 
-public extension UIDevice {
-    
-    var modelName: String {
-        var systemInfo = utsname()
-        uname(&systemInfo)
-        
-        let machine = systemInfo.machine
-        let mirror = reflect(machine)
-        var identifier = ""
-        
-        for i in 0..<mirror.count {
-            if let value = mirror[i].1.value as? Int8 where value != 0 {
-                identifier.append(UnicodeScalar(UInt8(value)))
-            }
-        }
-        return DeviceList[identifier] ?? identifier
-    }
-    
-}
+//public extension UIDevice {
+//    
+//    var modelName: String {
+//        var systemInfo = utsname()
+//        uname(&systemInfo)
+//        
+//        let machine = systemInfo.machine
+//        let mirror = reflect(machine)
+//        var identifier = ""
+//        
+//        for i in 0..<mirror.count {
+//            if let value = mirror[i].1.value as? Int8 where value != 0 {
+//                identifier.append(UnicodeScalar(UInt8(value)))
+//            }
+//        }
+//        return DeviceList[identifier] ?? identifier
+//    }
+//    
+//}

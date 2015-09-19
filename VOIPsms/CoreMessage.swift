@@ -43,7 +43,7 @@ class CoreMessage: NSManagedObject {
         var uuid = NSNumber()
         if CoreMessage.getMessages(managedObjectContext, ascending: false).count > 0 {
             let lastMsgId = CoreMessage.getMessages(managedObjectContext, ascending: false)[0].coreId
-            var newMsgID = lastMsgId.intValue + 1
+            let newMsgID = lastMsgId.intValue + 1
             coreMessage.coreId = NSNumber(int: newMsgID)
             uuid = NSNumber(int: newMsgID)
         } else {
@@ -54,7 +54,7 @@ class CoreMessage: NSManagedObject {
 //            if  CoreContact.updateInManagedObjectContext(managedObjectContext, contactId: contact, lastModified: date, fullName: nil, phoneLabel: nil, addressBookLastModified: nil) {
 //                coreMessage.contact = c
 //            }
-            var formatter1: NSDateFormatter = NSDateFormatter()
+            let formatter1: NSDateFormatter = NSDateFormatter()
             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
             let parsedDate: NSDate = formatter1.dateFromString(date)!
             c.lastModified = parsedDate
@@ -86,18 +86,21 @@ class CoreMessage: NSManagedObject {
 //            println(coreMessage.id)
             CoreDeleteMessage.createInManagedObjectContext(moc, id: coreMessage.id)
             Message.deleteMessagesFromAPI([coreMessage.id], completionHandler: { (responseObject, error) -> () in
-                println("done")
+                print("done")
             })
         }
-        var contact = coreMessage.contactId
-        var did = coreMessage.did
+        let contact = coreMessage.contactId
+        let did = coreMessage.did
         
         moc.deleteObject(coreMessage)
-        moc.save(nil)
+        do {
+            try moc.save()
+        } catch _ {
+        }
         
         if let lastMessage = CoreContact.getLastMessageFromContact(moc, contactId: contact, did: did) {
-            var currentContact = CoreContact.currentContact(moc, contactId: contact)
-            var formatter1: NSDateFormatter = NSDateFormatter()
+            let currentContact = CoreContact.currentContact(moc, contactId: contact)
+            let formatter1: NSDateFormatter = NSDateFormatter()
             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
             let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
             currentContact?.lastModified = parsedDate
@@ -130,14 +133,17 @@ class CoreMessage: NSManagedObject {
         fetchRequest.entity = entity
         fetchRequest.returnsObjectsAsFaults = false
         var coreMessages = [CoreMessage]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreMessage]
         if fetchResults?.count > 0 {
             coreMessages = fetchResults!
         }
         for cm in coreMessages {
             CoreDeleteMessage.createInManagedObjectContext(moc, id: cm.id)
             moc.deleteObject(cm)
-            moc.save(nil)
+            do {
+                try moc.save()
+            } catch _ {
+            }
             return true
         }
         
@@ -153,13 +159,16 @@ class CoreMessage: NSManagedObject {
         fetchRequest.entity = entity
         fetchRequest.returnsObjectsAsFaults = false
         var coreMessages = [CoreMessage]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreMessage]
         if fetchResults?.count > 0 {
             coreMessages = fetchResults!
         }
         for cm in coreMessages {
             moc.deleteObject(cm)
-            moc.save(nil)
+            do {
+                try moc.save()
+            } catch _ {
+            }
             return true
         }
         
@@ -185,9 +194,12 @@ class CoreMessage: NSManagedObject {
         
         if let cm = CoreMessage.getMessageByUUID(moc, coreId: coreId) {
             cm.id = id
-            moc.save(nil)
+            do {
+                try moc.save()
+            } catch _ {
+            }
             
-            var formatter: NSDateFormatter = NSDateFormatter()
+            let formatter: NSDateFormatter = NSDateFormatter()
             formatter.dateFormat = "dd-MM-yyyy"
             let stringDate: String = formatter.stringFromDate(NSDate())
             CoreContact.updateInManagedObjectContext(moc, contactId: cm.contactId, lastModified: stringDate,fullName: nil, phoneLabel: nil, addressBookLastModified: nil)
@@ -205,7 +217,7 @@ class CoreMessage: NSManagedObject {
         fetchRequest.sortDescriptors = [sortDescriptor]
         fetchRequest.returnsObjectsAsFaults = false
         var coreMessages = [CoreMessage]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreMessage]
         if fetchResults?.count > 0 {
             coreMessages = fetchResults!
         }
@@ -216,14 +228,27 @@ class CoreMessage: NSManagedObject {
         let fetchRequest = NSFetchRequest(entityName: "CoreMessage")
         let predicate = NSPredicate(format: "coreId == %@", coreId)
         fetchRequest.predicate = predicate
-        var error : NSError? = nil
-        if let fetchResults = moc.executeFetchRequest(fetchRequest, error: &error) as? [CoreMessage] {
+        
+        do {
+            let fetchResults = try moc.executeFetchRequest(fetchRequest) as! [CoreMessage]
             if fetchResults.count > 0 {
                 return fetchResults[0] as CoreMessage
             }
-        } else {
-            println("\(error?.userInfo)")
         }
+        catch {
+            print(error)
+            return nil
+        }
+        
+//        fetchRequest.predicate = predicate
+//        let error : NSError? = nil
+//        if let fetchResults = moc.executeFetchRequest(fetchRequest) as? [CoreMessage] {
+//            if fetchResults.count > 0 {
+//                return fetchResults[0] as CoreMessage
+//            }
+//        } else {
+//            print("\(error?.userInfo)")
+//        }
         return nil
     }
     
@@ -232,14 +257,28 @@ class CoreMessage: NSManagedObject {
         let predicate = NSPredicate(format: "id == %@", Id)
         fetchRequest.predicate = predicate
         fetchRequest.fetchLimit = 1
-        var error : NSError? = nil
-        if let fetchResults = moc.executeFetchRequest(fetchRequest, error: &error) as? [CoreMessage] {
+        
+        do {
+            let fetchResults = try moc.executeFetchRequest(fetchRequest) as! [CoreMessage]
             if fetchResults.count > 0 {
                 return fetchResults[0] as CoreMessage
             }
-        } else {
-            println("\(error?.userInfo)")
         }
+        catch {
+            print(error)
+            return nil
+        }
+
+        
+//        let error : NSError? = nil
+//
+//        if let fetchResults = moc.executeFetchRequest(fetchRequest) as? [CoreMessage] {
+//            if fetchResults.count > 0 {
+//                return fetchResults[0] as CoreMessage
+//            }
+//        } else {
+//            print("\(error?.userInfo)")
+//        }
         return nil
     }
     
@@ -256,7 +295,7 @@ class CoreMessage: NSManagedObject {
         
         fetchRequest.returnsObjectsAsFaults = false
         var coreMessages = [CoreMessage]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreMessage]
         if fetchResults?.count > 0 {
             coreMessages = fetchResults!
         }
@@ -281,7 +320,7 @@ class CoreMessage: NSManagedObject {
         
         fetchRequest.returnsObjectsAsFaults = false
         var coreMessages = [CoreMessage]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreMessage]
         if fetchResults?.count > 0 {
             coreMessages = fetchResults!
             return coreMessages
@@ -301,7 +340,7 @@ class CoreMessage: NSManagedObject {
         
         fetchRequest.returnsObjectsAsFaults = false
         var coreMessages = [CoreMessage]()
-        let fetchResults = moc.executeFetchRequest(fetchRequest, error: nil) as? [CoreMessage]
+        let fetchResults = (try? moc.executeFetchRequest(fetchRequest)) as? [CoreMessage]
         if fetchResults?.count > 0 {
             coreMessages = fetchResults!
             return coreMessages
@@ -322,15 +361,27 @@ class CoreMessage: NSManagedObject {
             fetchRequest.fetchLimit = 1
             
             var coreMessages = [CoreMessage]()
-            var error : NSError? = nil
-            if let fetchResults = moc.executeFetchRequest(fetchRequest, error: &error) as? [CoreMessage] {
-                coreMessages = fetchResults
-                if fetchResults.count > 0 {
-                    return coreMessages[0]
+//            let error : NSError? = nil
+        
+                do {
+                    let fetchResults = try moc.executeFetchRequest(fetchRequest) as! [CoreMessage]
+                    if fetchResults.count > 0 {
+                        return fetchResults[0]
+                    }
                 }
-            } else {
-                println("\(error?.userInfo)")
-            }
+                catch {
+                    print(error)
+                }
+        
+        
+//            if let fetchResults = moc.executeFetchRequest(fetchRequest) as? [CoreMessage] {
+//                coreMessages = fetchResults
+//                if fetchResults.count > 0 {
+//                    return coreMessages[0]
+//                }
+//            } else {
+//                print("\(error?.userInfo)")
+//            }
             return nil
     }
     
@@ -338,14 +389,14 @@ class CoreMessage: NSManagedObject {
         let date = NSDate().dateByAddingTimeInterval(NSTimeIntervalSince1970)
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
-        var dateStr = formatter.stringFromDate(date)
+        let dateStr = formatter.stringFromDate(date)
         
         CoreMessage.createInManagedObjectContext(moc, contact: contact, id: "", type: false, date: dateStr, message: messageText, did: did, flag: message_status.PENDING.rawValue) { (responseObject, error) -> () in
-            let err = NSError()
+            let err : NSError? = nil
             if responseObject != nil {
                 return completionHandler(responseObject: responseObject, error: nil)
             } else {
-                return completionHandler(responseObject: nil, error: err)
+                return completionHandler(responseObject: nil, error: error)
                 
             }
         }

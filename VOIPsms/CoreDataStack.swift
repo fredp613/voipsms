@@ -16,7 +16,7 @@ class CoreDataStack {
     lazy var applicationDocumentsDirectory: NSURL = {
         // The directory the application uses to store the Core Data store file. This code uses a directory named "myclerical.Trasher" in the application's documents Application Support directory.
         let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
-        return urls[urls.count-1] as! NSURL
+        return urls[urls.count-1] 
         }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {
@@ -32,7 +32,10 @@ class CoreDataStack {
         let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("VOIPsms.sqlite")
         var error: NSError? = nil
         var failureReason = "There was an error creating or loading the application's saved data."
-        if coordinator!.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: nil, error: &error) == nil {
+        do {
+            try coordinator!.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: nil)
+        } catch var error1 as NSError {
+            error = error1
             coordinator = nil
             // Report any error we got.
             let dict = NSMutableDictionary()
@@ -44,6 +47,8 @@ class CoreDataStack {
             // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             NSLog("Unresolved error \(error), \(error!.userInfo)")
             abort()
+        } catch {
+            fatalError()
         }
         
         return coordinator
@@ -79,12 +84,17 @@ class CoreDataStack {
         var error: NSError? = nil
 //        context.performBlockAndWait { () -> Void in
 //        context.performBlock { () -> Void in
-            if context.hasChanges && !context.save(&error) {
+            if context.hasChanges {
+            do {
+                try context.save()
+            } catch let error1 as NSError {
+                error = error1
                 // Replace this implementation with code to handle the error appropriately.
                 // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 NSLog("Unresolved error \(error), \(error!.userInfo)")
-                abort()
+//                abort()
             }
+        }
 //        }
         
 //        }
@@ -118,17 +128,17 @@ class CoreDataStack {
         
         let sender = notification.object as! NSManagedObjectContext
         if sender === self.managedObjectContext {
-            println("saved to main context in this thread")
+            print("saved to main context in this thread")
             self.managedObjectContextPrivate!.performBlock({ () -> Void in
                 self.managedObjectContextPrivate!.mergeChangesFromContextDidSaveNotification(notification)
             })
         } else if sender === self.managedObjectContextPrivate {
-            println("saved backgorund context in this thread")
+            print("saved backgorund context in this thread")
             self.managedObjectContext!.performBlock({ () -> Void in
                 self.managedObjectContext!.mergeChangesFromContextDidSaveNotification(notification)
             })
         } else {
-            println("saved to context in other thread")
+            print("saved to context in other thread")
             self.managedObjectContextPrivate!.performBlock({ () -> Void in
                 self.managedObjectContextPrivate?.mergeChangesFromContextDidSaveNotification(notification)
             })
