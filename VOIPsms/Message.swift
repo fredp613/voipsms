@@ -244,12 +244,12 @@ class Message {
                 "id":id
             ]
         VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
-                if responseObject {
-                   print(responseObject)
-                }
-                if error != nil {
-                    print(error)
-                }
+//                if responseObject {
+//                   print(responseObject)
+//                }
+//                if error != nil {
+//                    print(error)
+//                }
             }
         }
         return completionHandler(responseObject: true, error: nil)

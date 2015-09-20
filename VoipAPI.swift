@@ -87,7 +87,7 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
     
     func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
         print("did receive response")
-        print(response)
+//        print(response)
     }
     
     func connection(connection: NSURLConnection, willSendRequest request: NSURLRequest, redirectResponse response: NSURLResponse?) -> NSURLRequest? {

@@ -216,7 +216,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func createOrUpdateMessage(userInfo: [NSObject : AnyObject], userActive: Bool) {
-        print(userInfo)
+//        print(userInfo)
         let did = userInfo["did"] as! String
         let id = userInfo["id"] as! String
         let message = userInfo["message"] as! String
@@ -265,12 +265,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //                params should go in body of request
         
         VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest({ (responseObject, error) -> () in
-            if responseObject != nil {
-                print(responseObject)
-            }
-            if error != nil {
-                print(error)
-            }
+//            if responseObject != nil {
+//                print(responseObject)
+//            }
+//            if error != nil {
+//                print(error)
+//            }
 
         })
     }

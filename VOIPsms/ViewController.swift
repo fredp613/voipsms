@@ -47,9 +47,16 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     }
 
     @IBAction func loginWasPressed(sender: AnyObject) {
-        self.loginBtn.setTitle("", forState: UIControlState.Normal)
-        self.activityIndicator.startAnimating()
-        self.login()
+       
+        if self.textPwd.text != "" && self.textUserName != nil {
+            self.loginBtn.setTitle("", forState: UIControlState.Normal)
+            self.activityIndicator.startAnimating()
+            self.login()
+        } else {
+            let alert = UIAlertView(title: "Credentials Error", message: "User name and/or password cannot be blank", delegate: self, cancelButtonTitle: "Ok")
+            alert.show()
+        }
+        
     }
     
     @IBAction func goBackPressed(sender: AnyObject) {

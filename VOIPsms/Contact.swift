@@ -158,9 +158,9 @@ class Contact {
                 print("hi there")
 
                 for cc in coreContacts {
-                    print(cc)
+
                     self.loadAddressBook { (responseObject, error) -> () in
-                        print(responseObject)
+
                         let contacts = responseObject
                         let filteredArray = contacts.filter() {$0.recordId == cc.contactId}
                         if filteredArray.count > 0 {
@@ -263,7 +263,6 @@ class Contact {
                     }
                     for (key, value) in contactsDict {
                         if (value.rangeOfString(self.searchTerm) != nil) {
-                            print(searchTerm)
                             if let contact1 = CoreContact.currentContact(moc, contactId: key) {
                                 if !self.coreContacts.contains(contact1) {
                                     self.coreContacts.append(contact1)
@@ -274,11 +273,9 @@ class Contact {
                     return completionHandler(self.coreContacts)
                 }
         })
-        print(self.coreContacts)
         
         if self.coreContacts.count > 0 {
             for c in self.coreContacts {
-                print(c.contactId)
             }
             return self.coreContacts
         }
