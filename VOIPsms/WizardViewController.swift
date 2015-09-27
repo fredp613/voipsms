@@ -31,8 +31,6 @@ class WizardViewController: UIViewController {
     }
     
 
-    
-
     /*
     // MARK: - Navigation
 

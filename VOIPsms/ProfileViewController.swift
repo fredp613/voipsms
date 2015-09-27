@@ -23,7 +23,7 @@ class ProfileViewController: UIViewController {
         
         if Contact().checkAccess() {
             Contact().getContactsDict({ (contacts) -> () in
-                print(contacts)
+
             })
         }
         

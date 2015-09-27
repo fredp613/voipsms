@@ -713,7 +713,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     
     @IBAction func sendWasPressed(sender: AnyObject) {
-        var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+        let msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         let msgForCoreData = self.textMessage.text
         self.textMessage.text = ""
         
@@ -742,7 +742,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func processMessage(cm: CoreMessage) {
 
-        let msg : String = cm.message.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+//        let msg : String = cm.message.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+
+        let msg : String = cm.message.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet())!
         
         if Reachability.isConnectedToNetwork() {
             self.moc.performBlock({ () -> Void in

@@ -15,7 +15,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-//    var privateMoc : NSManagedObjectContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
     var remoteNotification : NSDictionary?
 
     var backgroundTaskID : UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier()
@@ -24,15 +23,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
-//        privateMoc.persistentStoreCoordinator = CoreDataStack().persistentStoreCoordinator
         let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
         privateMOC.parentContext = moc
         
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
-//            refreshMessages()
-            //sync addressBook when opening
+
             privateMOC.performBlock { () -> Void in
                 if Contact().checkAccess() {
                     Contact().syncAddressBook1(privateMOC)
@@ -48,8 +45,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-//        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: .Alert | .Sound | .Badge, categories: nil))
-        
         UIApplication.sharedApplication().registerForRemoteNotifications()
         
         let settings = UIUserNotificationSettings(forTypes: .Alert, categories: nil)
@@ -60,15 +55,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         })
         
         if let userInfo = launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? [NSObject : AnyObject] {
-//
-//            let sb = UIStoryboard(name: "Main", bundle: nil)
-//             NSNotificationCenter.defaultCenter().postNotificationName("appRestorePush", object: nil, userInfo: userInfo as [NSObject : AnyObject])
             
             let did = userInfo["did"] as! String
-            let id = userInfo["id"] as! String
-            let message = userInfo["message"] as! String
             let contact = userInfo["contact"] as! String
-            let date = userInfo["date"] as! String
 
             let navController = window?.rootViewController as! UINavigationController
             let firstVC = navController.viewControllers[0] as! MessageListViewController
@@ -79,11 +68,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             firstVC.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
          
         }
-       
-        
-
-        
-
         
         return true
     }
@@ -97,31 +81,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         remoteNotification = userInfo
         
-        
+        print("receive")
         
         if (application.applicationState == UIApplicationState.Active) {
             self.createOrUpdateMessage(userInfo, userActive: true)
         } else {
             self.createOrUpdateMessage(userInfo, userActive: false)
-//            if let notificationContact = userInfo["contact"] as? String {
-//                println("contact is: " + notificationContact)
-//                if let notificationDID = userInfo["did"] as? String {
-//                    println("did is:" + notificationDID)
-//                    if let selectedDID = CoreDID.getSelectedDID(self.moc) {
-//                        println("selected DID is: " + selectedDID.did)
-//                        if selectedDID.did != notificationDID {
-//                            CoreDID.toggleSelected(self.moc, did: notificationDID)
-//                            if let currentUser = CoreUser.currentUser(self.moc) {
-//                                currentUser.notificationLoad = 1
-//                                currentUser.notificationDID = notificationDID
-//                                currentUser.notificationContact = notificationContact
-//                                CoreDataStack().saveContext(moc)
-//                            }
-//                        }
-//                       
-//                    }
-//                }
-//            }
         }
         
     }
@@ -135,46 +100,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-        self.backgroundTaskID = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
-            UIApplication.sharedApplication().endBackgroundTask(self.backgroundTaskID)
-        }
-//          self.timer = NSTimer.scheduledTimerWithTimeInterval(5, target: self, selector: "timerDidFire:", userInfo: nil, repeats: true)
         
     }
     
     func applicationWillEnterForeground(application: UIApplication) {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-//        let app = UIApplication.sharedApplication()
-//        let oldNotifications = app.scheduledLocalNotifications
-//        if oldNotifications.count > 0 {
-//        app.cancelAllLocalNotifications()
-
-//        }
-
-//        refreshMessages()
     
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
-        
-//        if remoteNotification != nil {
-//            println("ok we are golen")
-//            let sb = UIStoryboard(name: "Main", bundle: nil)
-//            let mnvc = sb.instantiateViewControllerWithIdentifier("mnvc") as! UINavigationController
-//            let messageListVC: MessageListViewController = mnvc.viewControllers[0] as!
-//            MessageListViewController
-//            if let notificationContact = remoteNotification?["contact"] as? String {
-//                println("contact is:" + notificationContact)
-//                if let notificationDID = remoteNotification?["did"] as? String {
-//                    println("did is:" + notificationDID)
-//                    messageListVC.navToDetailFromNotification(notificationDID, contact: notificationContact)
-//                }
-//            }
-//        }
-        
-
         refreshMessages()
-
     }
 
     func applicationWillTerminate(application: UIApplication) {
@@ -190,11 +125,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let deviceTokenString: String = ( deviceToken.description as NSString )
             .stringByTrimmingCharactersInSet( characterSet )
             .stringByReplacingOccurrencesOfString( " ", withString: "" ) as String
-//        
-//        if let cd = CoreDevice.createInManagedObjectContext(self.moc, device: deviceTokenString) {
-//              println("Got token data! \(cd.deviceToken)")
-//        }
-        print(deviceToken)
         
         if let coreDevice = CoreDevice.createOrUpdateInMOC(self.moc, token: deviceTokenString) {
             print("got token data! \(coreDevice.deviceToken)")
@@ -216,13 +146,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func createOrUpdateMessage(userInfo: [NSObject : AnyObject], userActive: Bool) {
-//        print(userInfo)
         let did = userInfo["did"] as! String
         let id = userInfo["id"] as! String
         let message = userInfo["message"] as! String
         let contact = userInfo["contact"] as! String
         let date = userInfo["date"] as! String
-        
         
         var flagValue = message_status.DELIVERED.rawValue
         if userActive {
@@ -261,16 +189,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func pingPushServer() {
+        //do this in background
         let url = "https://mighty-springs-3852.herokuapp.com/users"
-        //                params should go in body of request
-        
         VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest({ (responseObject, error) -> () in
-//            if responseObject != nil {
-//                print(responseObject)
-//            }
-//            if error != nil {
-//                print(error)
-//            }
 
         })
     }

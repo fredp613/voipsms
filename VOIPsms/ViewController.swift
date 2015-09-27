@@ -62,6 +62,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     @IBAction func goBackPressed(sender: AnyObject) {
 //        self.performSegueWithIdentifier("showWizard", sender: self)
         navigationController?.popViewControllerAnimated(true)
+//        self.dismissViewControllerAnimated(true, completion: nil)
     }
     func login() {
         CoreUser.authenticate(moc, email: self.textUserName.text!, password: self.textPwd.text!) { (success, error, status) -> Void in

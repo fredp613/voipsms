@@ -26,6 +26,11 @@ class EAcViewController: UIViewController {
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
+    
+    @IBAction func setUpCompletedPressed(sender: AnyObject) {
+        self.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
 
     /*
     // MARK: - Navigation

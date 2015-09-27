@@ -106,11 +106,10 @@ class CoreUser: NSManagedObject {
     
     class func authenticate(moc: NSManagedObjectContext, email: String, password: String, completionHandler: ((Bool, error: NSError?, status: String?) -> Void)!) -> Void {
                 
-        var url = APIUrls.getUrl + "api_username=" + email + "&api_password=" + password + "&method=getDIDsInfo"
+        let url = APIUrls.getUrl + "api_username=" + email + "&api_password=" + password + "&method=getDIDsInfo"
         
          VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest { (data, error) -> () in
             if data != nil {
-                print(data)
                 if data["status"] == "success" {
                     
                     if self.userExists(moc) == false {

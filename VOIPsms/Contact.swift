@@ -155,7 +155,6 @@ class Contact {
         print("called")
         do {
             if let coreContacts = try CoreContact.getAllContacts(moc) {
-                print("hi there")
 
                 for cc in coreContacts {
 
