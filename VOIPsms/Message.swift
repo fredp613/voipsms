@@ -228,6 +228,7 @@ class Message {
             ]
             
         VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
+            print(APIUrls.get_request_url_contruct(params)!)
                 if error != nil {
                     return completionHandler(responseObject: responseObject, error: error)
                 } else {

@@ -91,7 +91,7 @@ class MessageBubbleCell: UITableViewCell, TTTAttributedLabelDelegate  {
             textColor = UIColor.whiteColor()
         }
         
-        let dateStr = NSAttributedString(string: "\n\(humanDate) \(message.id)", attributes:
+        let dateStr = NSAttributedString(string: "\n\(humanDate)", attributes:
             [NSForegroundColorAttributeName: textColor,
                 NSFontAttributeName: dateFont!])
         let messageStr = NSAttributedString(string: message.message, attributes:

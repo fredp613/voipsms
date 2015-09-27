@@ -12,13 +12,12 @@ import CoreData
 
 class APIUrls {
     
-    static let getUrl = "http://voip.ms/api/v1/rest.php?"
+    static let getUrl = "https://voip.ms/api/v1/rest.php?"
     var moc : NSManagedObjectContext
     
     init() {
         moc = CoreDataStack().managedObjectContext!
     }
-    
     
 //    api_username={$user}&api_password={$pass}&method={$method}"
     
@@ -33,7 +32,6 @@ class APIUrls {
         }
         return nil
     }
-    
     
     class func get_request_url_contruct(params: [String : String]?) -> String? {
         var url : String = ""

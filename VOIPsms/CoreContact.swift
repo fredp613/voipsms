@@ -32,12 +32,17 @@ class CoreContact: NSManagedObject {
         } else {
             contact.lastModified = NSDate().dateByAddingTimeInterval(NSTimeIntervalSince1970)
         }
-        let error : NSError? = nil
 //        if managedObjectContext.save(nil) {
 //            println("contact saved")
 //            return contact
 //        }
-        CoreDataStack().saveContext(managedObjectContext)
+//        CoreDataStack().saveContext(managedObjectContext)
+        do {
+            try managedObjectContext.save()
+        } catch _ {
+            print("somethign wrong")
+        }
+
         return contact
 
 //        return nil
@@ -70,7 +75,12 @@ class CoreContact: NSManagedObject {
             }
 //            managedObjectContext.save(nil)
         
-            CoreDataStack().saveContext(managedObjectContext)
+            do {
+                try managedObjectContext.save()
+            } catch _ {
+                print("somethign wrong")
+            }
+
             return true
         }
         return false
@@ -78,7 +88,12 @@ class CoreContact: NSManagedObject {
     
     class func updateContactInMOC(moc: NSManagedObjectContext) {
 //        moc.save(nil)
-        CoreDataStack().saveContext(moc)
+        do {
+            try moc.save()
+        } catch _ {
+            print("somethign wrong")
+        }
+
     }
     
     class func getAllContacts(managedObjectContext: NSManagedObjectContext) throws -> [CoreContact]? {

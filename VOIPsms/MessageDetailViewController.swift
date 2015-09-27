@@ -111,7 +111,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     var retrying : Bool = false
     var offsetHeight = CGFloat()
     
-    //    var coreDid = CoreDID()
     var delegate:MessageListViewDelegate? = nil
     
     lazy var messageFetchedResultsController: NSFetchedResultsController = {
@@ -124,7 +123,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let contactPredicate = NSPredicate(format: "contactId == %@", self.contactId)
         let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [msgDIDPredicate, contactPredicate])
         messagesFetchRequest.predicate = compoundPredicate
-        //        messagesFetchRequest.fetchBatchSize = 20
         let frc = NSFetchedResultsController(
             fetchRequest: messagesFetchRequest,
             managedObjectContext: self.moc,
@@ -154,7 +152,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         
         tableView.separatorStyle = .None
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
-//        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardDidHideNotification, object: nil)
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
         
@@ -164,16 +161,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         scrollView.bounces = false
         scrollView.bringSubviewToFront(tableView)
         
-        var error : NSError? = nil
-        
         do {
             try messageFetchedResultsController.performFetch()
         } catch _ {
         }
-//        if (messageFetchedResultsController.performFetch()==false) {
-//            print("An error has occurred: \(error?.localizedDescription)")
-//        }
-//        
 
         compressedTableViewHeight = self.tableView.frame.size.height
         
@@ -189,8 +180,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             }
         }
         
-        //refactor this - only call this when user navigates from new message
-        
         if let lastMessage = messageFetchedResultsController.fetchedObjects?.last! as? CoreMessage {
             if lastMessage.flag == message_status.PENDING.rawValue {
                 print("last message here")
@@ -200,13 +189,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 if lastMessage.type.boolValue == true || lastMessage.type == 1 {
                     lastMessage.flag = message_status.READ.rawValue
                     CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: lastMessage)
-//                    messageFetchedResultsController.performFetch(nil)
-//                    self.tableView.reloadData()
                 }
             }
         }
         startTimer()
-//        self.tableView.reloadData()
     }
     
     
@@ -228,9 +214,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func dataSourceRefreshTimerDidFire(sender: NSTimer) {
         
-        var error: NSError? = nil
         self.messageFetchedResultsController.fetchRequest.predicate = nil
-//        self.messageFetchedResultsController.fetchRequest.sortDescriptors = nil
         Message.getIncomingMessagesFromAPI(self.moc, did: self.did, contact: self.contactId, from: nil) { (responseObject, error) -> () in
             print("messages downloaded")
         }
@@ -245,10 +229,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             try self.messageFetchedResultsController.performFetch()
         } catch _ {
         }
-//        self.tableView.reloadData()
-//        if (self.messageFetchedResultsController.performFetch(&error)==false) {
-//            println("An error has occurred: \(error?.localizedDescription)")
-//        }
+
     }
     
     func startTimer() {
@@ -257,17 +238,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             if UIApplication.sharedApplication().isRegisteredForRemoteNotifications() {
                 time = 115
             } else {
-                time = 2
+                time = 4
             }
             timer = NSTimer.scheduledTimerWithTimeInterval(time, target: self, selector: "dataSourceRefreshTimerDidFire:", userInfo: nil, repeats: true)
         }
-        
-        //else {
-        //            let alert = UIAlertView(title: "Network Error", message: "You need to be connected to the network to be able to send and receive messages", delegate: self, cancelButtonTitle: "Ok")
-        //            alert.show()
-        //        }
-        
-        
     }
     
     func stopTimer() {
@@ -713,7 +687,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     
     @IBAction func sendWasPressed(sender: AnyObject) {
-        let msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+
         let msgForCoreData = self.textMessage.text
         self.textMessage.text = ""
         
@@ -742,14 +716,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func processMessage(cm: CoreMessage) {
 
-//        let msg : String = cm.message.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
-
-        let msg : String = cm.message.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet())!
-        
+        let msg : String = cm.message.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet())!        
         if Reachability.isConnectedToNetwork() {
             self.moc.performBlock({ () -> Void in
                 Message.sendMessageAPI(self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
-                    
                     if responseObject["status"].stringValue == "success" {
                         cm.id = responseObject["sms"].stringValue
                         cm.flag = message_status.DELIVERED.rawValue
@@ -757,16 +727,16 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                         formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                         let parsedDate: String = formatter1.stringFromDate(NSDate())
                         cm.date = parsedDate
+                        print("looks ok")
                     } else {
                         cm.flag = message_status.UNDELIVERED.rawValue
+                        print("looks bad")
                     }
                 })
                 dispatch_async(dispatch_get_main_queue(), { () -> Void in
                     CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: cm)
                 })
             })
-            
-            
         } else {
             if !retrying {
                 cm.flag = message_status.UNDELIVERED.rawValue
@@ -782,8 +752,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                     })
                 })
             }
-            
-            
         }
         
     }
@@ -818,7 +786,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func isLastMessage(message: CoreMessage) -> Bool {
-        var lastMessage = self.messageFetchedResultsController.fetchedObjects?.last! as! CoreMessage
+        let lastMessage = self.messageFetchedResultsController.fetchedObjects?.last! as! CoreMessage
         if message.id == lastMessage.id {
             return true
         }
@@ -857,15 +825,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                 
                 
                 if lm.flag != message_status.PENDING.rawValue {
-                    
                 }
                 
                 menuController.setMenuVisible(true, animated: true)
                 self.selectedIndexPath = pressedIndexPath
             }
         }
-        
-        
     }
     // 2. Copy text to pasteboard
     func messageCopyTextAction(menuController: UIMenuController) {

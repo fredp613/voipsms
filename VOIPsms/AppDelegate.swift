@@ -58,15 +58,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             let did = userInfo["did"] as! String
             let contact = userInfo["contact"] as! String
-
             let navController = window?.rootViewController as! UINavigationController
             let firstVC = navController.viewControllers[0] as! MessageListViewController
-            
             firstVC.did = did
             firstVC.contactForSegue = contact
             firstVC.fromClosedState = true
             firstVC.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
-         
         }
         
         return true
@@ -115,9 +112,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
         // Saves changes in the application's managed object context before the application terminates.
-//        self.saveContext()
+        self.saveContext()
     }
     
+    func saveContext() {
+        do {
+            try self.moc.save()
+        } catch _ {
+        }
+        
+    }
     
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
         let characterSet: NSCharacterSet = NSCharacterSet( charactersInString: "<>" )

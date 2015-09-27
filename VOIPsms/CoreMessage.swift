@@ -68,7 +68,15 @@ class CoreMessage: NSManagedObject {
         }
 //        let err = NSError()
         
-        CoreDataStack().saveContext(managedObjectContext)
+//        CoreDataStack().saveContext(managedObjectContext)
+        
+        do {
+            try managedObjectContext.save()
+        } catch _ {
+            print("somethign wrong")
+        }
+
+        
 //        if managedObjectContext.save(nil) {            
             return completionHandler(responseObject: coreMessage, error: nil)
 //        } else {
@@ -78,7 +86,13 @@ class CoreMessage: NSManagedObject {
     
     class func updateInManagedObjectContext(moc: NSManagedObjectContext, coreMessage: CoreMessage) {
         coreMessage.dateForSort = coreMessage.date.removeSpaces()
-        CoreDataStack().saveContext(moc)
+//        CoreDataStack().saveContext(moc)
+        
+        do {
+            try moc.save()
+        } catch _ {
+            print("somethign wrong")
+        }
     }
     
     class func deleteMessage(moc: NSManagedObjectContext, coreMessage: CoreMessage) {

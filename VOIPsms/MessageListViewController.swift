@@ -449,9 +449,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         if editingStyle == UITableViewCellEditingStyle.Delete {
             
-            var contactId = String()
             let contact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
-            contactId = contact.contactId
             contact.deletedContact = 1
             CoreContact.updateContactInMOC(self.managedObjectContext)
             

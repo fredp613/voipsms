@@ -105,10 +105,8 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
                 print(cleanedSearchBarText)
             }
             contact = cleanedSearchBarText as String
-//            contact = self.searchBar.text
         }
-//        var trimmedMessage = self.textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
-//        var msg : String = self.textMessage.text.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
+
         let msgForCoreData = self.textMessage.text
         //this is where the bug is, get the server date
         let date = NSDate()
@@ -117,17 +115,6 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         let dateStr = formatter.stringFromDate(date)
         self.textMessage.text = ""
         CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msgForCoreData, did: self.did, flag: message_status.PENDING.rawValue, completionHandler: { (responseObject, error) -> () in
-//            if let currentContact = CoreContact.currentContact(self.moc, contactId: contact) {
-//                var formatter1: NSDateFormatter = NSDateFormatter()
-//                formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
-//                let parsedDate: NSDate = formatter1.dateFromString(dateStr)!
-//                currentContact.lastModified = parsedDate
-//                currentContact.deletedContact = 0
-//                CoreContact.updateContactInMOC(self.moc)
-//            } else {
-//                println("creating contact")
-//                CoreContact.createInManagedObjectContext(self.moc, contactId: contact, lastModified: dateStr)
-//            }
             self.delegate?.triggerSegue!(contact, moc: self.moc)
             self.dismissViewControllerAnimated(false, completion: { () -> Void in
             })
