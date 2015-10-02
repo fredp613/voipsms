@@ -200,39 +200,46 @@ class Contact {
                 for(var numberIndex: CFIndex = 0;numberIndex < ABMultiValueGetCount(phones); numberIndex++) {
                     let contact = AddressBookContactStruct()
                     contact.contactFullName = fullName as String
-                    let phoneUnmanaged = ABMultiValueCopyValueAtIndex(phones, numberIndex)
-                    let phoneLabelUnmanaged = ABMultiValueCopyLabelAtIndex(phones, numberIndex)
-                    let phoneNumber : NSString = phoneUnmanaged.takeRetainedValue() as! NSString
-                    let phoneLabel : NSString = phoneLabelUnmanaged.takeRetainedValue() as NSString
-                    let regex = try! NSRegularExpression(pattern: "[0-9]",
-                        options: [])
-                    let regexLabel = try! NSRegularExpression(pattern: "[a-zA-Z0-9]",
-                        options: [])
-                    let results = regex.matchesInString(phoneNumber as String,
-                        options: [], range: NSMakeRange(0, phoneNumber.length))
-                    let resultsLabel = regexLabel.matchesInString(phoneLabel as String,
-                        options: [], range: NSMakeRange(0, phoneLabel.length))
+                    if let phoneUnmanaged = ABMultiValueCopyValueAtIndex(phones, numberIndex) {
                     
-                    let mappedResults = results.map { phoneNumber.substringWithRange($0.range)}
-                    let strRepresentationResults = mappedResults.joinWithSeparator("")
+                        let phoneLabelUnmanaged = ABMultiValueCopyLabelAtIndex(phones, numberIndex)
+                        let phoneNumber : NSString = phoneUnmanaged.takeRetainedValue() as! NSString
+                        if phoneLabelUnmanaged != nil {
+                            let phoneLabel : NSString = phoneLabelUnmanaged.takeRetainedValue() as NSString
+                            let regex = try! NSRegularExpression(pattern: "[0-9]",
+                                options: [])
+                            let regexLabel = try! NSRegularExpression(pattern: "[a-zA-Z0-9]",
+                                options: [])
+                            let results = regex.matchesInString(phoneNumber as String,
+                                options: [], range: NSMakeRange(0, phoneNumber.length))
+                            let resultsLabel = regexLabel.matchesInString(phoneLabel as String,
+                                options: [], range: NSMakeRange(0, phoneLabel.length))
+                            
+                            let mappedResults = results.map { phoneNumber.substringWithRange($0.range)}
+                            let strRepresentationResults = mappedResults.joinWithSeparator("")
+                            
+                            let mappedResultsLabel = resultsLabel.map { phoneLabel.substringWithRange($0.range)}
+                            let strRepresentationResultsLabel = mappedResultsLabel.joinWithSeparator("")
+                            
+                            let finalPhoneNumber = strRepresentationResults as NSString
+                            let finalPhoneLabel = strRepresentationResultsLabel as NSString
+                            
+                            var range = NSRange()
+                            if finalPhoneNumber.length > 10 {
+                                range = NSRange(location: 1, length: finalPhoneNumber.length - 1)
+                            } else {
+                                range = NSRange(location: 0, length: finalPhoneNumber.length)
+                            }
+                            let ff = finalPhoneNumber.substringWithRange(range)
+                            
+                            contact.recordId = ff
+                            contact.phoneLabel = String(finalPhoneLabel)
+                            self.contactsArr.append(contact)
+                        }
+                        
                     
-                    let mappedResultsLabel = resultsLabel.map { phoneLabel.substringWithRange($0.range)}
-                    let strRepresentationResultsLabel = mappedResultsLabel.joinWithSeparator("")
-                    
-                    let finalPhoneNumber = strRepresentationResults as NSString
-                    let finalPhoneLabel = strRepresentationResultsLabel as NSString
-                    
-                    var range = NSRange()
-                    if finalPhoneNumber.length > 10 {
-                        range = NSRange(location: 1, length: finalPhoneNumber.length - 1)
-                    } else {
-                        range = NSRange(location: 0, length: finalPhoneNumber.length)
                     }
-                    let ff = finalPhoneNumber.substringWithRange(range)
                     
-                    contact.recordId = ff
-                    contact.phoneLabel = String(finalPhoneLabel)
-                    self.contactsArr.append(contact)
                 }
 //                println(self.contactsArr.map({$0.contactFullName}))
             }

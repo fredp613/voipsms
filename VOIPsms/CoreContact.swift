@@ -77,11 +77,10 @@ class CoreContact: NSManagedObject {
         
             do {
                 try managedObjectContext.save()
+                return true
             } catch _ {
-                print("somethign wrong")
+                print("something went wrong")
             }
-
-            return true
         }
         return false
     }

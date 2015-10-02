@@ -97,6 +97,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+        self.backgroundTaskID = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
+            UIApplication.sharedApplication().endBackgroundTask(self.backgroundTaskID)
+        }
         
     }
     
@@ -142,11 +145,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     //MARK: Custom methods
     func refreshMessages() {
-        if let str = CoreDID.getSelectedDID(moc) {
-            let fromStr = CoreMessage.getLastMsgByDID(self.moc, did: str.did)?.date.strippedDateFromString()
-            Message.getMessagesFromAPI(true, fromList: false, moc: self.moc, from: fromStr) { (responseObject, error) -> () in
+        
+        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        dispatch_async(backgroundQueue, { () -> Void in
+            if let str = CoreDID.getSelectedDID(self.moc) {
+                let fromStr = CoreMessage.getLastMsgByDID(self.moc, did: str.did)?.date.strippedDateFromString()
+                Message.getMessagesFromAPI(true, fromList: false, moc: self.moc, from: fromStr) { (responseObject, error) -> () in
+                }
             }
-        }
+        })
+        
+        
     }
     
     func createOrUpdateMessage(userInfo: [NSObject : AnyObject], userActive: Bool) {
@@ -194,10 +204,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func pingPushServer() {
         //do this in background
-        let url = "https://mighty-springs-3852.herokuapp.com/users"
-        VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest({ (responseObject, error) -> () in
-
+        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        dispatch_async(backgroundQueue, { () -> Void in
+            let url = "https://mighty-springs-3852.herokuapp.com/users"
+            VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest({ (responseObject, error) -> () in
+                
+            })
         })
+        
     }
  
 

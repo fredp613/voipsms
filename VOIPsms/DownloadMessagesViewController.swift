@@ -28,8 +28,8 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
 
-        let qualityOfServiceClass = Int(QOS_CLASS_DEFAULT.rawValue)
-        var backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
 //        dispatch_async(backgroundQueue, { () -> Void in
              self.getMessages()
 //        })
@@ -66,6 +66,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
             print(dids)
             if let str = dids.filter({$0.currentlySelected.boolValue == true}).first {
                 if let currentUser = CoreUser.currentUser(backgroundMOC) {
+                    
                     Message.getMessagesFromAPI(false, fromList: false, moc: backgroundMOC, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
                         error) -> () in
                     
@@ -88,7 +89,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
                             }
                             
                             if Contact().checkAccess() {
-                                Contact().syncAddressBook1(backgroundMOC)
+//                                Contact().syncAddressBook1(backgroundMOC)
                             }
                             
                             print("done")
@@ -110,7 +111,9 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
                         }
                     })
                 }
+
             }
+
         }
     }
     
