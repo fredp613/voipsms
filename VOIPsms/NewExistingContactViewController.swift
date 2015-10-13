@@ -72,24 +72,22 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        if Contact().addPhoneToExistingContact(self.contacts[indexPath.row].recordId, phone: self.contactId) {
-            print("all good")
-        }
         let alertController = UIAlertController(title: "Confirm", message: "Are you sure you want to add \(self.contactId.northAmericanPhoneNumberFormat()) to this contact: \(self.contacts[indexPath.row].contactFullName)", preferredStyle: .Alert)
         
         let okAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default) {
             UIAlertAction in
             print("pressed")
-//            let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-            if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
-                currentContact.fullName = self.contacts[indexPath.row].contactFullName
-                print("saving to contact")
-                do {
-                    try self.moc.save()
-                } catch _ {
+            
+            if Contact().addPhoneToExistingContact(self.contacts[indexPath.row].recordId, phone: self.contactId) {
+                if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
+                    currentContact.fullName = self.contacts[indexPath.row].contactFullName
+                    print("saving to contact")
+                    do {
+                        try self.moc.save()
+                    } catch _ {
+                    }
                 }
             }
-//            CoreContact.updateInManagedObjectContext(moc, contactId: self.contactId, lastModified: nil, fullName: self.contacts[indexPath.row].contactFullName, phoneLabel: nil, addressBookLastModified: NSDate())
 
             self.dismissContactActionVC()
             self.dismissViewControllerAnimated(true, completion: { () -> Void in

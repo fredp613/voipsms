@@ -98,6 +98,7 @@ class CoreDevice: NSManagedObject {
                             "device": deviceId
                         ]
                     ]
+                    
                     let url = "https://mighty-springs-3852.herokuapp.com/users"
                     //                params should go in body of request
                     

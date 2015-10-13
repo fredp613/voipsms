@@ -167,8 +167,13 @@ class Contact {
                             let phoneLabel = filteredArray.map({$0.phoneLabel}).last!
                             CoreContact.updateInManagedObjectContext(moc, contactId: cc.contactId, lastModified: nil, fullName: fullName, phoneLabel: phoneLabel, addressBookLastModified: NSDate())
                         }
-                        
-                        
+                        if cc.fullName != "" || cc.fullName != nil {
+                            //contact has full name - check if still in addressbook, if not delete fullName
+                            if filteredArray.count == 0 {
+                                cc.fullName = nil
+                                CoreContact.updateContactInMOC(moc)
+                            }
+                        }
                     }
                 }
             }
@@ -182,10 +187,8 @@ class Contact {
     
     func loadAddressBook(completionHandler: (responseObject: [AddressBookContactStruct], error: NSError?) -> ()) {
 
-        let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
         let adbk : ABAddressBook? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()
-        var cs : [String] = [String]()
-        
+
         struct contactS {
             var phone : String
             var fullName : String
@@ -193,7 +196,7 @@ class Contact {
         
         let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as NSArray as [ABRecord]
         for person in people {
-            var lastMod: NSDate = (ABRecordCopyValue(person, kABPersonModificationDateProperty).takeRetainedValue() as? NSDate)!
+//            var lastMod: NSDate = (ABRecordCopyValue(person, kABPersonModificationDateProperty).takeRetainedValue() as? NSDate)!
             let phones : ABMultiValueRef = ABRecordCopyValue(person, kABPersonPhoneProperty).takeRetainedValue() as ABMultiValueRef
             if let fullName = ABRecordCopyCompositeName(person)?.takeRetainedValue() {
 //                let name : NSString = fullName1 as NSString

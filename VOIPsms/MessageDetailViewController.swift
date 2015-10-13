@@ -68,8 +68,6 @@ struct IOSModel {
             self.compressedHeight = 301
         case .IPHONE_6P:
             self.compressedHeight = 350
-        default:
-            self.compressedHeight = 301
         }
     }
     
