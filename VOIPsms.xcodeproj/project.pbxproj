@@ -633,7 +633,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "VOIP.ms sms";
 				PROVISIONING_PROFILE = "";
-				SDKROOT = iphoneos9.1;
+				SDKROOT = iphoneos9.0;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VALID_ARCHS = "arm64 armv7 armv7s i386 armv6";
 			};
@@ -677,7 +677,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "VOIP.ms sms";
 				PROVISIONING_PROFILE = "";
-				SDKROOT = iphoneos9.1;
+				SDKROOT = iphoneos9.0;
 				VALIDATE_PRODUCT = YES;
 				VALID_ARCHS = "arm64 armv7 armv7s i386 armv6";
 			};

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8191" systemVersion="15A282b" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="6K7-kf-s7U">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8191" systemVersion="15B38b" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="6K7-kf-s7U">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
@@ -73,45 +73,13 @@
                                     <action selector="goButtonPressed:" destination="VNb-gb-wWf" eventType="touchUpInside" id="h18-wK-JUw"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="3NF-xu-SJl">
-                                <rect key="frame" x="48" y="255" width="225" height="55"/>
-                                <animations/>
-                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="55" id="25R-YT-wJZ"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="15"/>
-                                <inset key="contentEdgeInsets" minX="6" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                <state key="normal" title="If you already have a VOIP.MS account press here">
-                                    <color key="titleColor" red="0.0" green="0.40685791090000001" blue="0.81844973600000004" alpha="1" colorSpace="calibratedRGB"/>
-                                </state>
-                                <connections>
-                                    <segue destination="6OQ-TC-BAx" kind="presentation" id="Mby-7B-Oz0"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="5Eq-Re-IRf">
-                                <rect key="frame" x="48" y="323" width="225" height="57"/>
-                                <animations/>
-                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="57" id="Qnx-ik-SOG"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="15"/>
-                                <inset key="contentEdgeInsets" minX="6" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                <state key="normal" title="If you do not have a VOIP.MS account press here">
-                                    <color key="titleColor" red="0.0" green="0.40685791090000001" blue="0.81844973600000004" alpha="1" colorSpace="calibratedRGB"/>
-                                </state>
-                                <connections>
-                                    <segue destination="ltG-Ss-vhO" kind="presentation" id="xLJ-Hg-dBg"/>
-                                </connections>
-                            </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Before you start" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5XB-Ld-y4Y">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Before you start " textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5XB-Ld-y4Y">
                                 <rect key="frame" x="58" y="154" width="205" height="48"/>
                                 <animations/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="xV6-k7-fEt"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="19"/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="19"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -131,19 +99,33 @@
                                     </mask>
                                 </variation>
                             </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="3NF-xu-SJl">
+                                <rect key="frame" x="44" y="205" width="233" height="55"/>
+                                <animations/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="55" id="25R-YT-wJZ"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="15"/>
+                                <inset key="contentEdgeInsets" minX="6" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <state key="normal" title="Setup Instructions">
+                                    <color key="titleColor" red="0.0" green="0.40685791090000001" blue="0.81844973600000004" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <segue destination="6OQ-TC-BAx" kind="presentation" id="Mby-7B-Oz0"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <animations/>
                         <color key="backgroundColor" red="0.4549019608" green="0.53333333329999999" blue="0.76470588240000004" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
                             <constraint firstItem="5XB-Ld-y4Y" firstAttribute="top" secondItem="T5R-5q-ZA8" secondAttribute="bottom" constant="8" symbolic="YES" id="2ge-am-Zae"/>
                             <constraint firstItem="Xgy-94-zOC" firstAttribute="leading" secondItem="0X0-2d-zW0" secondAttribute="leadingMargin" constant="209" id="9NN-mr-wl7"/>
-                            <constraint firstItem="5Eq-Re-IRf" firstAttribute="top" secondItem="3NF-xu-SJl" secondAttribute="bottom" constant="13" id="C3T-uE-MaS"/>
-                            <constraint firstItem="3NF-xu-SJl" firstAttribute="top" secondItem="5XB-Ld-y4Y" secondAttribute="bottom" constant="53" id="CEa-e4-nJu"/>
+                            <constraint firstItem="3NF-xu-SJl" firstAttribute="top" secondItem="5XB-Ld-y4Y" secondAttribute="bottom" constant="3" id="CEa-e4-nJu"/>
                             <constraint firstItem="3NF-xu-SJl" firstAttribute="centerX" secondItem="5XB-Ld-y4Y" secondAttribute="centerX" id="JBX-Ge-RdL"/>
                             <constraint firstItem="Ed8-xc-gEI" firstAttribute="centerX" secondItem="T5R-5q-ZA8" secondAttribute="centerX" id="K6f-Gt-P7D"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Xgy-94-zOC" secondAttribute="trailing" constant="-1" id="QtR-6K-Lbc"/>
-                            <constraint firstItem="5Eq-Re-IRf" firstAttribute="trailing" secondItem="3NF-xu-SJl" secondAttribute="trailing" id="RMg-h5-IJ6"/>
-                            <constraint firstItem="3NF-xu-SJl" firstAttribute="leading" secondItem="0X0-2d-zW0" secondAttribute="leadingMargin" constant="32" id="ROb-SV-PVs"/>
+                            <constraint firstItem="3NF-xu-SJl" firstAttribute="leading" secondItem="0X0-2d-zW0" secondAttribute="leadingMargin" constant="28" id="ROb-SV-PVs"/>
                             <constraint firstItem="Ed8-xc-gEI" firstAttribute="centerX" secondItem="T5R-5q-ZA8" secondAttribute="centerX" id="XqY-Qz-kDi"/>
                             <constraint firstItem="T5R-5q-ZA8" firstAttribute="centerX" secondItem="5XB-Ld-y4Y" secondAttribute="centerX" id="dfi-3h-1RR"/>
                             <constraint firstItem="Ed8-xc-gEI" firstAttribute="top" secondItem="LNF-qb-w2l" secondAttribute="bottom" constant="45" id="geR-E4-oUk"/>
@@ -152,8 +134,6 @@
                             <constraint firstItem="5XB-Ld-y4Y" firstAttribute="centerX" secondItem="0X0-2d-zW0" secondAttribute="centerX" id="ptq-pb-Pd3"/>
                             <constraint firstItem="5XB-Ld-y4Y" firstAttribute="leading" secondItem="0X0-2d-zW0" secondAttribute="leadingMargin" constant="42" id="qpa-NI-6Jw"/>
                             <constraint firstItem="Fwc-EV-61c" firstAttribute="top" secondItem="Xgy-94-zOC" secondAttribute="bottom" constant="15" id="quf-Bl-LZz"/>
-                            <constraint firstItem="5Eq-Re-IRf" firstAttribute="top" secondItem="LNF-qb-w2l" secondAttribute="bottom" constant="303" id="ueU-Pu-GK0"/>
-                            <constraint firstItem="5Eq-Re-IRf" firstAttribute="leading" secondItem="3NF-xu-SJl" secondAttribute="leading" id="zSd-Pp-gzv"/>
                         </constraints>
                         <variation key="default">
                             <mask key="constraints">
@@ -334,8 +314,8 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SMS Setup Instructions" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JFo-Fm-Uzy">
                                 <rect key="frame" x="43" y="91" width="234" height="21"/>
                                 <animations/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="LHp-dL-a3s">
@@ -501,8 +481,8 @@
                                         <constraints>
                                             <constraint firstAttribute="height" constant="21" id="3nX-iP-9Rl"/>
                                         </constraints>
-                                        <fontDescription key="fontDescription" type="system" pointSize="18"/>
-                                        <color key="textColor" red="0.96470588239999999" green="0.96470588239999999" blue="0.96470588239999999" alpha="0.88" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="18"/>
+                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gbm-vp-upM">
