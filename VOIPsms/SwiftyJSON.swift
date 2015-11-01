@@ -116,7 +116,7 @@ public struct JSON {
                 } else {
                     _type = .Number
                 }
-            case let string as NSString:
+            case let _ as NSString:
                 _type = .String
             case let null as NSNull:
                 _type = .Null
@@ -1335,14 +1335,14 @@ extension JSON {
     @available(*, unavailable, renamed="uInt")
     public var unsignedInteger: Int? {
         get {
-            return self.number?.unsignedIntegerValue
+            return self.number as? Int //?.unsignedIntegerValue
         }
     }
     
     @available(*, unavailable, renamed="uIntValue")
     public var unsignedIntegerValue: Int {
         get {
-            return self.numberValue.unsignedIntegerValue
+            return self.numberValue as Int // .unsignedIntegerValue
         }
     }
 }
