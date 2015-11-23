@@ -41,9 +41,9 @@ extension String {
     }
     
     func truncatedString() -> String {
-        if self.characters.count > 15 {
+        if self.characters.count > 22 {
             //truncate
-            let firstPart = self.substringToIndex(self.startIndex.advancedBy(23))
+            let firstPart = self.substringToIndex(self.startIndex.advancedBy(21))
             let truncateIndicator = "..."
             return firstPart + truncateIndicator
         }

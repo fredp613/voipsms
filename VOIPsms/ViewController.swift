@@ -23,7 +23,8 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         super.viewDidLoad()
         textUserName.delegate = self
         textPwd.delegate = self
-//        textUserName.text = "fredp613@gmail.com"
+        textUserName.text = "fredp613@gmail.com"
+        textPwd.text = "Fredp613$"
         loginBtn.layer.cornerRadius = 10
         
         
@@ -47,7 +48,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     }
 
     @IBAction func loginWasPressed(sender: AnyObject) {
-       
+
         if self.textPwd.text != "" && self.textUserName != nil {
             self.loginBtn.setTitle("", forState: UIControlState.Normal)
             self.activityIndicator.startAnimating()
@@ -61,15 +62,19 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     
 
     func login() {
+        print(self.textUserName.text!);
+        print(self.textPwd.text!);
         CoreUser.authenticate(moc, email: self.textUserName.text!, password: self.textPwd.text!) { (success, error, status) -> Void in
+
             if error == nil {
-                if success {
+                if success {                            
                     let alert = UIAlertView(title: "Login successful", message: "Checking for messages", delegate: self, cancelButtonTitle: nil)
 //                    CoreDID.createOrUpdateDID(self.moc)
                     alert.show()
                     self.activityIndicator.stopAnimating()
                     if let currentUser = CoreUser.currentUser(self.moc) {
                         if currentUser.initialLogon.boolValue == true {
+                                    print("asdfasdf")
                             self.performSegueWithIdentifier("segueDownloadMessages", sender: self)
                         } else {
                             self.dismissViewControllerAnimated(true, completion: nil)
@@ -81,13 +86,16 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
                     self.activityIndicator.stopAnimating()
                     self.loginBtn.setTitle("Sign in", forState: UIControlState.Normal)
                     var messageTitle : String = ""
+                    var messageDesc : String = ""
                     if status == "api not enabled" {
                         messageTitle = "API not enabled"
+                        messageDesc = "Please go to your account settings and turn on the enable api option. Also ensure to insert 0.0.0.0 in the allowed IP section"
                     } else {
                         messageTitle = "Invalid login credentials"
+                        messageDesc = ""
                     }
 
-                    let alert = UIAlertView(title: messageTitle, message: "Please try again", delegate: self, cancelButtonTitle: "Ok")
+                    let alert = UIAlertView(title: messageTitle, message: messageDesc, delegate: self, cancelButtonTitle: "Ok")
                     alert.show()
                 }
             } else {

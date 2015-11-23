@@ -51,18 +51,23 @@ class CoreContact: NSManagedObject {
     class func updateInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contactId: String, lastModified: String?, fullName: String?, phoneLabel: String?, addressBookLastModified: NSDate?) -> Bool {
         if let contact : CoreContact = CoreContact.currentContact(managedObjectContext, contactId: contactId) {
             
-            if let lastModified = lastModified {
+            if let _ = lastModified {
                 
                 if let cc = CoreContact.getLastMessageFromContact(managedObjectContext, contactId: contactId, did: CoreDID.getSelectedDID(managedObjectContext)!.did) {
                     let formatter1: NSDateFormatter = NSDateFormatter()
                     formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                     let parsedDate: NSDate = formatter1.dateFromString(cc.date)!
                     contact.lastModified = parsedDate
+                } else {
+                    contact.lastModified = NSDate().dateByAddingTimeInterval(NSTimeIntervalSince1970)
                 }
+
             } else {
+                
                 if fullName == nil {
                     contact.lastModified = NSDate().dateByAddingTimeInterval(NSTimeIntervalSince1970)
                 }
+                
             }
             if let fullName = fullName {
                 contact.fullName = fullName
@@ -96,37 +101,25 @@ class CoreContact: NSManagedObject {
     }
     
     class func getAllContacts(managedObjectContext: NSManagedObjectContext) throws -> [CoreContact]? {
-//        let fetchRequest = NSFetchRequest(entityName: "CoreContact")
-//        let moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+
         var coreContacts = [CoreContact]()
-        
         let fetchRequest = NSFetchRequest(entityName: "CoreContact")
         
         let entity = NSEntityDescription.entityForName("CoreContact", inManagedObjectContext: managedObjectContext)
         fetchRequest.entity = entity
-
-        print("this is caleld")
+        print("get all contacts")
         do {
             let fetchResults = try managedObjectContext.executeFetchRequest(fetchRequest) as! [CoreContact]
+
             coreContacts = fetchResults
             if fetchResults.count > 0 {
                 return coreContacts
             }
         }
         catch let error {
-            print("this is caleld")
             print(error)
             return nil
         }
-//        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest) as? [CoreContact] {
-//            coreContacts = fetchResults
-//            if fetchResults.count > 0 {
-//                return coreContacts
-//            }
-//        } else {
-//            print("\(error?.userInfo)")
-//        }
-        
         return nil
     }
     

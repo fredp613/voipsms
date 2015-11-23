@@ -30,53 +30,51 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
         super.init()
         self.url = url
         self.httpMethod = httpMethod.rawValue
-        self.params = params
-        //initialize a connection from request
+        if params != nil {
+            self.params = params
+        }
+        
     }
     
     func APIAuthenticatedRequest(completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
-        
-        let urlSession = NSURLSession.sharedSession()
-        var request = NSMutableURLRequest(URL: NSURL(string: url)!)
+
+        let request = NSMutableURLRequest(URL: NSURL(string: url)!)
         request.HTTPMethod = self.httpMethod //httpMethod.rawValue
                 
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         
         var err: NSError?
-        if httpMethod != "GET" { //httpMethod.rawValue != "GET"  {
-            if let params = self.params {
+        if httpMethod != "GET" {
+            if params != nil {
                 do {
-                    request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params, options: [])
-                } catch var error as NSError {
+                    request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params!, options: [])
+                } catch let error as NSError {
                     err = error
+                    print(err)
                     request.HTTPBody = nil
                 }
             }
         }
         
         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response, data, error) -> Void in
-//            println(response)
-            if let err = error {
-                
+
+            if (error != nil) {
+                print(error)
                 return
             }
-            
-            if error == nil {
-                
-                if let json: AnyObject? = try? NSJSONSerialization.JSONObjectWithData(data!, options: .MutableContainers) {
-                    let parsedData = JSON(json!)
-                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        return completionHandler(responseObject: parsedData, error: nil)
-                    })
 
-                } else {
-                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        return completionHandler(responseObject: nil, error: error)
-                    })
-                }
+            if let json: AnyObject? = try? NSJSONSerialization.JSONObjectWithData(data!, options: .MutableContainers) {
+                let parsedData = JSON(json!)
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    return completionHandler(responseObject: parsedData, error: nil)
+                })
+
+            } else {
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    return completionHandler(responseObject: nil, error: error)
+                })
             }
-            
         }
     }
     
@@ -100,8 +98,7 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
     
     class func APIAuthenticatedRequestSync(httpMethod: httpMethodEnum, url: String, params: [String:String!]?, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         
-        let urlSession = NSURLSession.sharedSession()
-        var request = NSMutableURLRequest(URL: NSURL(string: url)!)
+        let request = NSMutableURLRequest(URL: NSURL(string: url)!)
         request.HTTPMethod = httpMethod.rawValue
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -112,8 +109,9 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
             if let params = params {
                 do {
                     request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(params, options: [])
-                } catch var error as NSError {
+                } catch let error as NSError {
                     err = error
+                    print(err)
                     request.HTTPBody = nil
                 }
             }
@@ -121,23 +119,15 @@ class VoipAPI : NSObject, UIAlertViewDelegate, NSURLConnectionDelegate, NSURLCon
         
 
         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response, data, error) -> Void in
-            if let err = error {
-
-//                let alert = UIAlertView(title: "Something went wrong please try again", message: "Connection error", delegate: self, cancelButtonTitle: "Ok")
-//                alert.show()
+            if error != nil {
                 return
             }
-            
-            if error == nil {
-                
-                if let json: AnyObject? = try? NSJSONSerialization.JSONObjectWithData(data!, options: .MutableContainers) {
-                    let parsedData = JSON(json!)
-                    return completionHandler(responseObject: parsedData, error: nil)
-                } else {
-                    return completionHandler(responseObject: nil, error: error)
-                }
+            if let json: AnyObject? = try? NSJSONSerialization.JSONObjectWithData(data!, options: .MutableContainers) {
+                let parsedData = JSON(json!)
+                return completionHandler(responseObject: parsedData, error: nil)
+            } else {
+                return completionHandler(responseObject: nil, error: error)
             }
-            
         }
     }
 }

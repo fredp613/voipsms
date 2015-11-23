@@ -57,7 +57,7 @@ class Contact {
 
         success = ABRecordSetValue(newContact, kABPersonFirstNameProperty, firstName, &error)
         success = ABRecordSetValue(newContact, kABPersonLastNameProperty, lastName, &error)
-        let propertyType: NSNumber = kABMultiStringPropertyType
+//        let propertyType: NSNumber = kABMultiStringPropertyType
         let phoneNumbers: ABMutableMultiValueRef =  createMultiStringRef()
         ABMultiValueAddValueAndLabel(phoneNumbers, phone, kABPersonPhoneMainLabel, nil)
         success = ABRecordSetValue(newContact, kABPersonPhoneProperty, phoneNumbers, &error)
@@ -76,7 +76,7 @@ class Contact {
         let adbk : ABAddressBook? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()
         let rid : ABRecordID = NSNumber(integer: Int(recordId)!).intValue
         let existingContact : ABRecord = ABAddressBookGetPersonWithRecordID(adbk, rid).takeUnretainedValue()
-        var success:Bool = false
+//        var success:Bool = false
         let phones: AnyObject = ABRecordCopyValue(existingContact, kABPersonPhoneProperty).takeRetainedValue()
         let phone1: ABMutableMultiValue = ABMultiValueCreateMutableCopy(phones).takeRetainedValue()
         ABMultiValueAddValueAndLabel(phone1, phone, kABPersonPhoneMobileLabel, nil)
@@ -152,23 +152,25 @@ class Contact {
     }
     
     func syncAddressBook1(moc: NSManagedObjectContext) {
-        print("called")
+
         do {
             if let coreContacts = try CoreContact.getAllContacts(moc) {
-
                 for cc in coreContacts {
 
                     self.loadAddressBook { (responseObject, error) -> () in
-
                         let contacts = responseObject
+                        print(error)
                         let filteredArray = contacts.filter() {$0.recordId == cc.contactId}
                         if filteredArray.count > 0 {
                             let fullName = filteredArray.map({$0.contactFullName}).last!
                             let phoneLabel = filteredArray.map({$0.phoneLabel}).last!
-                            CoreContact.updateInManagedObjectContext(moc, contactId: cc.contactId, lastModified: nil, fullName: fullName, phoneLabel: phoneLabel, addressBookLastModified: NSDate())
+                            cc.fullName = fullName
+                            cc.phoneLabel = phoneLabel
+                            cc.addressBookSyncLastModified = NSDate()
+                            CoreContact.updateContactInMOC(moc)
                         }
                         if cc.fullName != "" || cc.fullName != nil {
-                            //contact has full name - check if still in addressbook, if not delete fullName
+                            //contact has full name - check if still in addressbook, if not update fullName to nil
                             if filteredArray.count == 0 {
                                 cc.fullName = nil
                                 CoreContact.updateContactInMOC(moc)
@@ -179,7 +181,6 @@ class Contact {
             }
 
         } catch {
-            
         }
         
         
@@ -196,13 +197,14 @@ class Contact {
         
         let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as NSArray as [ABRecord]
         for person in people {
-//            var lastMod: NSDate = (ABRecordCopyValue(person, kABPersonModificationDateProperty).takeRetainedValue() as? NSDate)!
+
             let phones : ABMultiValueRef = ABRecordCopyValue(person, kABPersonPhoneProperty).takeRetainedValue() as ABMultiValueRef
             if let fullName = ABRecordCopyCompositeName(person)?.takeRetainedValue() {
-//                let name : NSString = fullName1 as NSString
+
                 for(var numberIndex: CFIndex = 0;numberIndex < ABMultiValueGetCount(phones); numberIndex++) {
                     let contact = AddressBookContactStruct()
                     contact.contactFullName = fullName as String
+//                    print(contact.contactFullName)
                     if let phoneUnmanaged = ABMultiValueCopyValueAtIndex(phones, numberIndex) {
                     
                         let phoneLabelUnmanaged = ABMultiValueCopyLabelAtIndex(phones, numberIndex)
@@ -234,19 +236,17 @@ class Contact {
                                 range = NSRange(location: 0, length: finalPhoneNumber.length)
                             }
                             let ff = finalPhoneNumber.substringWithRange(range)
-                            
                             contact.recordId = ff
                             contact.phoneLabel = String(finalPhoneLabel)
+//                            if self.contactsArr.startIndex < self.contactsArr.endIndex { self.contactsArr.append(contact); print("hi") } else { break }
                             self.contactsArr.append(contact)
                         }
-                        
-                    
                     }
                     
                 }
-//                println(self.contactsArr.map({$0.contactFullName}))
             }
         }
+
         return completionHandler(responseObject: self.contactsArr, error: nil)
     }
 
@@ -284,7 +284,7 @@ class Contact {
         })
         
         if self.coreContacts.count > 0 {
-            for c in self.coreContacts {
+            for _ in self.coreContacts {
             }
             return self.coreContacts
         }
@@ -293,23 +293,7 @@ class Contact {
         
     }
     
-    
-//    if let name = name {
-//        Contact().getContactsDict({ (contacts) -> () in
-//            var closureContacts : [CoreContact] = coreContacts
-//            if contacts.count > 0 {
-//                for (key,value) in contacts {
-//                    if (value.rangeOfString(name) != nil) {
-//                        if let contact1 = CoreContact.currentContact(moc, contactId: key) {
-//                            if !contains(coreContacts, contact1) {
-//                                coreContacts.append(contact1)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        })
-//    }
+
     
    
     

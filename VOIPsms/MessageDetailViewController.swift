@@ -201,8 +201,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
         
     func segueToContactDetails(sender: UIBarButtonItem) {
-        Contact().getContactsDict { (contacts) -> () in
-            if contacts[self.contactId] != nil {
+        if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
+            if currentContact.fullName != nil {
                 self.performSegueWithIdentifier("showExistingContactDetailSegue", sender: self)
             } else {
                 self.performSegueWithIdentifier("showContactDetailSegue", sender: self)
@@ -248,7 +248,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        //        self.tableView.reloadData()
         self.tableViewScrollToBottomAnimated(false)
         self.tableViewScrollToBottomAnimated(false)
     }
@@ -256,14 +255,14 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(false)
 
-        if let currentContactFullName = CoreContact.currentContact(self.moc, contactId: self.contactId)?.fullName {
-//            self.navigationController?.navigationBar.topItem?.title = currentContactFullName.truncatedString()
-            self.title = currentContactFullName.truncatedString()
-        } else {
-            self.dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
-            self.navigationItem.rightBarButtonItem = self.dynamicBarButton
-//            self.navigationController?.navigationBar.topItem?.title = self.contactId.northAmericanPhoneNumberFormat() //self.contactId.northAmericanPhoneNumberFormat()
-            self.title = self.contactId.northAmericanPhoneNumberFormat()
+        if let currentContact = CoreContact.currentContact(self.moc, contactId: self.contactId) {
+            if let fullName = currentContact.fullName {
+                self.title = fullName.truncatedString()
+            } else {
+                self.dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
+                self.navigationItem.rightBarButtonItem = self.dynamicBarButton
+                self.title = self.contactId.northAmericanPhoneNumberFormat()
+            }
         }
 
         self.tableViewScrollToBottomAnimated(false)
@@ -274,13 +273,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(true)
         self.timer.invalidate()
-//        if let lastMessage = CoreContact.getLastIncomingMessageFromContact(self.moc, contactId: self.contactId, did: self.did) {
-//            if lastMessage.type == 1 || lastMessage.type.boolValue == true {
-//                lastMessage.flag = message_status.READ.rawValue
-//                CoreMessage.updateInManagedObjectContext(self.moc, coreMessage: lastMessage)
-//            }
-//        }
-//        self.delegate?.updateMessagesTableView!()
     }
     
     

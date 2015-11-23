@@ -31,7 +31,11 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
         let qualityOfServiceClass = QOS_CLASS_BACKGROUND
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
 //        dispatch_async(backgroundQueue, { () -> Void in
+        if Reachability.isConnectedToNetwork() {
              self.getMessages()
+        }
+
+        
 //        })
         
     }      
@@ -63,10 +67,8 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     func getMessages() {                
         let backgroundMOC : NSManagedObjectContext = CoreDataStack().managedObjectContext!
         if let dids = CoreDID.getDIDs(backgroundMOC) {
-            print(dids)
             if let str = dids.filter({$0.currentlySelected.boolValue == true}).first {
                 if let currentUser = CoreUser.currentUser(backgroundMOC) {
-                    
                     Message.getMessagesFromAPI(false, fromList: false, moc: backgroundMOC, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
                         error) -> () in
                     

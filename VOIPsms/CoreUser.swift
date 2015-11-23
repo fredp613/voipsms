@@ -109,20 +109,15 @@ class CoreUser: NSManagedObject {
         
     
     class func authenticate(moc: NSManagedObjectContext, email: String, password: String, completionHandler: ((Bool, error: NSError?, status: String?) -> Void)!) -> Void {
-                
+        
         let url = APIUrls.getUrl + "api_username=" + email + "&api_password=" + password + "&method=getDIDsInfo"
         
          VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest { (data, error) -> () in
             if data != nil {
                 if data["status"] == "success" {
-                    
                     if self.userExists(moc) == false {
                         CoreUser.createInManagedObjectContext(moc, email: email, pwd: password)
-                        
-//                        CoreDID.createOrUpdateDID(moc)
                         let json = data
-//                        for (index, element: (key, t): (String, JSON)) in json["sms"] {
-//                        for (key, t) in json["dids"] {
                         for (index, element: (_, t)) in json["dids"].enumerate() {
                             var dtype = ""
                             if index == 0 {
@@ -164,31 +159,5 @@ class CoreUser: NSManagedObject {
                 return completionHandler(false, error: error, status: nil)
             }
         }
-        
     }
-    
-//    let json = responseObject
-//    
-//    for (index, (key: String, t: JSON)) in enumerate(json["dids"]) {
-//    var type : String
-//    if index == 0 {
-//    type = didType.PRIMARY.rawValue
-//    } else {
-//    type = didType.SUB.rawValue
-//    }
-//    let did = t["did"].stringValue
-//    
-//    let registeredOn = t["order_date"].stringValue
-//    let sms_enabled = t["sms_enabled"].stringValue
-//    
-//    if sms_enabled == "1" {
-//    if !CoreDID.isExistingDID(moc, didnum: did) {
-//    CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: type, didRegisteredOn: registeredOn)
-//    }
-//    } else {
-//    //some error to user
-//    }
-//    }
-
-
 }

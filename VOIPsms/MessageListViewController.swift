@@ -29,30 +29,11 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     var contactForSegue : String = String()
     var fromClosedState : Bool = false
     let managedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).moc
-    
+    let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
-        
-        
-//        var messagePredicate : NSPredicate?
-//        if let messages = CoreMessage.getMessagesByString(managedObjectContext, message: self.searchBar.text!, did: self.did) {
-//            if messages.count > 0 {
-//                messagePredicate = NSPredicate(format: "contactId IN %@", messages.map({$0.contactId}))
-//            }
-//        }
-//        let firstPredicate = NSPredicate(format: "contactId contains[cd] %@", self.searchKeyword)
-//        let secondPredicate = NSPredicate(format: "fullName contains[cd] %@", self.searchKeyword)
-//        if let messagePredicate = messagePredicate {
-//            let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType, subpredicates: [firstPredicate, secondPredicate, messagePredicate])
-//            fetchedResultsController.fetchRequest.predicate = compoundPredicate
-//        } else {
-//            let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType, subpredicates: [firstPredicate, secondPredicate])
-//            fetchedResultsController.fetchRequest.predicate = compoundPredicate
-//        }
-        
-        
-        
-//        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
+      
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreContact")
         let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
@@ -96,11 +77,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         return frc
         }()
-    
-   
-    
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 //        var error: NSError? = nil
@@ -108,33 +85,30 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         do {
             try fetchedResultsController.performFetch()        }
         catch {
-            print(error)
+            print("an error has occurred: \(error)")
         }
         
         do {
             try messageFetchedResultsController.performFetch()        }
         catch {
-            print(error)
+            print("an error has occurred: \(error)")
         }
-
         
-//        if (fetchedResultsController.performFetch()==false) {
-//            print("An error has occurred: \(error?.localizedDescription)")
-//        }
-        
-//        if (messageFetchedResultsController.performFetch()==false) {
-//            print("An error has occurred: \(error?.localizedDescription)")
-//        }
+        privateMOC.parentContext = managedObjectContext
         
         if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
             currentUser.initialLoad = true
             CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
+            
+            //refreshContacts
+            let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
+            appDel.refreshContacts(privateMOC)
+            
         }
         
         self.btnNewMessage.layer.cornerRadius = self.btnNewMessage.frame.size.height / 2
         self.view.bringSubviewToFront(self.btnNewMessage)
         self.pokeFetchedResultsController()
-//        NSString *identifier = [[UIDevice currentDevice].identifierForVendor UUIDString];
         let identifier = UIDevice.currentDevice().identifierForVendor!.UUIDString
         print(identifier)
         
@@ -257,14 +231,14 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         if let cu = CoreUser.currentUser(self.managedObjectContext) {
             if cu.notificationLoad == 1 || cu.notificationLoad.boolValue {
                 if let nc = cu.notificationContact  {
-                    if let contact = CoreContact.currentContact(self.managedObjectContext, contactId: nc) {
+                    if let _ = CoreContact.currentContact(self.managedObjectContext, contactId: nc) {
                         self.contactForSegue = nc
 //                        if contact.deletedContact.boolValue {
 //                            contact.deletedContact = 0
 //                            CoreDataStack().saveContext(self.managedObjectContext)
 //                        }
                     } else {
-                        if let cc = CoreContact.createInManagedObjectContext(self.managedObjectContext, contactId: nc, lastModified: nil) {
+                        if let _ = CoreContact.createInManagedObjectContext(self.managedObjectContext, contactId: nc, lastModified: nil) {
                             self.contactForSegue = nc
                         }
                     }
@@ -273,7 +247,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             }
         }
         
-            if let str = CoreDID.getSelectedDID(self.managedObjectContext) {
+            if let _ = CoreDID.getSelectedDID(self.managedObjectContext) {
                 if let cm = CoreMessage.getMessagesByDID(self.managedObjectContext, did: self.did).first {
                     if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
                         let lastMessage = cm
@@ -316,38 +290,21 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             case .Insert:
                 self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
             case .Delete:
-                print("deleting")
+                print("deleting contact")
                 self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
             case .Update:
                 print("updating contact")
-                self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
+//                self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
+//                self.tableView.reloadData()
             default:
                 self.pokeFetchedResultsController()
             }
         }
     }
-    
-//    func controller(controller: NSFetchedResultsController, didChangeObject anObject: NSManagedObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
-//        
-//        if controller == fetchedResultsController {
-//            switch type {
-//            case .Insert:
-//                self.tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
-//            case .Delete:
-//                print("deleting")
-//                self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
-//            case .Update:
-//                print("updating contact")
-//                self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Fade)
-//            default:
-//                self.pokeFetchedResultsController()
-//            }
-//        }
-//    }
+
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.endUpdates()
-//        self.pokeFetchedResultsController()
     }
     
     //MARK: table view delegates
@@ -425,11 +382,15 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             cell.contentView.addSubview(dateLbl)
         }
         
+//        if contact.fullName != nil {
         if contact.fullName != nil {
             cell.textLabel?.text = contact.fullName.truncatedString()
         } else {
-            cell.textLabel?.text = "\(contact.contactId.northAmericanPhoneNumberFormat())".truncatedString()  //.northAmericanPhoneNumberFormat()
+            print(contact)
+            cell.textLabel?.text = "\(contact.contactId.northAmericanPhoneNumberFormat())".truncatedString()
         }
+        
+
         
         return cell
     }
@@ -481,7 +442,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         return CoreDID.getDIDs(self.managedObjectContext)!.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         let formattedDID = CoreDID.getDIDs(self.managedObjectContext)![row].did.northAmericanPhoneNumberFormat()
         return formattedDID
     }
@@ -668,7 +629,6 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 self.searchBar.resignFirstResponder()
                 
                 if let indexPath = self.tableView.indexPathForSelectedRow {
-                    
                     let contact: CoreContact = self.fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
                     detailSegue.contactId = contact.contactId as String
                     if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {

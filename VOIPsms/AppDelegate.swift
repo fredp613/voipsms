@@ -29,12 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
-
-            privateMOC.performBlock { () -> Void in
-                if Contact().checkAccess() {
-                    Contact().syncAddressBook1(privateMOC)
-                }
-            }
+            refreshContacts(privateMOC)
             pingPushServer()
         }
         
@@ -157,6 +152,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         })
         
         
+    }
+    
+    func refreshContacts(privateMOC: NSManagedObjectContext) {
+        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
+        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
+        dispatch_async(backgroundQueue, { () -> Void in
+            privateMOC.performBlock { () -> Void in
+                if Contact().checkAccess() {
+                    Contact().syncAddressBook1(privateMOC)
+                }
+            }
+        })
     }
     
     func createOrUpdateMessage(userInfo: [NSObject : AnyObject], userActive: Bool) {
