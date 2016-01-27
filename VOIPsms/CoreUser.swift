@@ -152,7 +152,12 @@ class CoreUser: NSManagedObject {
                     }
                     return completionHandler(true, error: nil, status: "success")
                 } else {
-                    return completionHandler(false, error: nil, status: "api not enabled")
+                    if data["status"] == "invalid_credentials" {
+                        return completionHandler(false, error: nil, status: "invalid_credentials")
+                    } else {
+                        return completionHandler(false, error: nil, status: "api not enabled")
+                    }
+
                 }
                 
             } else {

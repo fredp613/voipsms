@@ -115,6 +115,15 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         let dateStr = formatter.stringFromDate(date)
         self.textMessage.text = ""
         CoreMessage.createInManagedObjectContext(self.moc, contact: contact, id: "", type: false, date: dateStr, message: msgForCoreData, did: self.did, flag: message_status.PENDING.rawValue, completionHandler: { (responseObject, error) -> () in
+            
+            if let cc = CoreContact.currentContact(self.moc, contactId: contact) {
+                if Contact().checkAccess() {
+                    Contact().syncNewMessageContact(cc, moc: self.moc)
+                }
+            }
+            //sync address book - should i go this synchronously?
+           
+            
             self.delegate?.triggerSegue!(contact, moc: self.moc)
             self.dismissViewControllerAnimated(false, completion: { () -> Void in
             })

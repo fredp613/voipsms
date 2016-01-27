@@ -40,9 +40,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-        UIApplication.sharedApplication().registerForRemoteNotifications()
+    
+        let settings = UIUserNotificationSettings(forTypes: [UIUserNotificationType.Sound, UIUserNotificationType.Alert], categories: nil)
         
-        let settings = UIUserNotificationSettings(forTypes: .Alert, categories: nil)
+//        let settings = UIUserNotificationSettings(forTypes: .Alert | .Sound, categories: nil)
         UIApplication.sharedApplication().registerUserNotificationSettings(settings)
         
         //ask for contact access
@@ -59,6 +60,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             firstVC.contactForSegue = contact
             firstVC.fromClosedState = true
             firstVC.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
+            
+            
+            //clear notifications
+            application.applicationIconBadgeNumber = 0
+            application.cancelAllLocalNotifications()
         }
         
         return true

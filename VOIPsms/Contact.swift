@@ -186,6 +186,29 @@ class Contact {
         
     }
     
+    func syncNewMessageContact(contact: CoreContact, moc: NSManagedObjectContext) -> Bool {
+        
+        var success = false
+        if self.checkAccess() {
+            self.loadAddressBook { (responseObject, error) -> () in
+                let contacts = responseObject
+                print(error)
+                let filteredArray = contacts.filter() {$0.recordId == contact.contactId}
+                if filteredArray.count > 0 {
+                    //make sure to only grab the last contact in case of duplicates in the address book - refactor this later to allow the user to choose which contact they want to assign the message to
+                    let fullName = filteredArray.map({$0.contactFullName}).last!
+                    let phoneLabel = filteredArray.map({$0.phoneLabel}).last!
+                    contact.fullName = fullName
+                    contact.phoneLabel = phoneLabel
+                    contact.addressBookSyncLastModified = NSDate()
+                    CoreContact.updateContactInMOC(moc)
+                    success = true
+                }
+            }
+        }
+        return success
+    }
+    
     func loadAddressBook(completionHandler: (responseObject: [AddressBookContactStruct], error: NSError?) -> ()) {
 
         let adbk : ABAddressBook? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()

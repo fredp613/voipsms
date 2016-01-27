@@ -23,8 +23,8 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         super.viewDidLoad()
         textUserName.delegate = self
         textPwd.delegate = self
-        textUserName.text = "fredp613@gmail.com"
-        textPwd.text = "Fredp613$"
+//        textUserName.text = "fredp613@gmail.com"
+//        textPwd.text = "Fredp613$"
         loginBtn.layer.cornerRadius = 10
         
         
@@ -48,23 +48,30 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     }
 
     @IBAction func loginWasPressed(sender: AnyObject) {
-
-        if self.textPwd.text != "" && self.textUserName != nil {
-            self.loginBtn.setTitle("", forState: UIControlState.Normal)
-            self.activityIndicator.startAnimating()
-            self.login()
+        
+        
+        let userName : String = self.textUserName.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet());
+        print("\(userName)".isEmail())
+        if userName != "" {
+            if self.textPwd.text != "" {
+                self.loginBtn.setTitle("", forState: UIControlState.Normal)
+                self.activityIndicator.startAnimating()
+                self.login()
+            } else {
+                let alert = UIAlertView(title: "Credentials Error", message: "User name and/or password cannot be blank", delegate: self, cancelButtonTitle: "Ok")
+                alert.show()
+            }
         } else {
-            let alert = UIAlertView(title: "Credentials Error", message: "User name and/or password cannot be blank", delegate: self, cancelButtonTitle: "Ok")
+            let alert = UIAlertView(title: "Email error", message: "Please enter a valid email address", delegate: self, cancelButtonTitle: "Ok")
             alert.show()
         }
-        
     }
     
-
     func login() {
-        print(self.textUserName.text!);
-        print(self.textPwd.text!);
-        CoreUser.authenticate(moc, email: self.textUserName.text!, password: self.textPwd.text!) { (success, error, status) -> Void in
+        
+        let userName : String = self.textUserName.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet());
+        
+        CoreUser.authenticate(moc, email: userName, password: self.textPwd.text!) { (success, error, status) -> Void in
 
             if error == nil {
                 if success {                            
@@ -74,7 +81,6 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
                     self.activityIndicator.stopAnimating()
                     if let currentUser = CoreUser.currentUser(self.moc) {
                         if currentUser.initialLogon.boolValue == true {
-                                    print("asdfasdf")
                             self.performSegueWithIdentifier("segueDownloadMessages", sender: self)
                         } else {
                             self.dismissViewControllerAnimated(true, completion: nil)
@@ -120,6 +126,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         alertController.addAction(cancelAction)
         self.presentViewController(alertController, animated: true, completion: nil)
     }
+    
     
     func getInitialMessages() {
         let fromStr = CoreDID.getSelectedDID(moc)!.registeredOn.strippedDateFromString()        
