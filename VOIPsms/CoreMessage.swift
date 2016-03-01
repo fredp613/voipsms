@@ -20,7 +20,7 @@ class CoreMessage: NSManagedObject {
 
     @NSManaged var contactId: String
     @NSManaged var did: String
-    @NSManaged var message: String
+    @NSManaged var message: NSString
     @NSManaged var type: NSNumber
     @NSManaged var id: String
     @NSManaged var coreId: NSNumber
@@ -29,7 +29,7 @@ class CoreMessage: NSManagedObject {
     @NSManaged var flag: String
     @NSManaged var contact: CoreContact
     
-    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contact: String, id: String, type: Bool, date: String, message: String, did: String, flag: String,completionHandler: (responseObject: CoreMessage?, error: NSError?) -> ()) {
+    class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, contact: String, id: String, type: Bool, date: String, message: NSString, did: String, flag: String,completionHandler: (responseObject: CoreMessage?, error: NSError?) -> ()) {
 
             let coreMessage : CoreMessage = NSEntityDescription.insertNewObjectForEntityForName("CoreMessage", inManagedObjectContext: managedObjectContext) as! CoreMessage
             coreMessage.message = message

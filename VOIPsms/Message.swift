@@ -78,12 +78,12 @@ class Message {
         }
         
         privateContext.performBlock { () -> Void in
-            var coreMessages = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
+            _ = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
                         
             VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
                 print(error)
                 let json = responseObject
-                for (key, t): (String, JSON) in json["sms"] {
+                for (_, t): (String, JSON) in json["sms"] {
                     let contact = t["contact"].stringValue
                     let id = t["id"].stringValue
                     let typeStr = t["type"].stringValue

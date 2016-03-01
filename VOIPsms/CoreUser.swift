@@ -25,14 +25,20 @@ class CoreUser: NSManagedObject {
     @NSManaged var notificationsFlag: NSNumber
     
     class func createInManagedObjectContext(managedObjectContext: NSManagedObjectContext, email: String, pwd: String) -> Bool {
+
+        //deleteInManagedObjectContext(managedObjectContext, email: email)
         
         let coreUser : CoreUser = NSEntityDescription.insertNewObjectForEntityForName("CoreUser", inManagedObjectContext: managedObjectContext) as! CoreUser
         
         coreUser.email = email
         coreUser.remember = true
         coreUser.initialLogon = true
-        coreUser.notificationsFlag = true
         coreUser.messagesLoaded = false
+        if let _ = CoreDevice.getToken(managedObjectContext) {
+            coreUser.notificationsFlag = true
+        } else {
+            coreUser.notificationsFlag = false
+        }
         
         do {
             try managedObjectContext.save()
@@ -47,7 +53,14 @@ class CoreUser: NSManagedObject {
     }
     
     class func deleteInManagedObjectContext(moc: NSManagedObjectContext, email: String) {
-//        let coreUser : CoreUser 
+        if let coreUser : CoreUser = CoreUser.currentUser(moc) {
+            moc.deleteObject(coreUser)
+            do {
+                try moc.save()
+            } catch _ {
+            }
+
+        }
     }
     
     class func logoutUser(managedObjectContext: NSManagedObjectContext, coreUser: CoreUser) {
@@ -71,6 +84,8 @@ class CoreUser: NSManagedObject {
     class func currentUser(managedObjectContext: NSManagedObjectContext) -> CoreUser? {
 //        let moc = CoreDataStack().managedObjectContext!
         let fetchRequest = NSFetchRequest(entityName: "CoreUser")
+//        let sortDescriptor = NSSortDescriptor(key: "id", ascending: false)
+//        fetchRequest.sortDescriptors = [sortDescriptor]
        
         do {
            let fetchResults = try managedObjectContext.executeFetchRequest(fetchRequest) as! [CoreUser]
@@ -129,22 +144,28 @@ class CoreUser: NSManagedObject {
                             
                             let registeredOn = t["order_date"].stringValue
                             let sms_enabled = t["sms_enabled"].stringValue
+                            let sms_available = t["sms_available"].stringValue
                             
-                            if sms_enabled == "1" {
+                            if sms_enabled == "1" && sms_available == "1" {
                                 if !CoreDID.isExistingDID(moc, didnum: did) {
                                     CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: dtype, didRegisteredOn: registeredOn)
                                     
                                     //here call your web service send the device id
                                 }
                             } else {
+//
+                                    return completionHandler(false, error:nil, status: "SMS Not Enabled, please verify your account settings")
+                                    
+                                
                                 // error should be something like, please enable SMS
-                                return completionHandler(false, error:nil, status: nil)
+                                
                                 //some error to user
                             }
                         }
                     } else {
                         let currentUser = CoreUser.currentUser(moc)
                         currentUser?.remember = true
+                         KeyChainHelper.createORupdateForKey(password, keyName: email)
                         do {
                             try moc.save()
                         } catch _ {

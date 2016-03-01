@@ -14,9 +14,9 @@ class AddressBookContactStruct {
     var contactFullName : String = String()
     var recordId : String = String()
     var phoneLabel : String = String()
-    init() {
-
-    }
+//    init() {
+//
+//    }
 }
 
 class Contact {
@@ -115,7 +115,7 @@ class Contact {
     func getAllContacts(keyword: String?) -> [AddressBookContactStruct] {
 //        var tstStr = [NSString]()
         let adbk : ABAddressBook? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()
-        let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as NSArray as [ABRecord]
+        let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as [ABRecord]
 //        let phones: ABMultiValueRef = ABRecordCopyValue(people, kABPersonPhoneProperty) as! ABMultiValueRef
         print("get all contacts called")
         for person in people {
@@ -126,26 +126,21 @@ class Contact {
             
             if let fullName : CFString = ABRecordCopyCompositeName(person)?.takeRetainedValue() {
                 
-                let name : NSString = fullName as NSString
+//                let name : NSString = fullName as NSString
 
-                if let keyword = keyword {
-                    if name.lowercaseString.rangeOfString(keyword.lowercaseString) != nil {
-                        let abContact = AddressBookContactStruct()
-                        abContact.contactFullName = fullName as String
-                        abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
-                        self.contactsArr.append(abContact)
-                    } /**else {
-                        var abContact = AddressBookContactStruct()
-                        abContact.contactFullName = fullName as String
-                        abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
-                        self.contactsArr.append(abContact)
-                    }**/
-                } else {
+//                if let keyword = keyword {
+//                    if name.lowercaseString.rangeOfString(keyword.lowercaseString) != nil {
+//                        let abContact = AddressBookContactStruct()
+//                        abContact.contactFullName = fullName as String
+//                        abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
+//                        self.contactsArr.append(abContact)
+//                    }
+//                } else {
                     let abContact = AddressBookContactStruct()
                     abContact.contactFullName = fullName as String
                     abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
                     self.contactsArr.append(abContact)
-                }
+//                }
             }
         }
         return self.contactsArr
@@ -155,28 +150,38 @@ class Contact {
 
         do {
             if let coreContacts = try CoreContact.getAllContacts(moc) {
-                for cc in coreContacts {
+                
+                autoreleasepool {
+                
+                    for cc in coreContacts {
 
-                    self.loadAddressBook { (responseObject, error) -> () in
-                        let contacts = responseObject
-                        print(error)
-                        let filteredArray = contacts.filter() {$0.recordId == cc.contactId}
-                        if filteredArray.count > 0 {
-                            let fullName = filteredArray.map({$0.contactFullName}).last!
-                            let phoneLabel = filteredArray.map({$0.phoneLabel}).last!
-                            cc.fullName = fullName
-                            cc.phoneLabel = phoneLabel
-                            cc.addressBookSyncLastModified = NSDate()
-                            CoreContact.updateContactInMOC(moc)
-                        }
-                        if cc.fullName != "" || cc.fullName != nil {
-                            //contact has full name - check if still in addressbook, if not update fullName to nil
-                            if filteredArray.count == 0 {
-                                cc.fullName = nil
-                                CoreContact.updateContactInMOC(moc)
+                        self.loadAddressBook { (responseObject, error) -> () in
+                            let contacts = responseObject
+                            print(error)
+                            let filteredArray = contacts.filter() {$0.recordId == cc.contactId}
+                            if filteredArray.count > 0 {
+                                let fullName = filteredArray.map({$0.contactFullName}).last!
+                                let phoneLabel = filteredArray.map({$0.phoneLabel}).last!
+                                cc.fullName = fullName
+                                cc.phoneLabel = phoneLabel
+                                cc.addressBookSyncLastModified = NSDate()
+                                // CoreContact.updateContactInMOC(moc)
+                            }
+                            if cc.fullName != "" || cc.fullName != nil {
+                                //contact has full name - check if still in addressbook, if not update fullName to nil
+                                if filteredArray.count == 0 {
+                                    cc.fullName = nil
+    //                                CoreContact.updateContactInMOC(moc)
+                                }
                             }
                         }
                     }
+                }
+                
+                do {
+                    try moc.save()
+                } catch _ {
+                    print("somethign wrong")
                 }
             }
 
@@ -225,44 +230,47 @@ class Contact {
             if let fullName = ABRecordCopyCompositeName(person)?.takeRetainedValue() {
 
                 for(var numberIndex: CFIndex = 0;numberIndex < ABMultiValueGetCount(phones); numberIndex++) {
-                    let contact = AddressBookContactStruct()
-                    contact.contactFullName = fullName as String
-//                    print(contact.contactFullName)
+                    
                     if let phoneUnmanaged = ABMultiValueCopyValueAtIndex(phones, numberIndex) {
                     
                         let phoneLabelUnmanaged = ABMultiValueCopyLabelAtIndex(phones, numberIndex)
-                        let phoneNumber : NSString = phoneUnmanaged.takeRetainedValue() as! NSString
+                        let phoneNumber : NSString = phoneUnmanaged.takeUnretainedValue() as! NSString
                         if phoneLabelUnmanaged != nil {
                             let phoneLabel : NSString = phoneLabelUnmanaged.takeRetainedValue() as NSString
                             let regex = try! NSRegularExpression(pattern: "[0-9]",
                                 options: [])
                             let regexLabel = try! NSRegularExpression(pattern: "[a-zA-Z0-9]",
                                 options: [])
-                            let results = regex.matchesInString(phoneNumber as String,
-                                options: [], range: NSMakeRange(0, phoneNumber.length))
-                            let resultsLabel = regexLabel.matchesInString(phoneLabel as String,
-                                options: [], range: NSMakeRange(0, phoneLabel.length))
-                            
-                            let mappedResults = results.map { phoneNumber.substringWithRange($0.range)}
-                            let strRepresentationResults = mappedResults.joinWithSeparator("")
-                            
-                            let mappedResultsLabel = resultsLabel.map { phoneLabel.substringWithRange($0.range)}
-                            let strRepresentationResultsLabel = mappedResultsLabel.joinWithSeparator("")
-                            
-                            let finalPhoneNumber = strRepresentationResults as NSString
-                            let finalPhoneLabel = strRepresentationResultsLabel as NSString
-                            
-                            var range = NSRange()
-                            if finalPhoneNumber.length > 10 {
-                                range = NSRange(location: 1, length: finalPhoneNumber.length - 1)
-                            } else {
-                                range = NSRange(location: 0, length: finalPhoneNumber.length)
+                            autoreleasepool {
+                                let results = regex.matchesInString(phoneNumber as String,
+                                    options: [], range: NSMakeRange(0, phoneNumber.length))
+                                
+                                let resultsLabel = regexLabel.matchesInString(phoneLabel as String,
+                                    options: [], range: NSMakeRange(0, phoneLabel.length))
+                                
+                                let mappedResults = results.map { phoneNumber.substringWithRange($0.range)}
+                                let strRepresentationResults = mappedResults.joinWithSeparator("")
+                                
+                                let mappedResultsLabel = resultsLabel.map { phoneLabel.substringWithRange($0.range)}
+                                let strRepresentationResultsLabel = mappedResultsLabel.joinWithSeparator("")
+                                
+                                let finalPhoneNumber = strRepresentationResults as NSString
+                                let finalPhoneLabel = strRepresentationResultsLabel as NSString
+                                
+                                var range = NSRange()
+                                if finalPhoneNumber.length > 10 {
+                                    range = NSRange(location: 1, length: finalPhoneNumber.length - 1)
+                                } else {
+                                    range = NSRange(location: 0, length: finalPhoneNumber.length)
+                                }
+                                let ff = finalPhoneNumber.substringWithRange(range)
+                                let contact = AddressBookContactStruct()
+                                contact.contactFullName = fullName as String
+                                contact.recordId = ff
+                                contact.phoneLabel = String(finalPhoneLabel)
+                                self.contactsArr.append(contact)
                             }
-                            let ff = finalPhoneNumber.substringWithRange(range)
-                            contact.recordId = ff
-                            contact.phoneLabel = String(finalPhoneLabel)
-//                            if self.contactsArr.startIndex < self.contactsArr.endIndex { self.contactsArr.append(contact); print("hi") } else { break }
-                            self.contactsArr.append(contact)
+
                         }
                     }
                     

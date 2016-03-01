@@ -160,17 +160,22 @@ class CoreDID: NSManagedObject {
 
             for (index, element: (_, t)) in json["dids"].enumerate() {
                 var type : String
-                if index == 0 {
-                    type = didType.PRIMARY.rawValue
-                } else {
-                    type = didType.SUB.rawValue
-                }
+                var primaryAssigned : Bool = false
                 let did = t["did"].stringValue
 
                 let registeredOn = t["order_date"].stringValue
                 let sms_enabled = t["sms_enabled"].stringValue
+                let sms_available = t["sms_available"].stringValue
 
-                if sms_enabled == "1" {
+                if sms_enabled == "1" && sms_available == "1" {
+                    
+                    if primaryAssigned {
+                        type = didType.SUB.rawValue
+                    } else {
+                        type = didType.PRIMARY.rawValue
+                        primaryAssigned = true;
+                    }
+
                     if !CoreDID.isExistingDID(moc, didnum: did) {
                         CoreDID.createInManagedObjectContext(moc, didnum: did, didtype: type, didRegisteredOn: registeredOn)
                     }

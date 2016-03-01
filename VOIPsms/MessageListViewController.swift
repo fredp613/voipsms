@@ -39,6 +39,8 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
         if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
             self.did = did.did
+            
+            
             var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
             let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
             let contactPredicateDeleted = NSPredicate(format: "deletedContact == 0")
@@ -77,13 +79,15 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
         return frc
         }()
-
+    
+  
     override func viewDidLoad() {
         super.viewDidLoad()
 //        var error: NSError? = nil
         
         do {
-            try fetchedResultsController.performFetch()        }
+            try fetchedResultsController.performFetch()
+        }
         catch {
             print("an error has occurred: \(error)")
         }
@@ -93,26 +97,28 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         catch {
             print("an error has occurred: \(error)")
         }
-        
+    
         privateMOC.parentContext = managedObjectContext
         
+        //refresh stuff
         if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
             currentUser.initialLoad = true
             CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
             
             //refreshContacts
             let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
-            appDel.refreshContacts(privateMOC)
+//            appDel.refreshContacts(privateMOC)
+            appDel.refreshDeviceTokenOnServer(currentUser)
             
         }
         
         self.btnNewMessage.layer.cornerRadius = self.btnNewMessage.frame.size.height / 2
         self.view.bringSubviewToFront(self.btnNewMessage)
-        self.pokeFetchedResultsController()
+//        self.pokeFetchedResultsController()
         let identifier = UIDevice.currentDevice().identifierForVendor!.UUIDString
         print(identifier)
         
-               
+
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "handlePushNotification:", name: "appRestorePush", object: nil)
         
     }
@@ -135,6 +141,35 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         self.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
     }
     
+    func togglePushToServer() {
+        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
+        
+        if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
+            
+            let alertController = UIAlertController(title: "Activate Push Notifications", message: "**NOTE: Make sure that notifications are on for this app in your phone's setting**. Do you want to allow this app to send you push notifications?", preferredStyle: .Alert)
+            
+            let okAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default) {
+                UIAlertAction in
+                let settings = UIUserNotificationSettings(forTypes: [UIUserNotificationType.Sound, UIUserNotificationType.Alert, UIUserNotificationType.Badge], categories: nil)
+                
+                UIApplication.sharedApplication().registerUserNotificationSettings(settings)
+                UIApplication.sharedApplication().registerForRemoteNotifications()
+                    appDel.refreshDeviceTokenOnServer(currentUser)
+                    self.navigationItem.rightBarButtonItem = nil
+            }
+            let cancelAction = UIAlertAction(title: "No", style: UIAlertActionStyle.Cancel) {
+                UIAlertAction in
+                
+            }
+            alertController.addAction(okAction)
+            alertController.addAction(cancelAction)
+            self.presentViewController(alertController, animated: true, completion: nil)
+
+        }
+
+        
+    }
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
         self.pokeFetchedResultsController()
@@ -147,10 +182,24 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             self.navigationController?.navigationBar.topItem?.titleView = titleBtn
         }
         
-        
+        if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
+            if currentUser.notificationsFlag.boolValue == false {
+                let button = UIButton(type: UIButtonType.Custom)
+                let image = UIImage(named: "push.png")
+                button.setImage(image, forState: UIControlState.Normal)
+                button.addTarget(self, action:"togglePushToServer", forControlEvents: UIControlEvents.TouchUpInside)
+                button.frame=CGRectMake(0, 0, (image?.size.height)!, (image?.size.width)!)
+                let barButton = UIBarButtonItem(customView: button)
+                self.navigationItem.rightBarButtonItem = barButton
+
+            } else {
+                self.navigationItem.rightBarButtonItem = nil
+            }
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
+      
         if CoreUser.userExists(managedObjectContext) {
             let currentUser = CoreUser.currentUser(managedObjectContext)
             let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
@@ -166,11 +215,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                     }
                 }
             })
-            
-            //            UIApplication.sharedApplication().registerForRemoteNotifications()
-            //
-            //            let settings = UIUserNotificationSettings(forTypes: .Alert, categories: nil)
-            //            UIApplication.sharedApplication().registerUserNotificationSettings(settings)
+
             
         } else {
             performSegueWithIdentifier("showLoginSegue", sender: self)
@@ -247,8 +292,8 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             }
         }
         
-            if let _ = CoreDID.getSelectedDID(self.managedObjectContext) {
-                if let cm = CoreMessage.getMessagesByDID(self.managedObjectContext, did: self.did).first {
+            if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
+                if let cm = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).first {
                     if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
                         let lastMessage = cm
                         var from = ""

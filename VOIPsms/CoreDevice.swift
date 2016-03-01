@@ -55,7 +55,7 @@ class CoreDevice: NSManagedObject {
     }
     
     class func createOrUpdateInMOC(moc: NSManagedObjectContext, token: String) -> CoreDevice? {
-        print("this is being called")
+
         if let cu = CoreUser.currentUser(moc) {
             if let cd = CoreDevice.getToken(moc) {
                 if cd.deviceToken != token {

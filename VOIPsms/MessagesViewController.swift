@@ -225,7 +225,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
                         let d = contactLastMessage.date
                         contact.lastMsgDate = d
-                        contact.lastMsg = contactLastMessage.message
+                        contact.lastMsg = contactLastMessage.message as String
                         contact.lastMsgType = contactLastMessage.type
                         contact.lastMsgFlag = contactLastMessage.flag
                         contact.did = self.did
@@ -290,7 +290,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                                     if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
                                         let d = contactLastMessage.date
                                         contact.lastMsgDate = d
-                                        contact.lastMsg = contactLastMessage.message
+                                        contact.lastMsg = contactLastMessage.message as String
                                         contact.lastMsgType = contactLastMessage.type
                                         contact.lastMsgFlag = contactLastMessage.flag
                                         contact.did = self.did
@@ -449,7 +449,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                             if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
                                 let d = contactLastMessage.date
                                 contact.lastMsgDate = d
-                                contact.lastMsg = contactLastMessage.message
+                                contact.lastMsg = contactLastMessage.message as String
                                 contact.lastMsgType = contactLastMessage.type
                                 contact.lastMsgFlag = contactLastMessage.flag
                                 contact.did = self.did
@@ -599,7 +599,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                     if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
                         let d = contactLastMessage.date
                         contact.lastMsgDate = d
-                        contact.lastMsg = contactLastMessage.message
+                        contact.lastMsg = contactLastMessage.message as String
                         contact.lastMsgType = contactLastMessage.type
                         contact.lastMsgFlag = contactLastMessage.flag
                     }
@@ -627,7 +627,7 @@ class MessagesViewController: UIViewController, UITableViewDelegate, UISearchBar
                             if let contactLastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: self.did) {
                                 let d = contactLastMessage.date
                                 contact.lastMsgDate = d
-                                contact.lastMsg = contactLastMessage.message
+                                contact.lastMsg = contactLastMessage.message as String
                                 contact.lastMsgType = contactLastMessage.type
                                 contact.lastMsgFlag = contactLastMessage.flag
                             }

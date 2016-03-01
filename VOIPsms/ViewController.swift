@@ -56,6 +56,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
             if self.textPwd.text != "" {
                 self.loginBtn.setTitle("", forState: UIControlState.Normal)
                 self.activityIndicator.startAnimating()
+                
                 self.login()
             } else {
                 let alert = UIAlertView(title: "Credentials Error", message: "User name and/or password cannot be blank", delegate: self, cancelButtonTitle: "Ok")
@@ -71,43 +72,55 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         
         let userName : String = self.textUserName.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet());
         
-        CoreUser.authenticate(moc, email: userName, password: self.textPwd.text!) { (success, error, status) -> Void in
-
-            if error == nil {
-                if success {                            
-                    let alert = UIAlertView(title: "Login successful", message: "Checking for messages", delegate: self, cancelButtonTitle: nil)
-//                    CoreDID.createOrUpdateDID(self.moc)
-                    alert.show()
-                    self.activityIndicator.stopAnimating()
-                    if let currentUser = CoreUser.currentUser(self.moc) {
-                        if currentUser.initialLogon.boolValue == true {
-                            self.performSegueWithIdentifier("segueDownloadMessages", sender: self)
-                        } else {
-                            self.dismissViewControllerAnimated(true, completion: nil)
+        if Reachability.isConnectedToNetwork() {
+            CoreUser.authenticate(moc, email: userName, password: self.textPwd.text!) { (success, error, status) -> Void in
+                
+                if error == nil {
+                    if success {
+                        CoreDID.createOrUpdateDID(self.moc)
+                        
+                        let alert = UIAlertView(title: "Login successful", message: "Checking for messages", delegate: self, cancelButtonTitle: nil)
+                        alert.show()
+                        self.activityIndicator.stopAnimating()
+                        if let currentUser = CoreUser.currentUser(self.moc) {
+                            if currentUser.initialLogon.boolValue == true {
+                                self.performSegueWithIdentifier("segueDownloadMessages", sender: self)
+//                                self.performSegueWithIdentifier("segueToMessages", sender: self)
+                            } else {
+                                self.dismissViewControllerAnimated(true, completion: nil)
+                            }
                         }
-                    }
-                    self.dismissAlert(alert)
-                    
-                } else {
-                    self.activityIndicator.stopAnimating()
-                    self.loginBtn.setTitle("Sign in", forState: UIControlState.Normal)
-                    var messageTitle : String = ""
-                    var messageDesc : String = ""
-                    if status == "api not enabled" {
-                        messageTitle = "API not enabled"
-                        messageDesc = "Please go to your account settings and turn on the enable api option. Also ensure to insert 0.0.0.0 in the allowed IP section"
+                        self.dismissAlert(alert)
+                        
                     } else {
-                        messageTitle = "Invalid login credentials"
-                        messageDesc = ""
+                        self.activityIndicator.stopAnimating()
+                        self.loginBtn.setTitle("Sign in", forState: UIControlState.Normal)
+                        var messageTitle : String = ""
+                        var messageDesc : String = ""
+                        if status == "api not enabled" {
+                            messageTitle = "API not enabled"
+                            messageDesc = "Please go to your account settings and turn on the enable api option. Also ensure to insert 0.0.0.0 in the allowed IP section"
+                        } else {
+                            messageTitle = "Invalid login credentials"
+                            messageDesc = ""
+                        }
+                        
+                        let alert = UIAlertView(title: messageTitle, message: messageDesc, delegate: self, cancelButtonTitle: "Ok")
+                        alert.show()
                     }
-
-                    let alert = UIAlertView(title: messageTitle, message: messageDesc, delegate: self, cancelButtonTitle: "Ok")
-                    alert.show()
+                } else {
+                    self.loginBtn.setTitle("Sign In", forState: UIControlState.Normal)
+                    self.activityIndicator.stopAnimating()
+                    self.showErrorController()
                 }
-            } else {
-                self.showErrorController()
             }
+        } else {
+            self.loginBtn.setTitle("Sign In", forState: UIControlState.Normal)
+            self.activityIndicator.stopAnimating()
+            let alert = UIAlertView(title: "Not connected to the internet", message: "Please verify that you are on a working wifi or mobile connection", delegate: self, cancelButtonTitle: "Ok")
+            alert.show()
         }
+        
     }
     
     func showErrorController() {
@@ -159,6 +172,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "segueDownloadMessages") {
+            self.textPwd.resignFirstResponder()
 //          var dmvc = segue.destinationViewController as? DownloadMessagesViewController                
         }
     }

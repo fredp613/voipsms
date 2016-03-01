@@ -31,6 +31,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
             refreshContacts(privateMOC)
             pingPushServer()
+            refreshDeviceTokenOnServer(currentUser)
+            print(currentUser)
         }
         
         if let cds = CoreDevice.getTokens(moc) {
@@ -41,12 +43,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
     
-        let settings = UIUserNotificationSettings(forTypes: [UIUserNotificationType.Sound, UIUserNotificationType.Alert], categories: nil)
+        let settings = UIUserNotificationSettings(forTypes: [UIUserNotificationType.Sound, UIUserNotificationType.Alert, UIUserNotificationType.Badge], categories: nil)
         
-//        let settings = UIUserNotificationSettings(forTypes: .Alert | .Sound, categories: nil)
         UIApplication.sharedApplication().registerUserNotificationSettings(settings)
         
         //ask for contact access
+        
         Contact().getContactsDict({ (contacts) -> () in
         })
         
@@ -60,12 +62,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             firstVC.contactForSegue = contact
             firstVC.fromClosedState = true
             firstVC.performSegueWithIdentifier("showMessageDetailSegue", sender: self)
-            
-            
             //clear notifications
-            application.applicationIconBadgeNumber = 0
-            application.cancelAllLocalNotifications()
+//            application.cancelAllLocalNotifications()
         }
+        
+        UIApplication.sharedApplication().applicationIconBadgeNumber = 0
+        UIApplication.sharedApplication().cancelAllLocalNotifications()
         
         return true
     }
@@ -74,11 +76,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     }
     
+    
  
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject], fetchCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
         
         remoteNotification = userInfo
-        
+
         print("receive")
         
         if (application.applicationState == UIApplicationState.Active) {
@@ -106,6 +109,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func applicationWillEnterForeground(application: UIApplication) {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+        privateMOC.parentContext = moc
+        if let currentUser = CoreUser.currentUser(moc) {
+            currentUser.initialLoad = 1
+            CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
+            refreshContacts(privateMOC)
+            pingPushServer()
+            refreshDeviceTokenOnServer(currentUser)
+            print(currentUser)
+        }
     
     }
 
@@ -127,15 +140,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
     }
     
+    func application(application: UIApplication, didRegisterUserNotificationSettings notificationSettings: UIUserNotificationSettings) {
+        print("yes")
+        print(notificationSettings)
+        
+        if (notificationSettings.types != UIUserNotificationType.None) {
+            print("did register user")
+            application.registerForRemoteNotifications()
+        }
+    }
+    
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
+        
         let characterSet: NSCharacterSet = NSCharacterSet( charactersInString: "<>" )
         
         let deviceTokenString: String = ( deviceToken.description as NSString )
             .stringByTrimmingCharactersInSet( characterSet )
             .stringByReplacingOccurrencesOfString( " ", withString: "" ) as String
-        
+
         if let coreDevice = CoreDevice.createOrUpdateInMOC(self.moc, token: deviceTokenString) {
             print("got token data! \(coreDevice.deviceToken)")
+            if let currentUser = CoreUser.currentUser(self.moc) {
+                refreshDeviceTokenOnServer(currentUser)
+            }
         }
 
     }
@@ -164,10 +191,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let qualityOfServiceClass = QOS_CLASS_BACKGROUND
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
         dispatch_async(backgroundQueue, { () -> Void in
+           
             privateMOC.performBlock { () -> Void in
-                if Contact().checkAccess() {
-                    Contact().syncAddressBook1(privateMOC)
-                }
+//                autoreleasepool({ () -> () in
+                    if Contact().checkAccess() {
+                        Contact().syncAddressBook1(privateMOC)
+                    }
+//                })
+                
+                
             }
         })
     }
@@ -226,6 +258,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             })
         })
         
+    }
+    
+    func refreshDeviceTokenOnServer(currentUser: CoreUser) {
+
+        if UIApplication.sharedApplication().respondsToSelector("currentUserNotificationSettings") {
+            if let grantedSettings = UIApplication.sharedApplication().currentUserNotificationSettings() {
+                if grantedSettings.types != UIUserNotificationType.None {
+                    if let deviceToken = CoreDevice.getToken(self.moc) {
+                        print("device is: \(deviceToken.deviceToken)")
+                        CoreDevice.sendDeviceDetailsToAPI(deviceToken.deviceToken, user: currentUser, moc: self.moc)
+                    } else {
+                        let settings = UIUserNotificationSettings(forTypes: [UIUserNotificationType.Sound, UIUserNotificationType.Alert, UIUserNotificationType.Badge], categories: nil)
+                        
+                        UIApplication.sharedApplication().registerUserNotificationSettings(settings)
+                    }
+                    currentUser.notificationsFlag = true
+                    do {
+                        try self.moc.save()
+                    } catch _ {
+                    }
+                    
+                } else {
+                    currentUser.notificationsFlag = false
+                    do {
+                        try self.moc.save()
+                    } catch _ {
+                    }
+
+                }
+            }
+            
+        }
     }
  
 

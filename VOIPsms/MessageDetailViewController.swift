@@ -259,7 +259,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
             if let fullName = currentContact.fullName {
                 self.title = fullName.truncatedString()
             } else {
-                self.dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
+                if Contact().checkAccess() {
+                    self.dynamicBarButton = UIBarButtonItem(title: "Details", style: UIBarButtonItemStyle.Plain, target: self, action: "segueToContactDetails:")
+                }
+                
                 self.navigationItem.rightBarButtonItem = self.dynamicBarButton
                 self.title = self.contactId.northAmericanPhoneNumberFormat()
             }
@@ -546,6 +549,13 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     //MARK: - textView delegates
     
+    func textViewDidEndEditing(textView: UITextView) {
+        print(textView.frame.height)
+    }
+    func textViewDidBeginEditing(textView: UITextView) {
+        print(textView.frame.height)
+    }
+    
     func textViewDidChange(textView: UITextView) {
         if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
             sendButton.enabled = false
@@ -556,13 +566,32 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let offsetHeightTV = textView.frame.size.height
         
         self.tableView.frame.size.height = compressedTableViewHeight - offsetHeight
+
         self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight - offsetHeightTV + 30
-        //                                    self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight
+        
         let contentInsets : UIEdgeInsets = UIEdgeInsetsZero;
         scrollView.contentInset = contentInsets;
-
     }
     
+    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+
+        if text == UIPasteboard.generalPasteboard().string! {
+            print("paste")
+
+            
+        } else {
+            print("reg")
+        }
+        let currentCharacterCount = textView.text?.characters.count ?? 0
+        if (range.length + range.location > currentCharacterCount){
+            return false
+        }
+        let newLength = currentCharacterCount + text.characters.count - range.length
+        
+        return newLength <= 160
+    }
+    
+
 
     
     //MARK: - textField delegates
@@ -572,8 +601,10 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         } else {
             sendButton.enabled = true
         }
+        
     }
-    //MARK: - Keyboard delegates
+    
+       //MARK: - Keyboard delegates
     
     
     func keyboardWillHide(sender: NSNotification) {
@@ -677,8 +708,9 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     
     @IBAction func sendWasPressed(sender: AnyObject) {
+        
+        let msgForCoreData = NSString(string: self.textMessage.text)
 
-        let msgForCoreData = self.textMessage.text
         self.textMessage.text = ""
         
         let date = NSDate()
@@ -826,7 +858,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     func messageCopyTextAction(menuController: UIMenuController) {
         if let selectedIndexPath = tableView.indexPathForSelectedRow {
             let selectedMessage = messageFetchedResultsController.objectAtIndexPath(selectedIndexPath) as! CoreMessage
-            UIPasteboard.generalPasteboard().string = selectedMessage.message
+            UIPasteboard.generalPasteboard().string = selectedMessage.message as String
         }
     }
     // 3. Deselect row
