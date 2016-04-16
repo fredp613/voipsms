@@ -249,10 +249,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                 if let nc = cu.notificationContact  {
                     if let _ = CoreContact.currentContact(self.managedObjectContext, contactId: nc) {
                         self.contactForSegue = nc
-//                        if contact.deletedContact.boolValue {
-//                            contact.deletedContact = 0
-//                            CoreDataStack().saveContext(self.managedObjectContext)
-//                        }
+                        //deleted contact
                     } else {
                         if let _ = CoreContact.createInManagedObjectContext(self.managedObjectContext, contactId: nc, lastModified: nil) {
                             self.contactForSegue = nc
@@ -264,7 +261,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         }
         
             if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
-                print("processing+++++++++++++++++++++++")
+                
                 if let cm = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).first {
                     
                     if let currentUser = CoreUser.currentUser(self.managedObjectContext) {

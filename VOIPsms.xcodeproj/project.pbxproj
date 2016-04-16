@@ -692,7 +692,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.myclerical.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "c27fbe79-21de-4ad2-9c9f-30cc38ac754a";
 				SWIFT_OBJC_BRIDGING_HEADER = "VOIPsms/Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -711,7 +711,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.myclerical.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "c27fbe79-21de-4ad2-9c9f-30cc38ac754a";
 				SWIFT_OBJC_BRIDGING_HEADER = "VOIPsms/Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = 1;
 			};
