@@ -18,11 +18,11 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     var timer : NSTimer = NSTimer()
     var notificationCenter = NSNotificationCenter.defaultCenter()
     var totalCount : Int = Int()
+     let moc = (UIApplication.sharedApplication().delegate as! AppDelegate).moc
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.activityIndicator.startAnimating()
-        self.notificationCenter.addObserver(self, selector: "contextDidSave:", name: NSManagedObjectContextWillSaveNotification, object: nil)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -42,23 +42,6 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
         
     }      
     
-    @IBAction func testPressed(sender: AnyObject) {
-        print("testing")
-    }
-    func contextDidSave(notification: NSNotification) {
-//        self.testBtn.setTitle(String(totalCount), forState: UIControlState.Normal)
-//        if notification.name == NSManagedObjectContextWillSaveNotification {
-//            println("yes")
-//            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-//                println("main thread")
-//                var c = CoreMessage.getMessages(self.moc, ascending: false).count
-//                println(self.lblCount.text! + " - " + String(c))
-//            })
-        
-//        }
-        
-        
-    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -80,7 +63,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
             //                params should go in body of request
             
             VoipAPI(httpMethod: httpMethodEnum.POST, url: url, params: params).APIAuthenticatedRequest({ (responseObject, error) -> () in
-                print(responseObject)
+//                print(responseObject)
             })
         }
     }
@@ -88,36 +71,35 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     //MARK: Custom Methods
     func getMessages() {
         
-        let backgroundMOC : NSManagedObjectContext = CoreDataStack().managedObjectContext!
-//        let backgroundMOC = (UIApplication.sharedApplication().delegate as! AppDelegate).moc
+//        let backgroundMOC1 : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+       
         
-        if let _ = CoreUser.currentUser(backgroundMOC) {
-            CoreDID.createOrUpdateDID(backgroundMOC)
+        if let _ = CoreUser.currentUser(self.moc) {
+            CoreDID.createOrUpdateDID(self.moc)
 //             self.pingServerTempFunc(user)
         }
-        if let dids = CoreDID.getDIDs(backgroundMOC) {
+        if let dids = CoreDID.getDIDs(self.moc) {
 //             print(dids)
             if let str = dids.filter({$0.currentlySelected.boolValue == true}).first {
-                if let currentUser = CoreUser.currentUser(backgroundMOC) {
-                    Message.getMessagesFromAPI(false, fromList: false, moc: backgroundMOC, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
+                if let currentUser = CoreUser.currentUser(self.moc) {
+                    Message.getMessagesFromAPI(false, fromList: false, moc: self.moc, from: str.registeredOn.strippedDateFromString(), completionHandler: { (responseObject,
                         error) -> () in
                         
                         if error == nil {
                            
-                            do {
-                                print("interesting")
-                                 let contacts = try CoreContact.getAllContacts(backgroundMOC)
-                                    for c in contacts! {
-                                        if let lastMessage = CoreContact.getLastMessageFromContact(backgroundMOC, contactId: c.contactId, did: nil) {
+                            do {//
+                                if let contacts = try CoreContact.getAllContacts(self.moc) {
+                                    for c in contacts {
+                                        if let lastMessage = CoreContact.getLastMessageFromContact(self.moc, contactId: c.contactId, did: nil) {
                                             let formatter1: NSDateFormatter = NSDateFormatter()
                                             formatter1.dateFormat = "YYYY-MM-dd HH:mm:ss"
                                             let parsedDate: NSDate = formatter1.dateFromString(lastMessage.date)!
                                             c.lastModified = parsedDate
-                                            CoreContact.updateContactInMOC(backgroundMOC)
-                                            print("interesting2")
+                                            CoreContact.updateContactInMOC(self.moc)
+//
                                         }
                                     }
-                                print("interesting3")
+                                }
                                 
                             } catch {
                                 print("DEBUG--------------ERROR IN DOWNLOAD VIEW CONTROLLER")
@@ -129,43 +111,39 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
                             }
                             
                             
-                            print("done")
+//                            print("done")
                             currentUser.initialLogon = 0
                             currentUser.messagesLoaded = 1
-                            CoreUser.updateInManagedObjectContext(backgroundMOC, coreUser: currentUser)
+                            CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
                            
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 self.activityIndicator.stopAnimating()
                                 self.notificationCenter.removeObserver(self)
                                 self.performSegueWithIdentifier("segueToMessages", sender: self)
-                            })
+//                            })
                             
                         } else {
                             print(error)
-                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
                                 self.showErrorController()
-                            })
+//                            })
                         }
                     })
                     currentUser.initialLogon = 0
                     currentUser.messagesLoaded = 1
-                    CoreUser.updateInManagedObjectContext(backgroundMOC, coreUser: currentUser)
-//                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-//                        self.activityIndicator.stopAnimating()
-//                        self.notificationCenter.removeObserver(self)
-//                        self.performSegueWithIdentifier("segueToMessages", sender: self)
-//                    })
+                    CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
+
                 }
 
             }
 
         } else {
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                
+//            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+            
                 self.dismissViewControllerAnimated(true, completion: nil)
                 let alert = UIAlertView(title: "Fatal Error", message: "issue getting your DID info from voip.ms, contact app developer", delegate: self, cancelButtonTitle: "Ok")
                 alert.show()
-            })
+//            })
         }
        
         

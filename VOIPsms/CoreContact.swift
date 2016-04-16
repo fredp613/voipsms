@@ -9,6 +9,19 @@
 import Foundation
 import CoreData
 
+
+
+struct ContactStruct {
+    var contactName = String()
+    var contactId = String()
+    var phoneLabel = String()
+    var lastMsgDate = String()
+    var lastMsg = String()
+    var lastMsgType = NSNumber()
+    var lastMsgFlag = String()
+    var did = String()
+}
+
 class CoreContact: NSManagedObject {
 
     @NSManaged var contactId: String
@@ -142,15 +155,7 @@ class CoreContact: NSManagedObject {
             return nil
         }
         
-        
-//        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest) as? [CoreContact] {
-//            coreContact = fetchResults
-//            if fetchResults.count > 0 {
-//                return coreContact[0]
-//            }
-//        } else {
-//            print("\(error?.userInfo)")
-//        }
+
         return nil
     }
     

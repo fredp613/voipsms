@@ -32,40 +32,46 @@ class Message {
     
     class func getMessagesFromAPI(fromAppDelegate: Bool,fromList: Bool, moc: NSManagedObjectContext, from: String!, completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
         
-        let privateContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
-        privateContext.parentContext = moc
+//        let privateContext = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+//        privateContext.parentContext = moc
         
         let dateFormatter = NSDateFormatter()
         dateFormatter.dateFormat = "YYYY-MM-dd"
         //from should be last date in core data
         
-        var fromStr = String()
+        var fromStr : NSDate
         if from != nil {
-            fromStr = from!
+            fromStr = dateFormatter.dateFromString(from)!
         } else {
-            fromStr = CoreDID.getSelectedDID(moc)!.registeredOn
+            fromStr = dateFormatter.dateFromString(CoreDID.getSelectedDID(moc)!.registeredOn)!
         }
         var params = [String : String]()
 
         if let currentUser = CoreUser.currentUser(moc) {
 
             
-            let calendar: NSCalendar = NSCalendar.currentCalendar()
-            let strDate = dateFormatter.stringFromDate(NSDate())
-            // Replace the hour (time) of both dates with 00:00
-            let date1 : NSDate = dateFormatter.dateFromString(fromStr)!
-            let date2 : NSDate = dateFormatter.dateFromString(strDate)!
+//            let calendar: NSCalendar = NSCalendar.currentCalendar()
             
-            let flags = NSCalendarUnit.Day
-            let components = calendar.components(flags, fromDate: date1, toDate: date2, options: [])
             
-            if components.day > 91 {
-                fromStr = dateFormatter.stringFromDate(date2.dateByAddingTimeInterval(60*60*24*(-91)))
+            let date1 : NSDate = dateFormatter.dateFromString("2016-03-11")!
+            print("date 1 is: \(date1)")
+            let date2  = NSDate()
+            
+//           let interval = date2.timeIntervalSinceDate(fromStr)
+            let numberOfDaysBetweenTodayAndRegistrationDate = fromStr.numberOfDaysUntilDateTime(date2)
+            if numberOfDaysBetweenTodayAndRegistrationDate > 90 {
+                let newDate = NSDate().dateByAddingTimeInterval(-80*24*60*60)
+                fromStr = newDate
             }
+            
+            
+                        
+           
+            print("sadfalksjfa;lsfjasld;kfjasl;fjasdlf;jasdfl;kasdjfasld;jk NEW \(fromStr)")
             if (currentUser.initialLogon.boolValue == true) || (currentUser.initialLoad.boolValue == true) {
                 params = [
                     "method" : "getSMS",
-                    "from" : fromStr,
+                    "from" : dateFormatter.stringFromDate(fromStr),
                     "to" : dateFormatter.stringFromDate(NSDate()) as String,
                     "limit" : "450"
                 ]
@@ -76,12 +82,14 @@ class Message {
                 ]
             }
         }
+        print(params)
         
-        privateContext.performBlock { () -> Void in
-            _ = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
-                        
-            VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
+//        privateContext.performBlock { () -> Void in
+//            _ = CoreMessage.getMessages(moc, ascending: true).map({$0.id})
+            
+            VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls(moc1: moc).get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
                 print(error)
+                print(responseObject)
                 let json = responseObject
                 for (_, t): (String, JSON) in json["sms"] {
                     let contact = t["contact"].stringValue
@@ -100,7 +108,8 @@ class Message {
                     let did = t["did"].stringValue
                     
                     if CoreMessage.isExistingMessageById(moc, id: id) == false /**&& CoreDeleteMessage.isDeletedMessage(moc, id: id) == false**/  {
-                        if let currentUser = CoreUser.currentUser(privateContext) {
+                        print("message")
+                        if let currentUser = CoreUser.currentUser(moc) {
                             if type == true {
                                 if currentUser.initialLogon == 1 || currentUser.initialLogon.boolValue == true  {
                                     flagValue = message_status.READ.rawValue
@@ -113,13 +122,13 @@ class Message {
                         }
                         
                         
-                        CoreMessage.createInManagedObjectContext(privateContext, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
+                        CoreMessage.createInManagedObjectContext(moc, contact: contact, id: id, type: type, date: date, message: message, did: did, flag: flagValue, completionHandler: { (t, error) -> () in
                         })
                     }
                 }
                 return completionHandler(responseObject: json, error: nil)
             }
-        }
+//        }
         
         
     }
@@ -139,7 +148,6 @@ class Message {
         }
         let boldText  = contactStr
         let attrs = [NSFontAttributeName : UIFont.boldSystemFontOfSize(15)]
-        var boldString = NSMutableAttributedString(string:boldText, attributes:attrs)
         let localNotification = UILocalNotification()
         localNotification.alertBody = "\(contactStr)\r\n\(message)"
 //        UIApplication.sharedApplication().presentLocalNotificationNow(localNotification)
@@ -187,7 +195,7 @@ class Message {
         }
         
 //        privateMoc.performBlock { () -> Void in
-            VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
+            VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls(moc1: moc).get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
                 
                 let json = responseObject
                 for (key, t): (String, JSON) in json["sms"] {
@@ -218,7 +226,7 @@ class Message {
 //        }
     }
     
-    class func sendMessageAPI(contact: String, messageText: String, did: String,
+    class func sendMessageAPI(moc: NSManagedObjectContext, contact: String, messageText: String, did: String,
         completionHandler: (responseObject: JSON, error: NSError?) -> ()) {
             let params = [
                 "method":"sendSMS",
@@ -227,8 +235,8 @@ class Message {
                 "message": messageText
             ]
             
-        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
-            print(APIUrls.get_request_url_contruct(params)!)
+        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls(moc1: moc).get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
+//            print(APIUrls.get_request_url_contruct(params)!)
                 if error != nil {
                     return completionHandler(responseObject: responseObject, error: error)
                 } else {
@@ -237,14 +245,14 @@ class Message {
             }
     }
     
-    class func deleteMessagesFromAPI(ids: [String]!, completionHandler: (responseObject: Bool, error: NSError?)->()) {
+    class func deleteMessagesFromAPI(moc: NSManagedObjectContext, ids: [String]!, completionHandler: (responseObject: Bool, error: NSError?)->()) {
         
         for id in ids {
             let params = [
                 "method":"deleteSMS",
                 "id":id
             ]
-        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls.get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
+        VoipAPI(httpMethod: httpMethodEnum.GET, url: APIUrls(moc1: moc).get_request_url_contruct(params)!, params: nil).APIAuthenticatedRequest { (responseObject, error) -> () in
 //                if responseObject {
 //                   print(responseObject)
 //                }

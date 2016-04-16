@@ -23,16 +23,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
-        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
-        privateMOC.parentContext = moc
+//        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+//        privateMOC.parentContext = moc
         
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
-            refreshContacts(privateMOC)
+//            refreshContacts(privateMOC)
             pingPushServer()
             refreshDeviceTokenOnServer(currentUser)
-            print(currentUser)
         }
         
         if let cds = CoreDevice.getTokens(moc) {
@@ -49,8 +48,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         //ask for contact access
         
-        Contact().getContactsDict({ (contacts) -> () in
-        })
+//        Contact().getContactsDict({ (contacts) -> () in
+//        })
         
         if let userInfo = launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? [NSObject : AnyObject] {
             
@@ -109,12 +108,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func applicationWillEnterForeground(application: UIApplication) {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
-        privateMOC.parentContext = moc
+//        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+//        privateMOC.parentContext = moc
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
-            refreshContacts(privateMOC)
+//            refreshContacts(privateMOC)
             pingPushServer()
             refreshDeviceTokenOnServer(currentUser)
             print(currentUser)
@@ -262,7 +261,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func refreshDeviceTokenOnServer(currentUser: CoreUser) {
 
-        if UIApplication.sharedApplication().respondsToSelector("currentUserNotificationSettings") {
+        if UIApplication.sharedApplication().respondsToSelector(#selector(UIApplication.currentUserNotificationSettings)) {
             if let grantedSettings = UIApplication.sharedApplication().currentUserNotificationSettings() {
                 if grantedSettings.types != UIUserNotificationType.None {
                     if let deviceToken = CoreDevice.getToken(self.moc) {

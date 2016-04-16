@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2A1648251ADCBB7E00E8DF91 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1648241ADCBB7E00E8DF91 /* MainTabBarController.swift */; };
 		2A2878BD1B504BE600C9C1A4 /* TextFieldExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2878BC1B504BE600C9C1A4 /* TextFieldExtension.swift */; };
 		2A287D381AF724380078F0F7 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A287D371AF724380078F0F7 /* AddressBook.framework */; };
 		2A2F256B1B55D7FB00949569 /* TableViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2F256A1B55D7FB00949569 /* TableViewController1.swift */; };
@@ -41,9 +40,9 @@
 		2AA6CAF41B1B9A1D006C7D39 /* ContactActionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA6CAF31B1B9A1D006C7D39 /* ContactActionViewController.swift */; };
 		2AA6CAF61B1BF277006C7D39 /* NewExistingContactViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA6CAF51B1BF277006C7D39 /* NewExistingContactViewController.swift */; };
 		2AACDE261BAE4AB600789B4E /* NAViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AACDE251BAE4AB600789B4E /* NAViewController.swift */; };
+		2AAF08591CB745D80055EB29 /* testTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AAF08581CB745D80055EB29 /* testTableViewController.swift */; };
 		2AB3B42E1B598E4B00096DC2 /* NSMutableStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB3B42D1B598E4B00096DC2 /* NSMutableStringExtension.swift */; };
 		2AB4AC2F1B2F3ED700358899 /* DateExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AB4AC2E1B2F3ED700358899 /* DateExtension.swift */; };
-		2ABFAED91AE08DBC00EFABBD /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAED81AE08DBC00EFABBD /* MessagesViewController.swift */; };
 		2ABFAEDD1AE09FD700EFABBD /* CoreMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAEDC1AE09FD700EFABBD /* CoreMessage.swift */; };
 		2ABFAEDF1AE0AA4900EFABBD /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABFAEDE1AE0AA4900EFABBD /* Message.swift */; };
 		2AC251C51AF6F40700A47AD0 /* NewMessageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC251C41AF6F40700A47AD0 /* NewMessageViewController.swift */; };
@@ -73,7 +72,6 @@
 
 /* Begin PBXFileReference section */
 		255C57A492F6184F53AFAD80 /* libPods-VOIPsmsTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-VOIPsmsTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2A1648241ADCBB7E00E8DF91 /* MainTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		2A2878BC1B504BE600C9C1A4 /* TextFieldExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldExtension.swift; sourceTree = "<group>"; };
 		2A287D361AF723F20078F0F7 /* Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
 		2A287D371AF724380078F0F7 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
@@ -116,9 +114,9 @@
 		2AA6CAF31B1B9A1D006C7D39 /* ContactActionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactActionViewController.swift; sourceTree = "<group>"; };
 		2AA6CAF51B1BF277006C7D39 /* NewExistingContactViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewExistingContactViewController.swift; sourceTree = "<group>"; };
 		2AACDE251BAE4AB600789B4E /* NAViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NAViewController.swift; sourceTree = "<group>"; };
+		2AAF08581CB745D80055EB29 /* testTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = testTableViewController.swift; sourceTree = "<group>"; };
 		2AB3B42D1B598E4B00096DC2 /* NSMutableStringExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSMutableStringExtension.swift; sourceTree = "<group>"; };
 		2AB4AC2E1B2F3ED700358899 /* DateExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateExtension.swift; sourceTree = "<group>"; };
-		2ABFAED81AE08DBC00EFABBD /* MessagesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
 		2ABFAEDC1AE09FD700EFABBD /* CoreMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreMessage.swift; sourceTree = "<group>"; };
 		2ABFAEDE1AE0AA4900EFABBD /* Message.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		2AC251C41AF6F40700A47AD0 /* NewMessageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewMessageViewController.swift; sourceTree = "<group>"; };
@@ -237,13 +235,12 @@
 				2A98D4331ADB665C003D3512 /* ViewController.swift */,
 				2A98D4351ADB665C003D3512 /* Main.storyboard */,
 				2A99162A1B0183FA0025F8D2 /* ProfileViewController.swift */,
-				2ABFAED81AE08DBC00EFABBD /* MessagesViewController.swift */,
 				2A98D4381ADB665C003D3512 /* Images.xcassets */,
 				2A98D43A1ADB665C003D3512 /* LaunchScreen.xib */,
 				2A98D4301ADB665C003D3512 /* VOIPsms.xcdatamodeld */,
-				2A1648241ADCBB7E00E8DF91 /* MainTabBarController.swift */,
 				2A98D42C1ADB665C003D3512 /* Supporting Files */,
 				2A287D361AF723F20078F0F7 /* Bridging-Header.h */,
+				2AAF08581CB745D80055EB29 /* testTableViewController.swift */,
 			);
 			path = VOIPsms;
 			sourceTree = "<group>";
@@ -513,7 +510,7 @@
 				2A98D4341ADB665C003D3512 /* ViewController.swift in Sources */,
 				2AD9D6771BAE4E760087E508 /* EAcViewController.swift in Sources */,
 				2A640C6D1B266D40009A77D0 /* UIScrollView+TPKeyboardAvoidingAdditions.m in Sources */,
-				2A1648251ADCBB7E00E8DF91 /* MainTabBarController.swift in Sources */,
+				2AAF08591CB745D80055EB29 /* testTableViewController.swift in Sources */,
 				2A98D42F1ADB665C003D3512 /* AppDelegate.swift in Sources */,
 				2AC251C51AF6F40700A47AD0 /* NewMessageViewController.swift in Sources */,
 				2A640C701B266D40009A77D0 /* TPKeyboardAvoidingScrollView.m in Sources */,
@@ -537,7 +534,6 @@
 				2A7FA6331AEB4BDD00011C6C /* CoreDID.swift in Sources */,
 				2A98D4321ADB665C003D3512 /* VOIPsms.xcdatamodeld in Sources */,
 				2AE76D331AE2B91D00A6E84D /* MessageDetailViewController.swift in Sources */,
-				2ABFAED91AE08DBC00EFABBD /* MessagesViewController.swift in Sources */,
 				2A2F256B1B55D7FB00949569 /* TableViewController1.swift in Sources */,
 				2AACDE261BAE4AB600789B4E /* NAViewController.swift in Sources */,
 				2AE0DE5E1AE72946008EC08E /* MessageBubbleCell.swift in Sources */,
@@ -633,7 +629,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "VOIP.ms sms";
 				PROVISIONING_PROFILE = "";
-				SDKROOT = iphoneos9.1;
+				SDKROOT = iphoneos9.3;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VALID_ARCHS = "arm64 armv7 armv7s i386 armv6";
 			};
@@ -658,7 +654,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -677,7 +673,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "VOIP.ms sms";
 				PROVISIONING_PROFILE = "";
-				SDKROOT = iphoneos9.1;
+				SDKROOT = iphoneos9.3;
 				VALIDATE_PRODUCT = YES;
 				VALID_ARCHS = "arm64 armv7 armv7s i386 armv6";
 			};

@@ -186,4 +186,6 @@ class CoreUser: NSManagedObject {
             }
         }
     }
+    
+    
 }

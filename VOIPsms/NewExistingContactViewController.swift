@@ -110,7 +110,7 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text != "" {
             self.contacts = Contact().getAllContacts(searchBar.text)
-            print(self.contacts)
+//            print(self.contacts)
         } else {
             self.contacts = Contact().getAllContacts(nil)
         }
@@ -120,6 +120,7 @@ class NewExistingContactViewController: UIViewController, UITableViewDelegate, U
     func searchBarCancelButtonClicked(searchBar: UISearchBar) {
         searchBar.text = ""
         self.contacts = Contact().getAllContacts(nil)
+        self.tableView.reloadData()
         searchBar.resignFirstResponder()
     }
     

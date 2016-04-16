@@ -13,17 +13,18 @@ import CoreData
 class APIUrls {
     
     static let getUrl = "https://voip.ms/api/v1/rest.php?"
-    var moc : NSManagedObjectContext
-    
-    init() {
-        moc = CoreDataStack().managedObjectContext!
+    let moc : NSManagedObjectContext
+
+
+    init(moc1: NSManagedObjectContext) {
+        moc = moc1
     }
     
 //    api_username={$user}&api_password={$pass}&method={$method}"
     
-    class func authenticatedUrl() -> String? {
-        let moc1 = CoreDataStack().managedObjectContext!
-        if let currentUser = CoreUser.currentUser(moc1) {
+    func authenticatedUrl() -> String? {
+        
+        if let currentUser = CoreUser.currentUser(moc) {
             if let api_password = KeyChainHelper.retrieveForKey(currentUser.email) {
                 let url = APIUrls.getUrl + "api_username=" + currentUser.email + "&api_password=" + api_password
                 return url
@@ -33,12 +34,12 @@ class APIUrls {
         return nil
     }
     
-    class func get_request_url_contruct(params: [String : String]?) -> String? {
+    func get_request_url_contruct(params: [String : String]?) -> String? {
         var url : String = ""
         
         if (params != nil) {
 
-            if var url = APIUrls.authenticatedUrl() {
+            if var url = authenticatedUrl() {
                 url += "&"
                 for (i, p) in (params!).enumerate() {
                     let lastIndexElement : Int = Int(params!.count - 1)
@@ -60,7 +61,7 @@ class APIUrls {
             return nil
         
         } else {
-            url = APIUrls.authenticatedUrl()!
+            url = authenticatedUrl()!
             return url
         }
                 

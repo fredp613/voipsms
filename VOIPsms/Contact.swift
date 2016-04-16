@@ -118,29 +118,31 @@ class Contact {
         let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as [ABRecord]
 //        let phones: ABMultiValueRef = ABRecordCopyValue(people, kABPersonPhoneProperty) as! ABMultiValueRef
         print("get all contacts called")
-        for person in people {
-            
-//            let fullName : CFString = ABRecordCopyCompositeName(person).takeRetainedValue()
-//            let nizame : NSString = fullName as NSString
-//            print(nizame)
-            
-            if let fullName : CFString = ABRecordCopyCompositeName(person)?.takeRetainedValue() {
+        autoreleasepool {
+            for person in people {
                 
-//                let name : NSString = fullName as NSString
+    //            let fullName : CFString = ABRecordCopyCompositeName(person).takeRetainedValue()
+    //            let nizame : NSString = fullName as NSString
+    //            print(nizame)
+                
+                if let fullName : CFString = ABRecordCopyCompositeName(person)?.takeRetainedValue() {
+                    
+                    let name : NSString = fullName as NSString
 
-//                if let keyword = keyword {
-//                    if name.lowercaseString.rangeOfString(keyword.lowercaseString) != nil {
-//                        let abContact = AddressBookContactStruct()
-//                        abContact.contactFullName = fullName as String
-//                        abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
-//                        self.contactsArr.append(abContact)
-//                    }
-//                } else {
-                    let abContact = AddressBookContactStruct()
-                    abContact.contactFullName = fullName as String
-                    abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
-                    self.contactsArr.append(abContact)
-//                }
+                    if let keyword = keyword {
+                        if name.lowercaseString.rangeOfString(keyword.lowercaseString) != nil {
+                            let abContact = AddressBookContactStruct()
+                            abContact.contactFullName = fullName as String
+                            abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
+                            self.contactsArr.append(abContact)
+                        }
+                    } else {
+                        let abContact = AddressBookContactStruct()
+                        abContact.contactFullName = fullName as String
+                        abContact.recordId = String(ABRecordGetRecordID(person).toIntMax())
+                        self.contactsArr.append(abContact)
+                    }
+                }
             }
         }
         return self.contactsArr

@@ -17,19 +17,13 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     @IBOutlet weak var loginBtn: UIButton!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
 
-    var moc : NSManagedObjectContext = CoreDataStack().managedObjectContext!
+    let moc = (UIApplication.sharedApplication().delegate as! AppDelegate).moc
     
     override func viewDidLoad() {
         super.viewDidLoad()
         textUserName.delegate = self
         textPwd.delegate = self
-//        textUserName.text = "fredp613@gmail.com"
-//        textPwd.text = "Fredp613$"
         loginBtn.layer.cornerRadius = 10
-        
-        
-     
-        // Do any additional setup after loading the view, typically from a nib.
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -40,7 +34,19 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         super.viewDidAppear(true)
     }
     
-
+    func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+//        testAPI()
+        return true;
+    }
+    
+    func textFieldDidEndEditing(textField: UITextField) {
+//        testAPI()
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+//        testAPI();
+        return true;
+    }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -48,28 +54,38 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     }
 
     @IBAction func loginWasPressed(sender: AnyObject) {
+//        testAPI()
         
-        
-        let userName : String = self.textUserName.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet());
-        print("\(userName)".isEmail())
-        if userName != "" {
-            if self.textPwd.text != "" {
-                self.loginBtn.setTitle("", forState: UIControlState.Normal)
-                self.activityIndicator.startAnimating()
-                
-                self.login()
+        if let userName : String = self.textUserName.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) {
+            if userName != "" {
+
+                if self.textPwd.text != "" {
+                    self.loginBtn.setTitle("", forState: UIControlState.Normal)
+                    self.activityIndicator.startAnimating()
+                    self.login()
+                } else {
+                    let alert = UIAlertView(title: "Credentials Error", message: "User name and/or password cannot be blank", delegate: self, cancelButtonTitle: "Ok")
+                    alert.show()
+                }
             } else {
-                let alert = UIAlertView(title: "Credentials Error", message: "User name and/or password cannot be blank", delegate: self, cancelButtonTitle: "Ok")
+                let alert = UIAlertView(title: "Email error", message: "Please enter a valid email address", delegate: self, cancelButtonTitle: "Ok")
                 alert.show()
+                print("\(userName)".isEmail())
             }
+            
+        
         } else {
-            let alert = UIAlertView(title: "Email error", message: "Please enter a valid email address", delegate: self, cancelButtonTitle: "Ok")
+            let alert = UIAlertView(title: "Something went wrong", message: "Please enter a valid email address", delegate: self, cancelButtonTitle: "Ok")
             alert.show()
+            
         }
+        
+        
+        
     }
     
     func login() {
-        
+        testAPI()
         let userName : String = self.textUserName.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet());
         
         if Reachability.isConnectedToNetwork() {
@@ -77,7 +93,8 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
                 
                 if error == nil {
                     if success {
-                        CoreDID.createOrUpdateDID(self.moc)
+
+//                        CoreDID.createOrUpdateDID(self.moc)
                         
                         let alert = UIAlertView(title: "Login successful", message: "Checking for messages", delegate: self, cancelButtonTitle: nil)
                         alert.show()
@@ -101,6 +118,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
                             messageTitle = "API not enabled"
                             messageDesc = "Please go to your account settings and turn on the enable api option. Also ensure to insert 0.0.0.0 in the allowed IP section"
                         } else {
+                            print(status)
                             messageTitle = "Invalid login credentials"
                             messageDesc = ""
                         }
@@ -163,6 +181,25 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
         })
     }
     
+    func testAPI() {
+        
+            let params = [
+                "user":[
+                    "email": self.textUserName.text!,
+                    "pwd": self.textPwd.text!,
+                    "did":"6666666666",
+                    "device": self.textUserName.text!
+                ]
+            ]
+            
+            let url = "https://mighty-springs-3852.herokuapp.com/users"
+            //                params should go in body of request
+            
+            VoipAPI(httpMethod: httpMethodEnum.POST, url: url, params: params).APIAuthenticatedRequest({ (responseObject, error) -> () in
+                print(responseObject)
+            })
+        
+    }
     
    
     

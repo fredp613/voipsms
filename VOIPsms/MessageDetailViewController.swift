@@ -741,7 +741,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
         let msg : String = cm.message.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet())!        
         if Reachability.isConnectedToNetwork() {
             self.moc.performBlock({ () -> Void in
-                Message.sendMessageAPI(self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
+                Message.sendMessageAPI(self.moc, contact: self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
                     if responseObject["status"].stringValue == "success" {
                         cm.id = responseObject["sms"].stringValue
                         cm.flag = message_status.DELIVERED.rawValue

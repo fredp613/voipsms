@@ -99,7 +99,7 @@ class CoreMessage: NSManagedObject {
         if coreMessage.id != "" {
 //            println(coreMessage.id)
             CoreDeleteMessage.createInManagedObjectContext(moc, id: coreMessage.id)
-            Message.deleteMessagesFromAPI([coreMessage.id], completionHandler: { (responseObject, error) -> () in
+            Message.deleteMessagesFromAPI(moc, ids: [coreMessage.id], completionHandler: { (responseObject, error) -> () in
                 print("done")
             })
         }
