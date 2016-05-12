@@ -684,8 +684,8 @@
 			baseConfigurationReference = 8FAE43D590EDBB6CDA7FE0A1 /* Pods-VOIPsms.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Frederick Pearson (HAWM2XFY5Y)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Frederick Pearson (HAWM2XFY5Y)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = VOIPsms/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
@@ -703,8 +703,8 @@
 			baseConfigurationReference = A4FDD4F4952922383B8B6166 /* Pods-VOIPsms.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Frederick Pearson (HAWM2XFY5Y)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Frederick Pearson (HAWM2XFY5Y)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = VOIPsms/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;

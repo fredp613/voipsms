@@ -35,7 +35,6 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     }
     
     func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
-//        testAPI()
         return true;
     }
     
@@ -85,7 +84,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
     }
     
     func login() {
-        testAPI()
+       // testAPI()
         let userName : String = self.textUserName.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet());
         
         if Reachability.isConnectedToNetwork() {
@@ -180,26 +179,7 @@ class ViewController: UIViewController, UIAlertViewDelegate, UITextFieldDelegate
             })
         })
     }
-    
-    func testAPI() {
-        
-            let params = [
-                "user":[
-                    "email": self.textUserName.text!,
-                    "pwd": self.textPwd.text!,
-                    "did":"6666666666",
-                    "device": self.textUserName.text!
-                ]
-            ]
-            
-            let url = "https://mighty-springs-3852.herokuapp.com/users"
-            //                params should go in body of request
-            
-            VoipAPI(httpMethod: httpMethodEnum.POST, url: url, params: params).APIAuthenticatedRequest({ (responseObject, error) -> () in
-                print(responseObject)
-            })
-        
-    }
+
     
    
     

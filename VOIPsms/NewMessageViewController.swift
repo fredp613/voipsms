@@ -36,22 +36,18 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         super.viewDidLoad()
         self.tableView.delegate = self
         self.textMessage.delegate = self
-//        self.textContacts.delegate = self
         self.scrollView.delegate = self
         self.searchBar.delegate = self
         compressedTableViewHeight = self.tableView.frame.size.height
 
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("keyboardWillHide:"), name: UIKeyboardWillHideNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(NewMessageViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
 //
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("adjustForKeyboard:"), name: UIKeyboardWillChangeFrameNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(NewMessageViewController.adjustForKeyboard(_:)), name: UIKeyboardWillChangeFrameNotification, object: nil)
         
 
         self.textMessage.sizeToFit()
-//        self.textMessage.layoutIfNeeded()
-//        self.scrollView.bringSubviewToFront(self.textMessage)
         currentTextViewSize = self.textMessage.contentSize.height
-//        self.textMessage.becomeFirstResponder()
         self.searchBar.becomeFirstResponder()
         scrollView.bounces = false
         scrollView.bringSubviewToFront(tableView)
@@ -72,7 +68,6 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     }
     
     override func viewWillDisappear(animated: Bool) {
-//        self.tableViewHeighConstraint.constant = 600
         self.searchBar.resignFirstResponder()
         self.textMessage.resignFirstResponder()
     }
@@ -102,13 +97,13 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
             var cleanedSearchBarText = NSString(string: self.searchBar.text!)
             if cleanedSearchBarText.length > 10 {
                 cleanedSearchBarText = cleanedSearchBarText.substringWithRange(NSMakeRange(1, 10))
-                print(cleanedSearchBarText)
+                
             }
             contact = cleanedSearchBarText as String
         }
 
         let msgForCoreData = self.textMessage.text
-        //this is where the bug is, get the server date
+        
         let date = NSDate()
         let formatter = NSDateFormatter()
         formatter.dateFormat = "YYYY-MM-dd HH:mm:ss"
@@ -121,7 +116,6 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
                     Contact().syncNewMessageContact(cc, moc: self.moc)
                 }
             }
-            //sync address book - should i go this synchronously?
            
             
             self.delegate?.triggerSegue!(contact, moc: self.moc)
@@ -155,8 +149,8 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
         } else {
             self.sendButton.enabled = false
         }
-        
-        var offsetHeightTV = textView.frame.size.height
+        textView.layoutIfNeeded()
+        let offsetHeightTV = textView.frame.size.height
         
         self.tableView.frame.size.height = compressedTableViewHeight - offsetHeight
         self.tableViewHeighConstraint.constant = compressedTableViewHeight - offsetHeight - offsetHeightTV + 30
@@ -217,14 +211,39 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
     
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
         
+        
+        
         if searchText != "" {
-            CoreContact.getContacts(moc, did: did, dst: searchText, name: nil, message: nil, completionHandler: { (responseObject, error) -> () in
-                let coreContacts = responseObject as! [CoreContact]
-                CoreContact.findAllContactsByName(self.moc, searchTerm: searchText, existingContacts: coreContacts, completionHandler: { (contacts) -> () in
-                    self.contacts = contacts!
+            
+            let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+            privateMOC.parentContext = self.moc
+            
+            
+            Contact().getContactsBySearchString(searchText, moc: self.moc, completionHandler: { (data) in
+//                self.contacts = data
+                var cstruct = [ContactStruct]()
+                if let unwrappedData = data {
+                    for u in unwrappedData {
+                        var cStr = ContactStruct()
+                        cStr.contactName = u.contactFullName
+                        cStr.contactId = u.recordId
+                        cStr.phoneLabel = u.phoneLabel
+                        cstruct.append(cStr)
+                    }
+                    self.contacts = cstruct
                     self.tableView.reloadData()
-                })
+                }
+                
             })
+            
+            
+//            CoreContact.getContacts(moc, did: did, dst: searchText, name: nil, message: nil, completionHandler: { (responseObject, error) -> () in
+//                let coreContacts = responseObject as! [CoreContact]
+//                CoreContact.findAllContactsByName(self.moc, searchTerm: searchText, existingContacts: coreContacts, completionHandler: { (contacts) -> () in
+//                    self.contacts = contacts!
+//                    self.tableView.reloadData()
+//                })
+//            })
             
         } else {
             self.contacts = [ContactStruct]()
@@ -282,7 +301,7 @@ class NewMessageViewController: UIViewController, UITableViewDelegate, UITextFie
                     if contact.phoneLabel != "" {
                         cell.detailTextLabel?.text = contact.phoneLabel + ": " +  contact.contactId.northAmericanPhoneNumberFormat()
                     } else {
-                        cell.detailTextLabel?.text = ""
+                        cell.detailTextLabel?.text = contact.contactId.northAmericanPhoneNumberFormat()
                     }
                 
             }

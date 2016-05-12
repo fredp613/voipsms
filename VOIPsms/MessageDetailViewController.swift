@@ -557,14 +557,14 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func textViewDidChange(textView: UITextView) {
+        
         if textMessage.text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == "" {
             sendButton.enabled = false
         } else {
             sendButton.enabled = true
         }
-
+        textView.layoutIfNeeded()
         let offsetHeightTV = textView.frame.size.height
-        
         self.tableView.frame.size.height = compressedTableViewHeight - offsetHeight
 
         self.tableViewHeightConstraint.constant = compressedTableViewHeight - offsetHeight - offsetHeightTV + 30
@@ -575,20 +575,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
 
-        if text == UIPasteboard.generalPasteboard().string! {
-            print("paste")
-
-            
-        } else {
-            print("reg")
-        }
-        let currentCharacterCount = textView.text?.characters.count ?? 0
-        if (range.length + range.location > currentCharacterCount){
-            return false
-        }
-        let newLength = currentCharacterCount + text.characters.count - range.length
-        
-        return newLength <= 160
+        return true;
     }
     
 
@@ -710,7 +697,6 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     @IBAction func sendWasPressed(sender: AnyObject) {
         
         let msgForCoreData = NSString(string: self.textMessage.text)
-
         self.textMessage.text = ""
         
         let date = NSDate()
@@ -738,10 +724,12 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     
     func processMessage(cm: CoreMessage) {
 
-        let msg : String = cm.message.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet())!        
+        let msg : String = cm.message.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet())!
+        
         if Reachability.isConnectedToNetwork() {
             self.moc.performBlock({ () -> Void in
                 Message.sendMessageAPI(self.moc, contact: self.contactId, messageText: msg, did: self.did, completionHandler: { (responseObject, error) -> () in
+                    print(responseObject)
                     if responseObject["status"].stringValue == "success" {
                         cm.id = responseObject["sms"].stringValue
                         cm.flag = message_status.DELIVERED.rawValue
@@ -752,6 +740,8 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
                         print("looks ok")
                     } else {
                         cm.flag = message_status.UNDELIVERED.rawValue
+//                        let errorMessageAlert = UIAlertView(title: "Error", message: responseObject["status"].stringValue, delegate: self, cancelButtonTitle: "Ok")
+//                        errorMessageAlert.show();
                         print("looks bad")
                     }
                 })
@@ -802,7 +792,7 @@ class MessageDetailViewController: UIViewController, UITableViewDelegate, UIScro
     }
     
     func retryWasPressed(sender: UIButton) {
-        print("hi")
+       
         //        let cm : CoreMessage = self.messageFetchedResultsController.objectAtIndexPath(self.selectedIndexPath) as! CoreMessage
         //        processMessage(cm)
     }

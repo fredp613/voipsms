@@ -29,23 +29,13 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
     var contactForSegue : String = String()
     var fromClosedState : Bool = false
     let managedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).moc
-//    let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
-
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
       
         let contactsFetchRequest = NSFetchRequest(entityName: "CoreContact")
         let primarySortDescriptor = NSSortDescriptor(key: "lastModified", ascending: false)
         contactsFetchRequest.sortDescriptors = [primarySortDescriptor]
-//        if let did = CoreDID.getSelectedDID(self.managedObjectContext) {
-//            self.did = did.did
-//            var contactIDs = CoreMessage.getMessagesByDID(self.managedObjectContext, did: did.did).map({$0.contactId})
-//            let contactPredicate = NSPredicate(format: "contactId IN %@", contactIDs)
-//            let contactPredicateDeleted = NSPredicate(format: "deletedContact == 0")
-//            let compoundPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [contactPredicate, contactPredicateDeleted])
-//            contactsFetchRequest.predicate = compoundPredicate
-//        }
-        
+
         let frc = NSFetchedResultsController(
             fetchRequest: contactsFetchRequest,
             managedObjectContext: self.managedObjectContext,
@@ -69,16 +59,12 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             print("an error has occurred: \(error)")
         }
         
-//        privateMOC.parentContext = managedObjectContext
-        
+        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+        privateMOC.parentContext = managedObjectContext
         //refresh stuff
         if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
-            currentUser.initialLoad = true
-            CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser)
             
-            //refreshContacts
             let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
-//            appDel.refreshContacts(privateMOC)
             appDel.refreshDeviceTokenOnServer(currentUser)
             
         }
@@ -91,7 +77,27 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         
 
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MessageListViewController.handlePushNotification(_:)), name: "appRestorePush", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MessageListViewController.appIsActive(_:)), name: UIApplicationWillEnterForegroundNotification, object: nil)
         
+        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
+        appDel.refreshContacts(privateMOC)
+        
+        
+    }
+    func appIsActive(notification: NSNotification) {
+        print("im active");
+        self.viewWillAppear(true);
+//        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
+//        //refreshContacts
+//        if let currentUser = CoreUser.currentUser(self.managedObjectContext) {
+//            if currentUser.initialLogon == false || currentUser.initialLogon == 0 {
+//               appDel.refreshContacts(self.managedObjectContext)
+//                self.pokeFetchedResultsController()
+//                print("NOT** initial logon --------------------------------------------")
+//            }
+//            self.tableView.reloadData()
+//        }
+       
     }
     
     func handlePushNotification(notification: NSNotification) {
@@ -166,11 +172,17 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             } else {
                 self.navigationItem.rightBarButtonItem = nil
             }
+            
         }
+
     }
+    
     
     override func viewWillAppear(animated: Bool) {
       
+        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+        privateMOC.parentContext = managedObjectContext
+        
         if CoreUser.userExists(managedObjectContext) {
             let currentUser = CoreUser.currentUser(managedObjectContext)
             let pwd = KeyChainHelper.retrieveForKey(currentUser!.email)
@@ -182,11 +194,29 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                     if currentUser!.messagesLoaded.boolValue == false || currentUser!.messagesLoaded.boolValue == false {
                         self.performSegueWithIdentifier("showDownloadMessagesSegue", sender: self)
                     } else {
+                        let appDel = UIApplication.sharedApplication().delegate as! AppDelegate
+                        //refreshContacts
+                        if currentUser!.initialLogon == true || currentUser!.initialLogon == 1 {
+                            print("initial logon --------------------------------------------")
+                            appDel.refreshContacts(privateMOC)
+                            
+                        } else {
+                            print("NOT** initial logon --------------------------------------------")
+                        }
+                        
+                        currentUser!.initialLoad = true
+                        currentUser!.initialLogon = false
+                        CoreUser.updateInManagedObjectContext(self.managedObjectContext, coreUser: currentUser!)
+                        self.tableView.reloadData()
+                        
                         self.startTimer()
                     }
                 }
             })
-
+            
+            
+            
+           
             
         } else {
             performSegueWithIdentifier("showLoginSegue", sender: self)
@@ -268,6 +298,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                         let lastMessage = cm
                         var from = ""
                         from = lastMessage.date
+                        
                         Message.getMessagesFromAPI(false, fromList: true, moc: self.managedObjectContext, from: from.strippedDateFromString(), completionHandler: { (responseObject, error) -> () in
                             
                             if currentUser.initialLogon.boolValue == true || currentUser.initialLoad.boolValue == true {
@@ -278,7 +309,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
                         })
                     }
                     
-                }
+                } 
             }
     }
     
@@ -360,14 +391,19 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) 
 
         let contact = fetchedResultsController.objectAtIndexPath(indexPath) as! CoreContact
-        print("hi")
+        
         if let lastMessage = CoreContact.getLastMessageFromContact(self.managedObjectContext, contactId: contact.contactId, did: self.did) {
             let message = lastMessage as CoreMessage
             let text2 = message.message
             if message.flag == message_status.PENDING.rawValue {
                 cell.detailTextLabel?.text = "\(text2) sending..."
             } else {
-                cell.detailTextLabel?.text = "\(text2)"
+                if message.flag == message_status.UNDELIVERED.rawValue {
+                    cell.detailTextLabel?.text = "(undelivered) \(text2)"
+                } else {
+                    cell.detailTextLabel?.text = "\(text2)"
+                }
+                
             }
 
             let font:UIFont? = UIFont(name: "Arial", size: 13.0)
@@ -397,7 +433,12 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             } else {
                 //default light gray and text colors
                 cell.textLabel?.textColor = UIColor.blackColor()
-                cell.detailTextLabel?.textColor = UIColor.blackColor()
+                if message.flag == message_status.UNDELIVERED.rawValue {
+                    cell.detailTextLabel?.textColor = UIColor.redColor()
+                } else {
+                    cell.detailTextLabel?.textColor = UIColor.blackColor()
+                }
+                
             }
 
             cell.contentView.addSubview(dateLbl)
@@ -406,10 +447,7 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
 
         if contact.fullName != nil {
             cell.textLabel?.text = contact.fullName.truncatedString()
-            print("what")
-            
         } else {
-            cell.textLabel?.text = "asfsdf"
             cell.textLabel?.text = "\(contact.contactId.northAmericanPhoneNumberFormat())".truncatedString()
         }
         
@@ -687,15 +725,16 @@ class MessageListViewController: UIViewController, UITableViewDataSource, UITabl
             }
         
             detailSegue.did = self.did
+            
             detailSegue.moc = self.managedObjectContext
             detailSegue.delegate = self
         }
         
         if segue.identifier == "segueToNewMessage" {
-            let newMsgVC = segue.destinationViewController as? NewMessageViewController
-            newMsgVC?.did = self.did
-            newMsgVC?.delegate = self
-            newMsgVC?.moc = self.managedObjectContext
+            let newMsgVC : NewMessageViewController = segue.destinationViewController as! NewMessageViewController
+            newMsgVC.did = self.did
+            newMsgVC.delegate = self            
+            newMsgVC.moc = self.managedObjectContext
         }
     
     }

@@ -23,14 +23,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
-//        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
-//        privateMOC.parentContext = moc
+        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+        privateMOC.parentContext = moc
         
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
 //            refreshContacts(privateMOC)
-            pingPushServer()
             refreshDeviceTokenOnServer(currentUser)
         }
         
@@ -50,6 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
 //        Contact().getContactsDict({ (contacts) -> () in
 //        })
+        Contact().addressBookAccess();
         
         if let userInfo = launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? [NSObject : AnyObject] {
             
@@ -107,16 +107,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func applicationWillEnterForeground(application: UIApplication) {
-        // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-//        let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
-//        privateMOC.parentContext = moc
+        
         if let currentUser = CoreUser.currentUser(moc) {
             currentUser.initialLoad = 1
             CoreUser.updateInManagedObjectContext(moc, coreUser: currentUser)
+            let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+            privateMOC.parentContext = moc
 //            refreshContacts(privateMOC)
-            pingPushServer()
             refreshDeviceTokenOnServer(currentUser)
             print(currentUser)
+            print("hi im in the foregroud");
         }
     
     }
@@ -177,8 +177,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
         dispatch_async(backgroundQueue, { () -> Void in
             if let str = CoreDID.getSelectedDID(self.moc) {
-                let fromStr = CoreMessage.getLastMsgByDID(self.moc, did: str.did)?.date.strippedDateFromString()
-                Message.getMessagesFromAPI(true, fromList: false, moc: self.moc, from: fromStr) { (responseObject, error) -> () in
+                if let lastMsg = CoreMessage.getLastMsgByDID(self.moc, did: str.did) {
+                    
+                    let fromStr = lastMsg.date.strippedDateFromString()
+                    print("MESSAGE FROM DATE IS: \(fromStr)")
+                    Message.getMessagesFromAPI(true, fromList: false, moc: self.moc, from: fromStr) { (responseObject, error) -> () in
+                    }
+                } else {
+                    print("MESSAGE FROM DATE IS NIL FOR SURE")
+                    Message.getMessagesFromAPI(true, fromList: false, moc: self.moc, from: nil) { (responseObject, error) -> () in
+                    }
                 }
             }
         })
@@ -194,7 +202,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             privateMOC.performBlock { () -> Void in
 //                autoreleasepool({ () -> () in
                     if Contact().checkAccess() {
-                        Contact().syncAddressBook1(privateMOC)
+                        Contact().loadAddressBook(privateMOC, completionHandler: { (responseObject, error) in
+                            print("contacts loaded app delegate")
+                        })
+//                        Contact().syncAddressBook1(privateMOC)
                     }
 //                })
                 
@@ -246,19 +257,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     }
     
-    func pingPushServer() {
-        //do this in background
-        let qualityOfServiceClass = QOS_CLASS_BACKGROUND
-        let backgroundQueue = dispatch_get_global_queue(qualityOfServiceClass, 0)
-        dispatch_async(backgroundQueue, { () -> Void in
-            let url = "https://mighty-springs-3852.herokuapp.com/users"
-            VoipAPI(httpMethod: httpMethodEnum.GET, url: url, params: nil).APIAuthenticatedRequest({ (responseObject, error) -> () in
-                
-            })
-        })
-        
-    }
-    
+       
     func refreshDeviceTokenOnServer(currentUser: CoreUser) {
 
         if UIApplication.sharedApplication().respondsToSelector(#selector(UIApplication.currentUserNotificationSettings)) {
@@ -290,10 +289,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
         }
     }
- 
-
-
-    
 
 }
 

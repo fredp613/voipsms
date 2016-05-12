@@ -47,26 +47,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
-    func pingServerTempFunc(user: CoreUser) {
-        if let api_password = KeyChainHelper.retrieveForKey(user.email) {
-            let params = [
-                "user":[
-                    "email": user.email,
-                    "pwd": api_password,
-                    "did":"6666666666",
-                    "device": "42343223423432"
-                ]
-            ]
-            
-            let url = "https://mighty-springs-3852.herokuapp.com/users"
-            //                params should go in body of request
-            
-            VoipAPI(httpMethod: httpMethodEnum.POST, url: url, params: params).APIAuthenticatedRequest({ (responseObject, error) -> () in
-//                print(responseObject)
-            })
-        }
-    }
+
     
     //MARK: Custom Methods
     func getMessages() {
@@ -112,7 +93,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
                             
                             
 //                            print("done")
-                            currentUser.initialLogon = 0
+//                            currentUser.initialLogon = 0
                             currentUser.messagesLoaded = 1
                             CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
                            
@@ -129,7 +110,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
 //                            })
                         }
                     })
-                    currentUser.initialLogon = 0
+//                    currentUser.initialLogon = 0
                     currentUser.messagesLoaded = 1
                     CoreUser.updateInManagedObjectContext(self.moc, coreUser: currentUser)
 
@@ -139,9 +120,8 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
 
         } else {
 //            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-            
                 self.dismissViewControllerAnimated(true, completion: nil)
-                let alert = UIAlertView(title: "Fatal Error", message: "issue getting your DID info from voip.ms, contact app developer", delegate: self, cancelButtonTitle: "Ok")
+                let alert = UIAlertView(title: "Error", message: "issue getting your DID info from voip.ms, please ensure that you toggled sms enabled in your voip.ms account settings", delegate: self, cancelButtonTitle: "Ok")
                 alert.show()
 //            })
         }
@@ -155,7 +135,7 @@ class DownloadMessagesViewController: UIViewController /**, NSFetchedResultsCont
     func skipToMainListVC() {
         let backgroundMOC : NSManagedObjectContext = CoreDataStack().managedObjectContext!
         if let currentUser = CoreUser.currentUser(backgroundMOC) {
-            currentUser.initialLogon = 0
+//            currentUser.initialLogon = 0
             currentUser.messagesLoaded = 1
             CoreUser.updateInManagedObjectContext(backgroundMOC, coreUser: currentUser)
             self.performSegueWithIdentifier("segueToMessages", sender: self)

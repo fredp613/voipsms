@@ -91,6 +91,40 @@ class Contact {
         let propertyType: NSNumber = kABMultiStringPropertyType
         return Unmanaged.fromOpaque(ABMultiValueCreateMutable(propertyType.unsignedIntValue).toOpaque()).takeUnretainedValue() as NSObject as ABMultiValueRef
     }
+    
+    func addressBookAccess() {
+        switch ABAddressBookGetAuthorizationStatus(){
+        case .Authorized:
+            print("Already authorized")
+            /* Access the address book */
+        case .Denied:
+            print("Denied access to address book")
+        case .NotDetermined:
+            
+            if let theBook: ABAddressBookRef = addressBook{
+                ABAddressBookRequestAccessWithCompletion(theBook,
+                 {(granted: Bool, error: CFError!) in
+                    
+                    if granted{
+                        print("Access granted")
+                    } else {
+                        print("Access not granted")
+                    }
+                    
+                })
+            }
+            
+        case .Restricted:
+            print("Access restricted")
+            
+        default:
+            print("Other Problem")
+        }
+    }
+
+    
+    
+    
     func getContactsDict(completionHandler: ([String : String]) -> ()){
         var contactsDict = [String: String]()
         self.addressBook.loadContacts(
@@ -113,18 +147,13 @@ class Contact {
         })
     }
     func getAllContacts(keyword: String?) -> [AddressBookContactStruct] {
-//        var tstStr = [NSString]()
+
         let adbk : ABAddressBook? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()
         let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as [ABRecord]
-//        let phones: ABMultiValueRef = ABRecordCopyValue(people, kABPersonPhoneProperty) as! ABMultiValueRef
         print("get all contacts called")
         autoreleasepool {
             for person in people {
-                
-    //            let fullName : CFString = ABRecordCopyCompositeName(person).takeRetainedValue()
-    //            let nizame : NSString = fullName as NSString
-    //            print(nizame)
-                
+    
                 if let fullName : CFString = ABRecordCopyCompositeName(person)?.takeRetainedValue() {
                     
                     let name : NSString = fullName as NSString
@@ -148,56 +177,56 @@ class Contact {
         return self.contactsArr
     }
     
-    func syncAddressBook1(moc: NSManagedObjectContext) {
-
-        do {
-            if let coreContacts = try CoreContact.getAllContacts(moc) {
-                
-                autoreleasepool {
-                
-                    for cc in coreContacts {
-
-                        self.loadAddressBook { (responseObject, error) -> () in
-                            let contacts = responseObject
-                            print(error)
-                            let filteredArray = contacts.filter() {$0.recordId == cc.contactId}
-                            if filteredArray.count > 0 {
-                                let fullName = filteredArray.map({$0.contactFullName}).last!
-                                let phoneLabel = filteredArray.map({$0.phoneLabel}).last!
-                                cc.fullName = fullName
-                                cc.phoneLabel = phoneLabel
-                                cc.addressBookSyncLastModified = NSDate()
-                                // CoreContact.updateContactInMOC(moc)
-                            }
-                            if cc.fullName != "" || cc.fullName != nil {
-                                //contact has full name - check if still in addressbook, if not update fullName to nil
-                                if filteredArray.count == 0 {
-                                    cc.fullName = nil
-    //                                CoreContact.updateContactInMOC(moc)
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                do {
-                    try moc.save()
-                } catch _ {
-                    print("somethign wrong")
-                }
-            }
-
-        } catch {
-        }
-        
-        
-    }
+//    func syncAddressBook1(moc: NSManagedObjectContext) {
+//
+//        do {
+//            if let coreContacts = try CoreContact.getAllContacts(moc) {
+//                
+//                autoreleasepool {
+//                
+//                    for cc in coreContacts {
+//
+//                        self.loadAddressBook { (responseObject, error) -> () in
+//                            let contacts = responseObject
+//                            print(error)
+//                            let filteredArray = contacts.filter() {$0.recordId == cc.contactId}
+//                            if filteredArray.count > 0 {
+//                                let fullName = filteredArray.map({$0.contactFullName}).last!
+//                                let phoneLabel = filteredArray.map({$0.phoneLabel}).last!
+//                                cc.fullName = fullName
+//                                cc.phoneLabel = phoneLabel
+//                                cc.addressBookSyncLastModified = NSDate()
+//                                // CoreContact.updateContactInMOC(moc)
+//                            }
+//                            if cc.fullName != "" || cc.fullName != nil {
+//                                //contact has full name - check if still in addressbook, if not update fullName to nil
+//                                if filteredArray.count == 0 {
+//                                    cc.fullName = nil
+//    //                                CoreContact.updateContactInMOC(moc)
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//                
+//                do {
+//                    try moc.save()
+//                } catch _ {
+//                    print("somethign wrong")
+//                }
+//            }
+//
+//        } catch {
+//        }
+//        
+//        
+//    }
     
     func syncNewMessageContact(contact: CoreContact, moc: NSManagedObjectContext) -> Bool {
         
         var success = false
-        if self.checkAccess() {
-            self.loadAddressBook { (responseObject, error) -> () in
+//        if self.checkAccess() {
+            self.loadAddressBook(moc, completionHandler: { (responseObject, error) in
                 let contacts = responseObject
                 print(error)
                 let filteredArray = contacts.filter() {$0.recordId == contact.contactId}
@@ -211,76 +240,98 @@ class Contact {
                     CoreContact.updateContactInMOC(moc)
                     success = true
                 }
-            }
-        }
+            })
+//        }
         return success
     }
     
-    func loadAddressBook(completionHandler: (responseObject: [AddressBookContactStruct], error: NSError?) -> ()) {
-
-        let adbk : ABAddressBook? = ABAddressBookCreateWithOptions(nil, nil).takeRetainedValue()
-
-        struct contactS {
-            var phone : String
-            var fullName : String
+    func contactName(contact :APContact) -> String {
+        if let firstName = contact.firstName, lastName = contact.lastName {
+            return "\(firstName) \(lastName)"
         }
+        else if let firstName = contact.firstName {
+            return "\(firstName)"
+        }
+        else if let lastName = contact.lastName {
+            return "\(lastName)"
+        }
+        else {
+            return ""
+        }
+    }
+    
+    func loadAddressBook(moc: NSManagedObjectContext, completionHandler: (responseObject: [AddressBookContactStruct], error: NSError?) -> ()) {
+
+        do {
+            if let coreContacts = try CoreContact.getAllContacts(moc) {
         
-        let people = ABAddressBookCopyArrayOfAllPeople(adbk).takeRetainedValue() as NSArray as [ABRecord]
-        for person in people {
+                self.addressBook.loadContacts(
+                    { (contacts: [AnyObject]!, error: NSError!) in
+                        if let unwrappedContacts = contacts {
+                            
+                            for c in unwrappedContacts {
 
-            let phones : ABMultiValueRef = ABRecordCopyValue(person, kABPersonPhoneProperty).takeRetainedValue() as ABMultiValueRef
-            if let fullName = ABRecordCopyCompositeName(person)?.takeRetainedValue() {
-
-                for(var numberIndex: CFIndex = 0;numberIndex < ABMultiValueGetCount(phones); numberIndex++) {
-                    
-                    if let phoneUnmanaged = ABMultiValueCopyValueAtIndex(phones, numberIndex) {
-                    
-                        let phoneLabelUnmanaged = ABMultiValueCopyLabelAtIndex(phones, numberIndex)
-                        let phoneNumber : NSString = phoneUnmanaged.takeUnretainedValue() as! NSString
-                        if phoneLabelUnmanaged != nil {
-                            let phoneLabel : NSString = phoneLabelUnmanaged.takeRetainedValue() as NSString
-                            let regex = try! NSRegularExpression(pattern: "[0-9]",
-                                options: [])
-                            let regexLabel = try! NSRegularExpression(pattern: "[a-zA-Z0-9]",
-                                options: [])
-                            autoreleasepool {
-                                let results = regex.matchesInString(phoneNumber as String,
-                                    options: [], range: NSMakeRange(0, phoneNumber.length))
-                                
-                                let resultsLabel = regexLabel.matchesInString(phoneLabel as String,
-                                    options: [], range: NSMakeRange(0, phoneLabel.length))
-                                
-                                let mappedResults = results.map { phoneNumber.substringWithRange($0.range)}
-                                let strRepresentationResults = mappedResults.joinWithSeparator("")
-                                
-                                let mappedResultsLabel = resultsLabel.map { phoneLabel.substringWithRange($0.range)}
-                                let strRepresentationResultsLabel = mappedResultsLabel.joinWithSeparator("")
-                                
-                                let finalPhoneNumber = strRepresentationResults as NSString
-                                let finalPhoneLabel = strRepresentationResultsLabel as NSString
-                                
-                                var range = NSRange()
-                                if finalPhoneNumber.length > 10 {
-                                    range = NSRange(location: 1, length: finalPhoneNumber.length - 1)
-                                } else {
-                                    range = NSRange(location: 0, length: finalPhoneNumber.length)
+                                for phone in c.phones {
+                                    
+                                    let regex = try! NSRegularExpression(pattern: "[0-9]",
+                                        options: [])
+                                    let pStr = phone as! NSString
+                                    let results = regex.matchesInString(phone as! String,
+                                        options: [], range: NSMakeRange(0, pStr.length))
+                                    let mappedResults = results.map { pStr.substringWithRange($0.range)}
+                                    let strRepresentationResults = mappedResults.joinWithSeparator("")
+                                    
+                                    let contact = AddressBookContactStruct()
+                                    contact.contactFullName = self.contactName(c as! APContact)
+                                    contact.recordId = strRepresentationResults
+                                    print(phone)
+                                    for cc in coreContacts {
+                                        if cc.contactId == strRepresentationResults {
+                                            cc.fullName = self.contactName(c as! APContact)
+                                            CoreContact.updateContactInMOC(moc)
+                                        
+                                        }
+                                    }
+                                    
+                                    self.contactsArr.append(contact)
                                 }
-                                let ff = finalPhoneNumber.substringWithRange(range)
-                                let contact = AddressBookContactStruct()
-                                contact.contactFullName = fullName as String
-                                contact.recordId = ff
-                                contact.phoneLabel = String(finalPhoneLabel)
-                                self.contactsArr.append(contact)
+                                
                             }
-
+                            
+                            return completionHandler(responseObject: self.contactsArr, error: nil)
                         }
-                    }
-                    
+                        if let unwrappedError = error {
+                            return completionHandler(responseObject: self.contactsArr, error: unwrappedError)
+                        }
+                })
+            }
+        } catch {
+            
+        }
+       
+    }
+    
+    func getContactsBySearchString(searchTerm: String, moc: NSManagedObjectContext, completionHandler: (data: [AddressBookContactStruct]?) -> ()) {
+        var addressBookData : [AddressBookContactStruct] = [AddressBookContactStruct]()
+        Contact().loadAddressBook(moc) { (responseObject, error) in
+            
+            for record in responseObject {
+                if record.contactFullName.rangeOfString(searchTerm) != nil {
+                    addressBookData.append(record)
+                }
+                if record.recordId.rangeOfString(searchTerm) != nil {
+                    addressBookData.append(record)
                 }
             }
+            
+            if addressBookData.count > 0 {
+                self.contactsArr = addressBookData
+                return completionHandler(data: self.contactsArr)
+            } else {
+                return completionHandler(data: nil)
+            }
+            
         }
-
-        return completionHandler(responseObject: self.contactsArr, error: nil)
     }
 
     

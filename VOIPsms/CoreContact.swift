@@ -14,6 +14,7 @@ import CoreData
 struct ContactStruct {
     var contactName = String()
     var contactId = String()
+    var recordId = String()
     var phoneLabel = String()
     var lastMsgDate = String()
     var lastMsg = String()
@@ -113,7 +114,7 @@ class CoreContact: NSManagedObject {
 
     }
     
-    class func getAllContacts(managedObjectContext: NSManagedObjectContext) throws -> [CoreContact]? {
+    class func getAllContacts1(managedObjectContext: NSManagedObjectContext) throws -> [CoreContact]? {
 
         var coreContacts = [CoreContact]()
         let fetchRequest = NSFetchRequest(entityName: "CoreContact")
@@ -124,6 +125,28 @@ class CoreContact: NSManagedObject {
         do {
             let fetchResults = try managedObjectContext.executeFetchRequest(fetchRequest) as! [CoreContact]
 
+            coreContacts = fetchResults
+            if fetchResults.count > 0 {
+                return coreContacts
+            }
+        }
+        catch let error {
+            print(error)
+            return nil
+        }
+        return nil
+    }
+    class func getAllContacts(managedObjectContext: NSManagedObjectContext) -> [CoreContact]? {
+        
+        var coreContacts = [CoreContact]()
+        let fetchRequest = NSFetchRequest(entityName: "CoreContact")
+        
+        let entity = NSEntityDescription.entityForName("CoreContact", inManagedObjectContext: managedObjectContext)
+        fetchRequest.entity = entity
+        print("get all contacts")
+        do {
+            let fetchResults = try managedObjectContext.executeFetchRequest(fetchRequest) as! [CoreContact]
+            
             coreContacts = fetchResults
             if fetchResults.count > 0 {
                 return coreContacts
@@ -276,7 +299,11 @@ class CoreContact: NSManagedObject {
             contactResult.append(contact)
         }
         if Contact().checkAccess() {
-            Contact().loadAddressBook { (responseObject, error) -> () in
+            
+            let privateMOC = NSManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType.PrivateQueueConcurrencyType)
+            privateMOC.parentContext = moc
+            
+            Contact().loadAddressBook(privateMOC, completionHandler: { (responseObject, error) in
                 let contacts = responseObject
                 for c in contacts {
                     if (c.contactFullName.lowercaseString.rangeOfString(searchTerm.lowercaseString) != nil) || (c.recordId.rangeOfString(searchTerm.lowercaseString) != nil) {
@@ -290,7 +317,7 @@ class CoreContact: NSManagedObject {
                     }
                 }
                 return completionHandler(contactResult)
-            }
+            })
         } else {
             return completionHandler(contactResult)
         }
@@ -402,15 +429,6 @@ class CoreContact: NSManagedObject {
             return nil
         }
         
-        
-//        if let fetchResults = moc.executeFetchRequest(fetchRequest) as? [CoreMessage] {
-//            coreMessages = fetchResults
-//            if fetchResults.count > 0 {
-//                return coreMessages[0]
-//            }
-//        } else {
-//            print("\(error?.userInfo)")
-//        }
         return nil
     }
     
@@ -421,18 +439,12 @@ class CoreContact: NSManagedObject {
         let sortDescriptor = NSSortDescriptor(key: "dateForSort", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         
-//        enum message_status : String {
-//            case PENDING = "pending"
-//            case DELIVERED = "delivered"
-//            case UNDELIVERED = "undelivered"
-//            case READ = "read"
-//        }
         
         let firstPredicate = NSPredicate(format: "contactId == %@", contactId)
         let validMessagePredicate = NSPredicate(format: "flag != %@ ", message_status.UNDELIVERED.rawValue)
             if let did = did {
                 let secondPredicate = NSPredicate(format: "did == %@", did)
-                let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate, validMessagePredicate])
+                let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, secondPredicate /**, validMessagePredicate**/])
                 fetchRequest.predicate = predicate
             } else {
                 let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [firstPredicate, validMessagePredicate])
@@ -455,15 +467,7 @@ class CoreContact: NSManagedObject {
             print(error)
             return nil
         }
-        
-//        if let fetchResults = managedObjectContext.executeFetchRequest(fetchRequest) as? [CoreMessage] {
-//            coreMessages = fetchResults
-//            if fetchResults.count > 0 {
-//                return coreMessages[0]
-//            }
-//        } else {
-//            print("\(error?.userInfo)")
-//        }
+
         return nil
         
     }
