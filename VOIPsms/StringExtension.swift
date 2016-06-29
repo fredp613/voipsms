@@ -13,10 +13,20 @@ extension String {
     func northAmericanPhoneNumberFormat() -> String {
        
         let strToFormat = self as NSString
+        
         let regex = try? NSRegularExpression(pattern: "[0-9]", options: [])
+        let googleRegex = try? NSRegularExpression(pattern: "[+]", options: [])
+        
         if (regex?.matchesInString(self, options: [], range: NSMakeRange(0, strToFormat.length)) != nil) {
             if strToFormat.length > 9 {
-                let areaCode = strToFormat.substringWithRange(NSRange(location: 0, length: 3))
+                var areaCode : String = String();
+//                if strToFormat.substringWithRange(NSRange(location:0, length: 1)) == "1" {
+//                    print("yes");
+                if googleRegex?.matchesInString(self, options: [], range: NSMakeRange(0, strToFormat.length)) != nil {
+                    areaCode = strToFormat.substringWithRange(NSRange(location: 1, length: 3))
+                } else {
+                    areaCode = strToFormat.substringWithRange(NSRange(location: 0, length: 3))
+                }
                 let firstPart = strToFormat.substringWithRange(NSRange(location: 3, length: 3))
                 let lastPart = strToFormat.substringWithRange(NSRange(location: 6, length: 4))
                 let formattedPhoneNumber = areaCode + "-" + firstPart + "-" + lastPart
@@ -27,6 +37,7 @@ extension String {
         return self
         
     }
+    
     
     func strippedDateFromString() -> String {
         let strToFormat = self as NSString
